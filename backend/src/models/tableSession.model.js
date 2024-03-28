@@ -1,0 +1,112 @@
+const { DataTypes } = require("sequelize");
+const { Table } = require("./table.model");
+const sequelize = require("../db/db"); // Adjust the path to your database configuration file
+
+const PaymentStatus = {
+  PENDING: "pending",
+  PAID: "Paid",
+  UNPAID: "Unpaid",
+};
+const PaymentMethod = {
+  CASH: "Cash",
+  ONLINE: "Online",
+};
+const SessionStatus = {
+  ACTIVE: "Active",
+  CLOSE: "Close",
+  WAITINGFORPAYMENT: "Waiting for Payment",
+};
+
+// Define the TableSession model
+const TableSession = sequelize.define(
+  "TableSession",
+  {
+    // Foreign keys for tableNumber, handlerId, and orders will be added below
+    startTime: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    endTime: DataTypes.DATE,
+    totalAmount: DataTypes.DECIMAL(10, 2),
+    customerName: DataTypes.STRING,
+    partySize: DataTypes.INTEGER,
+    transactionId: DataTypes.STRING, // Assuming this is part of paymentDetails
+    paymentStatus: {
+      type: DataTypes.ENUM(...Object.values(PaymentStatus)),
+      defaultValue: PaymentStatus.PENDING,
+    },
+    paymentMethod: {
+      type: DataTypes.ENUM(...Object.values(PaymentMethod)),
+      defaultValue: PaymentMethod.CASH,
+    },
+    specialRequests: DataTypes.STRING,
+    serviceNotes: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM(...Object.values(SessionStatus)),
+      defaultValue: SessionStatus.ACTIVE,
+    },
+    feedback: DataTypes.STRING,
+    foodRating: DataTypes.INTEGER,
+    serviceRating: DataTypes.INTEGER,
+    overallRating: DataTypes.INTEGER,
+    firmId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Firms", // Assumes you have a Users table
+        key: "id",
+      },
+    },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Employees", // Assumes you have a Users table
+        key: "id",
+      },
+    },
+    updatedBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Employees",
+        key: "id",
+      },
+    },
+    removedBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Employees",
+        key: "id",
+      },
+    },
+  },
+  {
+    timestamps: true,
+    paranoid: true,
+    deletedAt: "removedAt",
+  }
+);
+// Define associations
+TableSession.belongsTo(Table, { as: "table" });
+// TableSession.hasMany(Order);
+// TableSession.sync({});
+TableSession.beforeCreate((table, options) => {
+  table.createdBy = options.userId;
+});
+
+TableSession.beforeUpdate((table, options) => {
+  table.updatedBy = options.userId;
+});
+
+TableSession.beforeDestroy((table, options) => {
+  if (options.userId) {
+    table.removedBy = options.userId;
+    // Since we're performing a soft delete, we need to manually save the update
+    return table.save();
+  }
+});
+
+// TableSession.sync({});
+module.exports = { TableSession, SessionStatus, PaymentMethod, PaymentStatus };

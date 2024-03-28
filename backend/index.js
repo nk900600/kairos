@@ -1,0 +1,43 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+
+const dotenv = require("dotenv");
+require("./env/.env.dev");
+const envFile = `./env/.env.${process.env.NODE_ENV || "dev"}`;
+dotenv.config({ path: envFile });
+const sequelize = require("./src/db/db");
+
+async function init() {
+  const authRoutes = require("./src/routes/auth.routes");
+  const firmRoutes = require("./src/routes/firm.routes");
+  const employeeRoutes = require("./src/routes/employee.routes");
+  const menuItemRoutes = require("./src/routes/menuItem.routes");
+  const rolesRoutes = require("./src/routes/role.routes");
+  const orderRoutes = require("./src/routes/order.routes");
+  const documentRoutes = require("./src/routes/document.routes");
+  const leaveRoutes = require("./src/routes/leave.routes");
+  const tableRoutes = require("./src/routes/table.routes");
+  const tableSessionRoutes = require("./src/routes/tableSession.routes");
+
+  const app = express();
+  const port = 3000;
+
+  app.use(bodyParser.json());
+  app.use("/api/firms", firmRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/employees", employeeRoutes);
+  app.use("/api/menu", menuItemRoutes);
+  app.use("/api/roles", rolesRoutes);
+  app.use("/api/orders", orderRoutes);
+  app.use("/api/docs", documentRoutes);
+  app.use("/api/documents", documentRoutes);
+  app.use("/api/leaves", leaveRoutes);
+  app.use("/api/tables", tableRoutes);
+  app.use("/api/tables-session", tableSessionRoutes);
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+  sequelize.sync();
+}
+
+init();
