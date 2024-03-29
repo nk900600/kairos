@@ -1,27 +1,14 @@
-const { Employee } = require("../models/employee.model.js");
+const { Employee, Designation, Role } = require("../models/employee.model.js");
+const { Firm } = require("../models/firm.model.js");
+const { mobileNumberRegex, emailRegex } = require("../utils/const.js");
 
 class EmployeeController {
   async getAllEmployees(req, res) {
     try {
-      const employees = await Employee.aggregate([
-        {
-          $lookup: {
-            from: "roles", // The collection to join with
-            localField: "role", // The field from the input documents
-            foreignField: "_id", // The field from the documents of the "from" collection
-            as: "role", // The output array field with the joined documents
-          },
-        },
-        {
-          $lookup: {
-            from: "designations", // The collection to join with
-            localField: "designation", // The field from the input documents
-            foreignField: "_id", // The field from the documents of the "from" collection
-            as: "designation", // The output array field with the joined documents
-          },
-        },
-      ]);
-      res.status(200).json(employees);
+      const employees = await Employee.findAll({
+        include: [Role, Firm, Designation],
+      });
+      res.json(employees);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -29,16 +16,34 @@ class EmployeeController {
 
   async getEmployeeById(req, res) {
     try {
-      const employee = await Employee.findById(req.params.id);
-      res.status(200).json(employee);
+      const employee = await Employee.findByPk(req.params.id, {
+        include: [Role, Firm, Designation],
+      });
+      if (employee) {
+        res.json(employee);
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
     } catch (error) {
-      res.status(404).json({ error: "Employee not found" });
+      res.status(500).json({ error: error.message });
     }
   }
 
   async createEmployee(req, res) {
     try {
-      const employee = await Employee.create(req.body);
+      // Validate the mobile number
+      if (req.body?.mobileNumber && !emailRegex.test(req.body?.mobileNumber)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid mobile number format" });
+      }
+
+      const employee = await Employee.create({
+        ...req.body,
+        role: req.body.roleId,
+        firmId: req.body.firmId,
+        designation: req.body.designationId,
+      });
       res.status(201).json(employee);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -47,23 +52,38 @@ class EmployeeController {
 
   async updateEmployee(req, res) {
     try {
-      const employee = await Employee.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-      );
-      res.status(200).json(employee);
+      const employee = await Employee.findByPk(req.params.id);
+      if (employee) {
+        await employee.update({
+          ...req.body,
+          roleId: req.body.roleId,
+          firmId: req.body.firmId,
+          designationId: req.body.designationId,
+        });
+        res.json(employee);
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
     } catch (error) {
-      res.status(404).json({ error: "Employee not found" });
+      res.status(400).json({ error: error.message });
     }
   }
 
   async deleteEmployee(req, res) {
     try {
-      await Employee.findByIdAndDelete(req.params.id);
-      res.status(204).send();
+      const employee = await Employee.findByPk(req.params.id, {
+        include: [Role, Firm, Designation],
+      });
+
+      if (employee) {
+        // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
+        await employee.destroy();
+        res.status(204).send(); // No content to send back
+      } else {
+        res.status(404).json({ error: "Employee not found" });
+      }
     } catch (error) {
-      res.status(404).json({ error: "Employee not found" });
+      res.status(500).json({ error: error.message });
     }
   }
 }

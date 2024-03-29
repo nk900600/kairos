@@ -1,3 +1,4 @@
+const { Designation } = require("../models/employee.model");
 const { FirmType } = require("../models/firm.model");
 
 const basicFirms = [
@@ -5,6 +6,23 @@ const basicFirms = [
     name: "Restaurant",
     description:
       "Establishments that prepare and serve food and beverages to customers",
+    generalDesginations: [
+      { title: "Chef" },
+      { title: "Sous Chef" },
+      { title: "Pastry Chef" },
+      { title: "Line Cook" },
+      { title: "Prep Cook" },
+      { title: "Kitchen Assistant" },
+      { title: "Dishwasher" },
+      { title: "Restaurant Manager" },
+      { title: "Assistant Manager" },
+      { title: "Host/Hostess" },
+      { title: "Waiter/Waitress" },
+      { title: "Bartender" },
+      { title: "Busser" },
+      { title: "Sommelier" },
+      { title: "Barista" },
+    ],
   },
 ];
 
@@ -16,10 +34,18 @@ async function initializeFirmTypes() {
       });
 
       if (!roleExists) {
-        await FirmType.create({
+        let firmType = await FirmType.create({
           name: firmName.name,
           description: firmName.description,
         });
+        await Designation.bulkCreate(
+          firmName.generalDesginations.map((data) => ({
+            ...data,
+            firmTypeId: firmType.id,
+            firmId: null,
+          })),
+          {}
+        );
       }
     }
     console.log("Basic firm types initialized successfully");

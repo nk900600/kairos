@@ -124,16 +124,22 @@ const Designation = sequelize.define("Designation", {
     allowNull: false,
     unique: true,
   },
-  firmId: {
+  firmTypeId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: {
+      model: "FirmTypes", // Assumes you have a Users table
+      key: "id",
+    },
+  },
+  firmId: {
+    type: DataTypes.INTEGER,
     references: {
       model: "Firms", // Assumes you have a Users table
       key: "id",
     },
   },
 });
-
 // Define the Document model
 const Document = sequelize.define("Document", {
   // Document fields
@@ -160,4 +166,4 @@ Employee.beforeDestroy((table, options) => {
     return table.save();
   }
 });
-module.exports = { Employee, Role, Designation, Document };
+module.exports = { Employee, Role, Document, Designation };
