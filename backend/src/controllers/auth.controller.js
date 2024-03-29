@@ -72,6 +72,12 @@ class AuthController {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
+      let isEmployee = await Employee.findOne({
+        where: { mobileNumber: req.body.mobileNumber },
+      });
+      if (!isEmployee) {
+        return res.status(401).json({ message: "Not a valid user" });
+      }
       const otpVerified = await this.verifyOtp(req.body);
       if (otpVerified) {
         response.token = this.generateToken(req.body);
