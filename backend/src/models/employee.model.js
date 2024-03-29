@@ -16,6 +16,9 @@ const Employee = sequelize.define(
     userPic: {
       type: DataTypes.STRING,
     },
+    mobileNumber: {
+      type: DataTypes.STRING,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -52,7 +55,7 @@ const Employee = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Firms", // Assumes you have a Users table
+        model: "Firms",
         key: "id",
       },
     },
@@ -60,15 +63,15 @@ const Employee = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Roles", // Assumes you have a Users table
+        model: "Roles",
         key: "id",
       },
     },
     designation: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
-        model: "Designations", // Assumes you have a Users table
+        model: "Designations",
         key: "id",
       },
     },
@@ -77,7 +80,7 @@ const Employee = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "Employees", // Assumes you have a Users table
+        model: "Employees",
         key: "id",
       },
     },

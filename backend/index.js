@@ -5,7 +5,10 @@ const dotenv = require("dotenv");
 require("./env/.env.dev");
 const envFile = `./env/.env.${process.env.NODE_ENV || "dev"}`;
 dotenv.config({ path: envFile });
+dotenv.config({ path: `./env/.env.common` });
 const sequelize = require("./src/db/db");
+const initializeRoles = require("./src/utils/create-roles");
+const initializeFirmTypes = require("./src/utils/create-firm-types");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -37,7 +40,9 @@ async function init() {
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
-  sequelize.sync();
+  await sequelize.sync({});
+  await initializeRoles();
+  await initializeFirmTypes();
 }
 
 init();

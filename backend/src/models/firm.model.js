@@ -1,10 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
 
-// const FrimType = Object.freeze({
-//   RESTURANT: "Resturant",
-// });
-
 const Firm = sequelize.define(
   "Firm",
   {
@@ -26,12 +22,10 @@ const Firm = sequelize.define(
     state: DataTypes.STRING,
     zip: DataTypes.STRING,
     country: DataTypes.STRING,
-    phone: DataTypes.STRING,
+    mobileNumber: DataTypes.STRING,
     email: {
+      unique: true,
       type: DataTypes.STRING,
-      validate: {
-        isEmail: true,
-      },
     },
     website: DataTypes.STRING,
 
@@ -41,6 +35,12 @@ const Firm = sequelize.define(
     timestamps: true,
     paranoid: true,
     deletedAt: "removedAt",
+    indexes: [
+      {
+        unique: true,
+        fields: ["email", "name"],
+      },
+    ],
   }
 );
 // Firm.sync({});

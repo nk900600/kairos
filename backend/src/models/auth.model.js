@@ -1,6 +1,12 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
 
+const OtpTYpe = Object.freeze({
+  LOGIN: "login",
+  SIGNUP: "signup",
+  SETTING: "setting",
+});
+
 // Define the Auth model
 const Auth = sequelize.define(
   "Auth",
@@ -8,13 +14,20 @@ const Auth = sequelize.define(
     mobileNumber: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       validate: {
         is: /^[0-9]{10}$/, // Example regex for a 10-digit mobile number
       },
     },
+    countryCode: {
+      type: DataTypes.STRING,
+    },
+    otpType: {
+      type: DataTypes.ENUM(...Object.values(OtpTYpe)),
+      defaultValue: OtpTYpe.SIGNUP,
+    },
     otpValue: DataTypes.STRING,
     otpExpiresAt: DataTypes.DATE,
+    cooldownUntil: DataTypes.DATE,
     failedOtpCount: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -29,7 +42,7 @@ const Auth = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["mobileNumber"],
+        fields: ["mobileNumber", "otpType"],
       },
     ],
   }
