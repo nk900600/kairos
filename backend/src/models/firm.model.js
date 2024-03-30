@@ -68,6 +68,5 @@ Firm.beforeDestroy((table, options) => {
   }
 });
 
-
 // FirmType.sync({});
 module.exports = { Firm, FirmType };

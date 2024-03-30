@@ -29,24 +29,23 @@ const basicFirms = [
 async function initializeFirmTypes() {
   try {
     for (const firmName of basicFirms) {
-      const roleExists = await FirmType.findOne({
+      let firmExist = await FirmType.findOne({
         where: { name: firmName.name },
       });
-
-      if (!roleExists) {
-        let firmType = await FirmType.create({
+      if (!firmExist) {
+        firmExist = await FirmType.create({
           name: firmName.name,
           description: firmName.description,
         });
-        await Designation.bulkCreate(
-          firmName.generalDesginations.map((data) => ({
-            ...data,
-            firmTypeId: firmType.id,
-            firmId: null,
-          })),
-          {}
-        );
       }
+      await Designation.bulkCreate(
+        firmName.generalDesginations.map((data) => ({
+          ...data,
+          firmTypeId: firmExist.id,
+          firmId: null,
+        })),
+        { ignoreDuplicates: true }
+      );
     }
     console.log("Basic firm types initialized successfully");
   } catch (error) {

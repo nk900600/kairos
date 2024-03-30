@@ -36,6 +36,11 @@ const MenuItem = sequelize.define(
     name: DataTypes.STRING,
     description: DataTypes.STRING,
     price: DataTypes.DECIMAL(10, 2),
+    currency: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "INR", // Set a default currency if applicable
+    },
     category: {
       type: DataTypes.ENUM(
         CategoryType.APPETIZER,

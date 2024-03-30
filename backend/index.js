@@ -15,7 +15,6 @@ async function init() {
   const firmRoutes = require("./src/routes/firm.routes");
   const employeeRoutes = require("./src/routes/employee.routes");
   const menuItemRoutes = require("./src/routes/menuItem.routes");
-  const rolesRoutes = require("./src/routes/role.routes");
   const orderRoutes = require("./src/routes/order.routes");
   const documentRoutes = require("./src/routes/document.routes");
   const leaveRoutes = require("./src/routes/leave.routes");
@@ -30,7 +29,6 @@ async function init() {
   app.use("/api/auth", authRoutes);
   app.use("/api/employees", employeeRoutes);
   app.use("/api/menu", menuItemRoutes);
-  app.use("/api/roles", rolesRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/docs", documentRoutes);
   app.use("/api/documents", documentRoutes);
@@ -40,10 +38,10 @@ async function init() {
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
-  await sequelize.sync({});
 
   await initializeRoles();
   await initializeFirmTypes();
+  // await sequelize.sync({});
 }
 
 init();
