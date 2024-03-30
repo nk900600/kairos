@@ -1,5 +1,6 @@
 const { Designation } = require("../models/employee.model");
 const { FirmType } = require("../models/firm.model");
+const { Category } = require("../models/menuItem.model");
 
 const basicFirms = [
   {
@@ -23,6 +24,14 @@ const basicFirms = [
       { title: "Sommelier" },
       { title: "Barista" },
     ],
+    categoriesType: [
+      { title: "Appetizer" },
+      { title: "Main Course" },
+      { title: "Burgers" },
+      { title: "Pizzas" },
+      { title: "Dessert" },
+      { title: "Beverages" },
+    ],
   },
 ];
 
@@ -40,6 +49,14 @@ async function initializeFirmTypes() {
       }
       await Designation.bulkCreate(
         firmName.generalDesginations.map((data) => ({
+          ...data,
+          firmTypeId: firmExist.id,
+          firmId: null,
+        })),
+        { ignoreDuplicates: true }
+      );
+      await Category.bulkCreate(
+        firmName.categoriesType.map((data) => ({
           ...data,
           firmTypeId: firmExist.id,
           firmId: null,

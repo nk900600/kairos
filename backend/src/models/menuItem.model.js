@@ -12,12 +12,22 @@ const SpiceLevel = Object.freeze({
   VERYSPICY: "Very Spicy",
 });
 
+const DietType = Object.freeze({
+  VEGETARIAN: "Vegetarian",
+  NON_VEGETARIAN: "Non-Vegetarian",
+  VEGAN: "Vegan",
+});
+
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
 
 // Define the Customization model
 const Customization = sequelize.define("Customization", {
-  name: DataTypes.STRING,
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: DataTypes.STRING,
   isRequired: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -26,6 +36,10 @@ const Customization = sequelize.define("Customization", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  maxMultiSelect: {
+    type: DataTypes.INTEGER,
+    defaultValue: 100,
+  },
   // Choices will be handled separately
 });
 
@@ -33,21 +47,25 @@ const Customization = sequelize.define("Customization", {
 const MenuItem = sequelize.define(
   "MenuItem",
   {
-    name: DataTypes.STRING,
+    name: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
     description: DataTypes.STRING,
-    price: DataTypes.DECIMAL(10, 2),
+    price: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     currency: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "INR", // Set a default currency if applicable
     },
-    category: {
-      type: DataTypes.ENUM(
-        CategoryType.APPETIZER,
-        CategoryType.DRINK,
-        CategoryType.SOUP
-      ),
+    categoryId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "CategoryTypes", // Assumes you have a Users table
+        key: "id",
+      },
     },
     available: {
       type: DataTypes.BOOLEAN,
@@ -60,19 +78,11 @@ const MenuItem = sequelize.define(
         SpiceLevel.SPICY,
         SpiceLevel.VERYSPICY
       ),
-      defaultValue: "Mild",
+      defaultValue: null,
     },
-    isVegetarian: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    isNonVegetarian: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    isVegan: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    dietType: {
+      type: DataTypes.ENUM(...Object.values(DietType)),
+      defaultValue: null,
     },
     imageUrl: DataTypes.STRING,
     firmId: {
@@ -99,19 +109,9 @@ const MenuItem = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
   }
 );
 
@@ -125,28 +125,58 @@ MenuItem.beforeCreate((table, options) => {
 });
 
 MenuItem.beforeUpdate((table, options) => {
-  console.log("testing update hook");
   table.updatedBy = options.userId;
 });
 
-MenuItem.beforeDestroy((table, options) => {
-  if (options.userId) {
-    table.removedBy = options.userId;
-    // Since we're performing a soft delete, we need to manually save the update
-    return table.save();
-  }
-});
-
 const CustomizationChoice = sequelize.define("CustomizationChoice", {
-  option: DataTypes.STRING,
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: DataTypes.STRING,
   additionalPrice: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.INTEGER,
     defaultValue: 0,
+  },
+  currency: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "INR", // Set a default currency if applicable
+  },
+  dietType: {
+    type: DataTypes.ENUM(...Object.values(DietType)),
+    defaultValue: DietType.VEGETARIAN,
   },
 });
 
-CustomizationChoice.belongsTo(Customization);
+const Category = sequelize.define("CategoryType", {
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  firmTypeId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "FirmTypes", // Assumes you have a Users table
+      key: "id",
+    },
+  },
+  firmId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: "Firms", // Assumes you have a Users table
+      key: "id",
+    },
+  },
+});
+
+CustomizationChoice.belongsTo(Customization), { foreignKey: "customizationId" };
 Customization.hasMany(CustomizationChoice);
 
-Customization.belongsTo(MenuItem, { foreignKey: "menuItemId" });
-module.exports = { MenuItem, Customization, CustomizationChoice };
+Customization.belongsTo(MenuItem, {
+  foreignKey: "menuItemId",
+  allowNull: false,
+});
+module.exports = { MenuItem, Customization, CustomizationChoice, Category };

@@ -28,7 +28,7 @@ async function init() {
   app.use("/api/firms", firmRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/employees", employeeRoutes);
-  app.use("/api/menu", menuItemRoutes);
+  app.use("/api/menus", menuItemRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/docs", documentRoutes);
   app.use("/api/documents", documentRoutes);
@@ -41,7 +41,14 @@ async function init() {
 
   await initializeRoles();
   await initializeFirmTypes();
-  // await sequelize.sync({});
+  // await sequelize.sync({ alter: true });
 }
 
 init();
+
+// let sql = "ALTER TABLE your_table_name\n";
+// for (let i = 1; i <= 50; i++) {
+//   sql += `  DROP INDEX \`email_${i}\`${i < 50 ? "," : ""}\n`;
+// }
+
+// console.log(sql);

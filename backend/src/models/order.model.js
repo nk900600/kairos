@@ -6,7 +6,7 @@ const { TableSession } = require("./tableSession.model");
 // Define the OrderItem model
 const OrderItem = sequelize.define("OrderItem", {
   quantity: DataTypes.INTEGER,
-  amount: DataTypes.DECIMAL(10, 2),
+  amount: DataTypes.INTEGER,
   currency: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -22,7 +22,7 @@ const Order = sequelize.define(
   "Order",
   {
     tableNumber: DataTypes.INTEGER,
-    totalAmount: DataTypes.DECIMAL(10, 2),
+    totalAmount: DataTypes.INTEGER,
     currency: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -52,7 +52,7 @@ const Order = sequelize.define(
     customerNotes: DataTypes.STRING,
     promoCodeApplied: DataTypes.STRING,
     discountAmount: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.INTEGER,
       defaultValue: 0,
     },
     firmId: {

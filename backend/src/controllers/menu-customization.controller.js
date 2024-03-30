@@ -32,6 +32,26 @@ class MenuCustomizationController {
     }
   }
 
+  async getMenuCustomizationItem(req, res) {
+    try {
+      const menuCustomizationIItem = await Customization.findByPk(
+        req.params.id,
+        {
+          include: [CustomizationChoice],
+        }
+      );
+
+      if (!menuCustomizationIItem) {
+        return res
+          .status(404)
+          .json({ message: "MenuCustomizationIItem not found" });
+      }
+      res.json(menuCustomizationIItem);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
   async updateCustomization(req, res) {
     try {
       const customizationId = req.params.id;

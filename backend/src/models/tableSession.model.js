@@ -27,7 +27,7 @@ const TableSession = sequelize.define(
       defaultValue: DataTypes.NOW,
     },
     endTime: DataTypes.DATE,
-    totalAmount: DataTypes.DECIMAL(10, 2),
+    totalAmount: DataTypes.INTEGER,
     customerName: DataTypes.STRING,
     partySize: DataTypes.INTEGER,
     transactionId: DataTypes.STRING, // Assuming this is part of paymentDetails

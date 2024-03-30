@@ -1,3 +1,4 @@
+const sequelize = require("../db/db");
 const {
   MenuItem,
   Customization,
@@ -11,20 +12,33 @@ class MenuItemsController {
       const menuItems = await MenuItem.findAll({
         include: {
           model: Customization,
-          include: [CustomizationChoice],
+          include: [
+            {
+              model: CustomizationChoice,
+            },
+          ],
         },
       });
-      res.json(menuItems);
+
+      return res.json(menuItems);
     } catch (error) {
       console.error("Error fetching menu items:", error);
-      res.status(500).send("Error fetching menu items");
+      return res.status(500).send("Error fetching menu items");
     }
   }
 
   // Get a single menu item by ID
   async getMenuItem(req, res) {
     try {
-      const menuItem = await MenuItem.findByPk(req.params.id);
+      const menuItem = await MenuItem.findByPk(req.params.id, {
+        include: [
+          {
+            model: Customization,
+            include: [CustomizationChoice],
+          },
+        ],
+      });
+
       if (!menuItem) {
         return res.status(404).json({ message: "MenuItem not found" });
       }
@@ -36,66 +50,105 @@ class MenuItemsController {
 
   // Create a new menu item
   async createMenuItem(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
+      if (
+        !req.body?.name ||
+        !req.body?.categoryId ||
+        !req.body?.price ||
+        !req.body?.spiceLevel ||
+        !req.body?.dietType ||
+        !req.body?.firmId
+      ) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
       const {
         name,
         description,
         price,
-        category,
+        categoryId,
         available,
         spiceLevel,
-        isVegetarian,
-        isNonVegetarian,
-        isVegan,
+        dietType,
         imageUrl,
         customizations,
+        firmId,
       } = req.body;
 
       // Create the menu item
-      const menuItem = await MenuItem.create({
-        name,
-        description,
-        price,
-        category,
-        available,
-        spiceLevel,
-        isVegetarian,
-        isNonVegetarian,
-        isVegan,
-        imageUrl,
-      });
+      const menuItem = await MenuItem.create(
+        {
+          name,
+          description,
+          price,
+          categoryId,
+          available,
+          spiceLevel,
+          dietType,
+          imageUrl,
+          firmId,
+        },
+        { transaction, userId: 1 }
+      );
 
-      // Create customizations and customization choices
+      let data = [];
       if (customizations && customizations.length > 0) {
-        for (const customizationData of customizations) {
-          const customization = await Customization.create({
-            name: customizationData.name,
-            isRequired: customizationData.isRequired,
-            isMultiselect: customizationData.isMultiselect,
-            MenuItemId: menuItem.id,
-          });
-
-          await menuItem.addCustomization(customization);
-
-          if (
-            customizationData.choices &&
-            customizationData.choices.length > 0
-          ) {
-            for (const choiceData of customizationData.choices) {
-              await CustomizationChoice.create({
-                option: choiceData.option,
-                additionalPrice: choiceData.additionalPrice,
-                CustomizationId: customization.id,
-              });
+        const customizationPromises = customizations.map(
+          async (customizationData) => {
+            if (!customizationData.name) {
+              throw new Error(
+                "Missing required fields - customization - Name "
+              );
             }
+
+            const customization = await Customization.create(
+              {
+                ...customizationData,
+                menuItemId: menuItem.id,
+              },
+              { transaction, userId: 1 }
+            );
+
+            if (
+              customizationData.choices &&
+              customizationData.choices.length > 0
+            ) {
+              const choicePromises = customizationData.choices.map(
+                (choiceData) => {
+                  if (!choiceData.name) {
+                    throw new Error(
+                      "Missing required fields - choiceData - Name "
+                    );
+                  }
+                  return CustomizationChoice.create(
+                    {
+                      ...choiceData,
+                      CustomizationId: customization.id,
+                    },
+                    { transaction, userId: 1 }
+                  );
+                }
+              );
+
+              await Promise.all(choicePromises);
+            }
+
+            return customization;
           }
-        }
+        );
+
+        data = await Promise.all(customizationPromises);
       }
 
-      res.status(201).json(menuItem);
+      transaction.commit();
+
+      return res.status(201).json({ menuItem, data });
     } catch (error) {
-      console.error("Error creating menu item:", error);
-      res.status(500).send("Error creating menu item");
+      console.log("Error creating menu item:", error);
+      transaction.rollback();
+      return res.status(500).send("Error creating menu item");
     }
   }
 
@@ -103,41 +156,14 @@ class MenuItemsController {
   async updateMenuItem(req, res) {
     try {
       const menuItemId = req.params.id;
-      const {
-        name,
-        description,
-        price,
-        category,
-        available,
-        spiceLevel,
-        isVegetarian,
-        isNonVegetarian,
-        isVegan,
-        imageUrl,
-      } = req.body;
-
       // Find the menu item
       const menuItem = await MenuItem.findByPk(menuItemId);
       if (!menuItem) {
         return res.status(404).send("Menu item not found");
       }
 
-      // Update only the provided fields
-      if (name !== undefined) menuItem.name = name;
-      if (description !== undefined) menuItem.description = description;
-      if (price !== undefined) menuItem.price = price;
-      if (category !== undefined) menuItem.category = category;
-      if (available !== undefined) menuItem.available = available;
-      if (spiceLevel !== undefined) menuItem.spiceLevel = spiceLevel;
-      if (isVegetarian !== undefined) menuItem.isVegetarian = isVegetarian;
-      if (isNonVegetarian !== undefined)
-        menuItem.isNonVegetarian = isNonVegetarian;
-      if (isVegan !== undefined) menuItem.isVegan = isVegan;
-      if (imageUrl !== undefined) menuItem.imageUrl = imageUrl;
-
-      await menuItem.save();
-
-      res.json(menuItem);
+      await menuItem.update(req.body, { userId: 1 });
+      return res.status(201).json(menuItem);
     } catch (error) {
       console.error("Error updating menu item:", error);
       res.status(500).send("Error updating menu item");
