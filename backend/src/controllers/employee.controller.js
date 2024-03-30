@@ -6,7 +6,7 @@ class EmployeeController {
   async getAllEmployees(req, res) {
     try {
       const employees = await Employee.findAll({
-        include: [Role, Firm, Designation],
+        include: [Firm, Designation],
       });
       res.json(employees);
     } catch (error) {
@@ -32,18 +32,25 @@ class EmployeeController {
   async createEmployee(req, res) {
     try {
       // Validate the mobile number
-      if (req.body?.mobileNumber && !emailRegex.test(req.body?.mobileNumber)) {
+      if (!mobileNumberRegex.test(req.body?.mobileNumber)) {
         return res
           .status(400)
           .json({ message: "Invalid mobile number format" });
       }
+      // Validate the email
+      if (!emailRegex.test(req.body?.email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
 
-      const employee = await Employee.create({
-        ...req.body,
-        role: req.body.roleId,
-        firmId: req.body.firmId,
-        designation: req.body.designationId,
-      });
+      const employee = await Employee.create(
+        {
+          ...req.body,
+          roleId: req.body.role,
+          firmId: req.body.firmId,
+          designationId: req.body.designation,
+        },
+        { userId: 1 }
+      );
       res.status(201).json(employee);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -54,12 +61,15 @@ class EmployeeController {
     try {
       const employee = await Employee.findByPk(req.params.id);
       if (employee) {
-        await employee.update({
-          ...req.body,
-          roleId: req.body.roleId,
-          firmId: req.body.firmId,
-          designationId: req.body.designationId,
-        });
+        await employee.update(
+          {
+            ...req.body,
+            roleId: req.body.roleId,
+            firmId: req.body.firmId,
+            designationId: req.body.designationId,
+          },
+          { userId: 1 }
+        );
         res.json(employee);
       } else {
         res.status(404).json({ error: "Employee not found" });
@@ -72,12 +82,12 @@ class EmployeeController {
   async deleteEmployee(req, res) {
     try {
       const employee = await Employee.findByPk(req.params.id, {
-        include: [Role, Firm, Designation],
+        include: [Firm, Designation],
       });
-
+      console.log(employee);
       if (employee) {
         // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
-        await employee.destroy();
+        await employee.destroy({ userId: 1 });
         res.status(204).send(); // No content to send back
       } else {
         res.status(404).json({ error: "Employee not found" });

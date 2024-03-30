@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db");
+const { Firm } = require("./firm.model");
 
 // Define the Employee model
 const Employee = sequelize.define(
@@ -59,7 +60,7 @@ const Employee = sequelize.define(
         key: "id",
       },
     },
-    role: {
+    roleId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -67,7 +68,7 @@ const Employee = sequelize.define(
         key: "id",
       },
     },
-    designation: {
+    designationId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -166,4 +167,9 @@ Employee.beforeDestroy((table, options) => {
     return table.save();
   }
 });
+
+Employee.belongsTo(Firm, { foreignKey: "firmId" });
+Employee.belongsTo(Role, { foreignKey: "roleId" });
+Employee.belongsTo(Designation, { foreignKey: "designationId" });
+
 module.exports = { Employee, Role, Document, Designation };

@@ -5,6 +5,8 @@ const { Firm } = require("../models/firm.model");
 const jwt = require("jsonwebtoken");
 const geoip = require("geoip-lite");
 const { mobileNumberRegex, emailRegex } = require("../utils/const");
+const sequelize = require("../db/db");
+
 class AuthController {
   constructor() {
     this.generateOtp = this.generateOtp.bind(this);
@@ -17,11 +19,12 @@ class AuthController {
   }
 
   async signup(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
       let response = {};
 
       // Validate the request body
-      console.log(req.body);
 
       if (
         !req.body?.mobileNumber ||
@@ -49,16 +52,18 @@ class AuthController {
 
       const otpVerified = await this.verifyOtp(req.body);
       if (otpVerified) {
-        response.employee = await this.onboarding(req.body);
+        response.employee = await this.onboarding(req.body, transaction);
         console.log(response.employee);
         response.token = this.generateToken(req.body);
       } else {
         return res.status(401).json({ message: "OTP verification failed" });
       }
 
+      transaction.commit();
       return res.status(201).json(response);
     } catch (error) {
       console.error("Error while signup:", error);
+      transaction.rollback();
       res.status(500).json({ message: "Error while signup: " + error.message });
     }
   }
@@ -92,27 +97,33 @@ class AuthController {
     }
   }
 
-  async onboarding(body) {
+  async onboarding(body, transaction) {
     try {
       const { mobileNumber, email, firstName, lastName, firmType, firmName } =
         body;
       let adminRole = await Role.findOne({ where: { name: "Admin" } });
       // Create the firm
-      const firm = await Firm.create({
-        name: firmName,
-        type: firmType,
-        mobileNumber,
-        email,
-      });
+      const firm = await Firm.create(
+        {
+          name: firmName,
+          type: firmType,
+          mobileNumber,
+          email,
+        },
+        { transaction }
+      );
       // Create the employee with the admin role and firm ID
-      const employee = await Employee.create({
-        mobileNumber,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        role: adminRole.id,
-        firmId: firm.id,
-      });
+      const employee = await Employee.create(
+        {
+          mobileNumber,
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          roleId: adminRole.id,
+          firmId: firm.id,
+        },
+        { transaction }
+      );
       return employee;
       // Implement login logic
     } catch (error) {
