@@ -1,3 +1,4 @@
+const sequelize = require("../db/db.js");
 const { Employee, Designation, Role } = require("../models/employee.model.js");
 const { Firm } = require("../models/firm.model.js");
 const { mobileNumberRegex, emailRegex } = require("../utils/const.js");
@@ -6,7 +7,7 @@ class EmployeeController {
   async getAllEmployees(req, res) {
     try {
       const employees = await Employee.findAll({
-        include: [Firm, Designation],
+        include: [Role, Firm, Designation],
       });
       res.json(employees);
     } catch (error) {
@@ -30,16 +31,54 @@ class EmployeeController {
   }
 
   async createEmployee(req, res) {
+    const transaction = await sequelize.transaction();
     try {
+      if (!req.body?.email || !req.body?.firstName || !req.body?.lastName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
       // Validate the mobile number
-      if (!mobileNumberRegex.test(req.body?.mobileNumber)) {
+      if (
+        req.body?.mobileNumber &&
+        !mobileNumberRegex.test(req.body?.mobileNumber)
+      ) {
         return res
           .status(400)
           .json({ message: "Invalid mobile number format" });
       }
+
+      if (
+        req.body?.emergencyContactPhone &&
+        !mobileNumberRegex.test(req.body?.emergencyContactPhone)
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Invalid mobile number format" });
+      }
+
       // Validate the email
       if (!emailRegex.test(req.body?.email)) {
         return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      const user = await Employee.findOne(
+        {
+          where: { email: req.body.email },
+          paranoid: false, // Include soft-deleted records
+        },
+        { transaction }
+      );
+      // Restore the user
+      if (user && user.removedAt) {
+        await user.restore({ transaction });
+        await user.update(
+          {
+            removedBy: null,
+          },
+          { transaction }
+        );
+        await transaction.commit();
+        return res.json(user);
       }
 
       const employee = await Employee.create(
@@ -49,33 +88,56 @@ class EmployeeController {
           firmId: req.body.firmId,
           designationId: req.body.designation,
         },
-        { userId: 1 }
+        { userId: 1, transaction }
       );
-      res.status(201).json(employee);
+      await transaction.commit();
+      return res.status(201).json(employee);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      await transaction.rollback();
+      return res.status(400).json({ error: error.message });
     }
   }
 
   async updateEmployee(req, res) {
     try {
+      if (
+        req.body?.mobileNumber &&
+        !mobileNumberRegex.test(req.body?.mobileNumber)
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Invalid mobile number format" });
+      }
+      if (
+        req.body?.emergencyContactPhone &&
+        !mobileNumberRegex.test(req.body?.emergencyContactPhone)
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Invalid emergencyContactPhone  format" });
+      }
+      // Validate the email
+      if (req.body?.email && !emailRegex.test(req.body?.email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
       const employee = await Employee.findByPk(req.params.id);
       if (employee) {
         await employee.update(
           {
             ...req.body,
-            roleId: req.body.roleId,
+            roleId: req.body.role,
             firmId: req.body.firmId,
-            designationId: req.body.designationId,
+            designationId: req.body.designation,
           },
+          // TODO: take id from token
           { userId: 1 }
         );
-        res.json(employee);
+        return res.json(employee);
       } else {
-        res.status(404).json({ error: "Employee not found" });
+        return res.status(404).json({ error: "Employee not found" });
       }
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     }
   }
 
@@ -84,16 +146,15 @@ class EmployeeController {
       const employee = await Employee.findByPk(req.params.id, {
         include: [Firm, Designation],
       });
-      console.log(employee);
       if (employee) {
         // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
         await employee.destroy({ userId: 1 });
-        res.status(204).send(); // No content to send back
+        return res.status(204).send(); // No content to send back
       } else {
-        res.status(404).json({ error: "Employee not found" });
+        return res.status(404).json({ error: "Employee not found" });
       }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 }
