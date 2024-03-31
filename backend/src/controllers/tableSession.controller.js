@@ -48,13 +48,14 @@ class TableSessionController {
         },
         { where: { id: session.id } }
       );
-      return res.status(200).json(session);
+      const updatedSession = await TableSession.findByPk(session.id);
+      return res.status(200).json(updatedSession);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
   }
 
-  async updateSessionOrderCount(req, res) {
+  async incerementSessionOrderCount(req, res) {
     try {
       const { id } = req.params;
       const session = await TableSession.findByPk(id);

@@ -7,6 +7,9 @@ router.put("/:id", tableSessionController.updateSession);
 router.delete("/:id", tableSessionController.deleteSession);
 router.get("/:id", tableSessionController.getSessionById);
 router.get("/", tableSessionController.getallSession);
-router.post("/:id/order-count", tableSessionController.updateSessionOrderCount);
+router.put(
+  "/:id/order-count",
+  tableSessionController.incerementSessionOrderCount
+);
 
 module.exports = router;
