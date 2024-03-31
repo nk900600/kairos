@@ -1,63 +1,157 @@
-const Order = require('./../models/order.model'); // Update the path as necessary
+const sequelize = require("../db/db");
+const { CustomizationChoice } = require("../models/menuItem.model");
+const {
+  Order,
+  OrderItem,
+  OrderItemCustomizationsChoice,
+} = require("../models/order.model");
 
-class OrdersController {
-    async getAllOrders(req, res) {
-        try {
-            const orders = await Order.find().populate('items.menuItem');
-            res.json(orders);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
+const OrderController = {
+  // Create a new order
+  create: async (req, res) => {
+    const { orderItems, ...orderDetails } = req.body;
+
+    const transaction = await sequelize.transaction();
+
+    try {
+      const order = await Order.create(orderDetails, {
+        userId: 1,
+      });
+
+      // Inside the createOrder method
+
+      const orderItemPromises = orderItems.map(async (item) => {
+        const { customizations, ...itemDetails } = item;
+        const orderItem = await OrderItem.create(
+          {
+            ...itemDetails,
+            OrderId: order.id,
+          },
+          { transaction, userId: 1 }
+        );
+
+        if (customizations && customizations.length > 0) {
+          const customizationPromises = customizations.map(
+            (customizationChoiceId) =>
+              OrderItemCustomizationsChoice.create(
+                {
+                  OrderItemId: orderItem.id,
+                  CustomizationChoiceId: customizationChoiceId,
+                },
+                { transaction, userId: 1 }
+              )
+          );
+          await Promise.all(customizationPromises);
         }
+
+        return orderItem;
+      });
+
+      await Promise.all(orderItemPromises);
+
+      await transaction.commit();
+
+      const createdOrder = await Order.findByPk(order.id, {
+        include: [
+          {
+            model: OrderItem,
+            as: "orderItems",
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(201).json(createdOrder);
+    } catch (error) {
+      await transaction.rollback();
+      return res.status(500).json({ message: error.message });
     }
+  },
 
-    async getOrder(req, res) {
-        try {
-            const order = await Order.findById(req.params.id).populate('items.menuItem');
-            if (!order) {
-                return res.status(404).json({ message: 'Order not found' });
-            }
-            res.json(order);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
+  // Retrieve all orders
+  findAll: async (req, res) => {
+    try {
+      const order = await Order.findAll({
+        include: [
+          {
+            model: OrderItem,
+            as: "orderItems",
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
+      });
+      return res.status(200).json(order);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
+  },
 
-    async createOrder(req, res) {
-        const order = new Order({
-            // Populate with data from request body
-        });
+  // Retrieve a single order by id
+  findOne: async (req, res) => {
+    try {
+      const order = await Order.findByPk(req.params.id, {
+        include: [
+          {
+            model: OrderItem,
+            as: "orderItems",
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
+      });
 
-        try {
-            const newOrder = await order.save();
-            res.status(201).json(newOrder);
-        } catch (err) {
-            res.status(400).json({ message: err.message });
-        }
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      return res.status(200).json(order);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
+  },
 
-    async updateOrder(req, res) {
-        try {
-            const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-            if (!order) {
-                return res.status(404).json({ message: 'Order not found' });
-            }
-            res.json(order);
-        } catch (err) {
-            res.status(400).json({ message: err.message });
-        }
+  // Update an order
+  update: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [updated] = await Order.update(req.body, {
+        where: { id: id },
+      });
+      if (updated) {
+        const updatedOrder = await Order.findByPk(id);
+        return res.status(200).json(updatedOrder);
+      }
+      throw new Error("Order not found");
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
+  },
 
-    async deleteOrder(req, res) {
-        try {
-            const order = await Order.findByIdAndDelete(req.params.id);
-            if (!order) {
-                return res.status(404).json({ message: 'Order not found' });
-            }
-            res.json({ message: 'Order deleted' });
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
+  // Delete an order
+  delete: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await Order.destroy({
+        where: { id: id },
+      });
+      if (deleted) {
+        return res.status(204).send("Order deleted");
+      }
+      throw new Error("Order not found");
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
-}
+  },
+};
 
-module.exports = new OrdersController();
+module.exports = OrderController;

@@ -1,7 +1,28 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
-const { MenuItem, Customization } = require("./menuItem.model");
+const {
+  MenuItem,
+  Customization,
+  CustomizationChoice,
+} = require("./menuItem.model");
 const { TableSession } = require("./tableSession.model");
+const { SpiceLevel, DietType } = require("../utils/const");
+
+const OrderTypes = Object.freeze({
+  DINE_IN: "dine-in",
+  TAKEAWAY: "takeaway",
+});
+
+const OrderStatuses = Object.freeze({
+  ADDED_TO_ORDER: "Added to Order",
+  MODIFIED: "Modified",
+  CONFIRMED: "Confirmed",
+  PREPARING: "Preparing",
+  READY_FOR_PICKUP: "Ready for Pickup",
+  CANCELLED: "Cancelled",
+  SERVED: "Served",
+  COMPLETED: "Completed",
+});
 
 // Define the OrderItem model
 const OrderItem = sequelize.define("OrderItem", {
@@ -21,7 +42,6 @@ const OrderItem = sequelize.define("OrderItem", {
 const Order = sequelize.define(
   "Order",
   {
-    tableNumber: DataTypes.INTEGER,
     totalAmount: DataTypes.INTEGER,
     currency: {
       type: DataTypes.STRING,
@@ -33,21 +53,18 @@ const Order = sequelize.define(
       defaultValue: DataTypes.NOW,
     },
     status: {
-      type: DataTypes.ENUM(
-        "Placed",
-        "Modified",
-        "Confirmed",
-        "Preparing",
-        "Ready for Pickup",
-        "Delivered",
-        "Cancelled"
-      ),
-      defaultValue: "Placed",
+      type: DataTypes.ENUM(...Object.values(OrderStatuses)),
+      defaultValue: OrderStatuses.ADDED_TO_ORDER,
       allowNull: false,
     },
     isPriority: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    orderType: {
+      type: DataTypes.ENUM(...Object.values(OrderTypes)),
+      defaultValue: OrderTypes.DINE_IN,
+      allowNull: false,
     },
     customerNotes: DataTypes.STRING,
     promoCodeApplied: DataTypes.STRING,
@@ -80,27 +97,20 @@ const Order = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
-    // Foreign key for handledBy will be added below
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
   }
 );
 
 // Define associations
-Order.hasMany(OrderItem, { as: "items" });
+Order.hasMany(OrderItem, {
+  as: "orderItems",
+  onDelete: "CASCADE",
+  foreignKey: "OrderId",
+});
 Order.belongsTo(TableSession, { foreignKey: "tableSessionId" });
-// Order.sync({});
+// Order.sync({ force: true });
 
 Order.beforeCreate((table, options) => {
   table.createdBy = options.userId;
@@ -122,7 +132,19 @@ OrderItem.belongsTo(Order);
 
 // Assuming you have defined MenuItem and Customization models
 OrderItem.belongsTo(MenuItem);
-OrderItem.belongsToMany(Customization, { through: "OrderItemCustomizations" });
-// OrderItem.sync({});
+const OrderItemCustomizationsChoice = sequelize.define(
+  "OrderItemCustomizationsChoices",
+  {
+    // Define any additional fields if needed
+  }
+);
 
-module.exports = { Order, OrderItem };
+OrderItem.belongsToMany(CustomizationChoice, {
+  through: OrderItemCustomizationsChoice,
+});
+
+
+// Order.sync({ force: true });
+// OrderItem.sync({ force: true });
+// OrderItemCustomizationsChoices.sync({ force: true });
+module.exports = { Order, OrderItem, OrderItemCustomizationsChoice };

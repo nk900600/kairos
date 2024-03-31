@@ -1,25 +1,8 @@
 // const mongoose = require("mongoose");
 
-const CategoryType = Object.freeze({
-  APPETIZER: "Appetizer",
-  SOUP: "Soup",
-  DRINK: "Drink",
-});
-const SpiceLevel = Object.freeze({
-  MILD: "Mild",
-  MEDIUM: "Medium",
-  SPICY: "Spicy",
-  VERYSPICY: "Very Spicy",
-});
-
-const DietType = Object.freeze({
-  VEGETARIAN: "Vegetarian",
-  NON_VEGETARIAN: "Non-Vegetarian",
-  VEGAN: "Vegan",
-});
-
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
+const { SpiceLevel, DietType } = require("../utils/const");
 
 // Define the Customization model
 const Customization = sequelize.define("Customization", {
