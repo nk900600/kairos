@@ -47,8 +47,8 @@ async function init() {
 init();
 
 // let sql = "ALTER TABLE your_table_name\n";
-// for (let i = 1; i <= 50; i++) {
-//   sql += `  DROP INDEX \`email_${i}\`${i < 50 ? "," : ""}\n`;
+// for (let i = 1; i <= 60; i++) {
+//   sql += `  DROP INDEX \`tableName_${i}\`${i < 50 ? "," : ""}\n`;
 // }
 
 // console.log(sql);

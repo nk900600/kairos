@@ -4,7 +4,7 @@ const { TableStatus } = require("../enums/tables.enum");
 const Table = sequelize.define(
   "Table",
   {
-    tableNumber: {
+    tableName: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -61,22 +61,11 @@ const Table = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
   }
 );
-// Table.sync({});
 
 Table.beforeCreate((table, options) => {
   table.createdBy = options.userId;
@@ -84,14 +73,6 @@ Table.beforeCreate((table, options) => {
 
 Table.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;
-});
-
-Table.beforeDestroy((table, options) => {
-  if (options.userId) {
-    table.removedBy = options.userId;
-    // Since we're performing a soft delete, we need to manually save the update
-    return table.save();
-  }
 });
 
 module.exports = { Table };

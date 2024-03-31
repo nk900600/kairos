@@ -1,3 +1,4 @@
+const { TableStatus } = require("../enums/tables.enum.js");
 const { Table } = require("../models/table.model.js");
 const {
   TableSession,
@@ -7,10 +8,10 @@ const {
 class TableController {
   async getAllTables(req, res) {
     try {
-      const tables = await Table.find();
-      res.status(200).json(tables);
+      const tables = await Table.findAll();
+      return res.status(200).json(tables);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -34,58 +35,104 @@ class TableController {
         };
       });
 
-      res.status(200).json(tablesWithSessions);
+      return res.status(200).json(tablesWithSessions);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 
   async createTable(req, res) {
     try {
-      const tables = await Table.create(req.body);
-      res.status(201).json(tables);
+      if (!req.body?.tableName || !req.body?.capacity) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const tables = await Table.create(
+        { ...req.body, firmId: 1 },
+        { userId: 1 }
+      );
+      return res.status(201).json(tables);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     }
   }
 
   async updateTable(req, res) {
     try {
-      const tables = await Table.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
-      res.status(200).json(tables);
+      const { id } = req.params;
+      const session = await Table.findByPk(id);
+      if (!session) {
+        return res.status(404).json({ message: "Table session not found" });
+      }
+      const updatedTable = await Table.update(
+        {
+          ...req.body,
+        },
+        { where: { id: session.id } }
+      );
+      return res.status(200).json(updatedTable);
     } catch (error) {
-      res.status(404).json({ error: "Table not found" });
+      return res.status(404).json({ error: "Table not found" });
     }
   }
 
   async deleteTable(req, res) {
     try {
-      await Table.findByIdAndDelete(req.params.id);
-      res.status(204).send();
+      const table = await Table.findByPk(req.params.id, {});
+      if (table) {
+        // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
+        await table.destroy({ userId: 1 });
+        return res.status(204).send(); // No content to send back
+      } else {
+        return res.status(404).json({ error: "table not found" });
+      }
     } catch (error) {
-      res.status(404).json({ error: "Table not found" });
+      return res.status(404).json({ error: "Table not found" });
     }
   }
   async createReservation(req, res) {
     try {
-      const tables = await Table.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
-      res.status(200).json(tables);
+      if (!req.body?.reservationName || !req.body?.reservationTime) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      const table = await Table.findByPk(req.params.id);
+      if (!table) {
+        return res.status(404).json({ message: "Table session not found" });
+      }
+      await Table.update(
+        {
+          ...req.body,
+          status: TableStatus.RESERVED,
+        },
+        { where: { id: table.id } }
+      );
+      return res.status(200).json(table);
     } catch (error) {
-      res.status(404).json({ error: "Table not found" });
+      return res.status(404).json({ error: "Table not found" });
     }
   }
   async updateStatus(req, res) {
     try {
-      const tables = await Table.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-      });
-      res.status(200).json(tables);
+      if (!req.body?.status) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      const table = await Table.findByPk(req.params.id);
+      if (!table) {
+        return res.status(404).json({ message: "Table not found" });
+      }
+
+      await Table.update(
+        {
+          status: req.body?.status,
+          reservationName: null,
+          reservationTime: null,
+          reservationPartySize: null,
+        },
+        { where: { id: table.id } }
+      );
+      return res.status(200).json(table);
     } catch (error) {
-      res.status(404).json({ error: "Table not found" });
+      return res.status(404).json({ error: "Table not found" });
     }
   }
 }

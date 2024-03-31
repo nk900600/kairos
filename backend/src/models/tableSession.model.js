@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { Table } = require("./table.model");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
+const { Order } = require("./order.model");
 
 const PaymentStatus = {
   PENDING: "pending",
@@ -28,9 +29,17 @@ const TableSession = sequelize.define(
     },
     endTime: DataTypes.DATE,
     totalAmount: DataTypes.INTEGER,
+
+    // Will create new custier table once MVP is out
     customerName: DataTypes.STRING,
+    customerMobile: DataTypes.INTEGER,
+
+    orderCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
     partySize: DataTypes.INTEGER,
-    transactionId: DataTypes.STRING, // Assuming this is part of paymentDetails
     paymentStatus: {
       type: DataTypes.ENUM(...Object.values(PaymentStatus)),
       defaultValue: PaymentStatus.PENDING,
@@ -45,10 +54,12 @@ const TableSession = sequelize.define(
       type: DataTypes.ENUM(...Object.values(SessionStatus)),
       defaultValue: SessionStatus.ACTIVE,
     },
-    feedback: DataTypes.STRING,
+    // whole new feature
+    feedback: DataTypes.STRING, //
     foodRating: DataTypes.INTEGER,
     serviceRating: DataTypes.INTEGER,
     overallRating: DataTypes.INTEGER,
+
     firmId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -73,39 +84,22 @@ const TableSession = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
   }
 );
 // Define associations
 TableSession.belongsTo(Table, { as: "table" });
 // TableSession.hasMany(Order);
-// TableSession.sync({});
+
+// TableSession.sync({ alter: true });
 TableSession.beforeCreate((table, options) => {
   table.createdBy = options.userId;
 });
 
 TableSession.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;
-});
-
-TableSession.beforeDestroy((table, options) => {
-  if (options.userId) {
-    table.removedBy = options.userId;
-    // Since we're performing a soft delete, we need to manually save the update
-    return table.save();
-  }
 });
 
 // TableSession.sync({});
