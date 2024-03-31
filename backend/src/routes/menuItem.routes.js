@@ -4,8 +4,20 @@ const menuItemsController = require("./../controllers/menuItem.controller");
 
 router.get("/", menuItemsController.getAllMenuItems);
 router.get("/:id", menuItemsController.getMenuItem);
+router.get(
+  "/:id/customization/:customid",
+  menuItemsController.getMenuCustomization
+);
 router.post("/", menuItemsController.createMenuItem);
 router.patch("/:id", menuItemsController.updateMenuItem);
+router.patch(
+  "/:id/customization/:customid",
+  menuItemsController.updateMenuCustomization
+);
 router.delete("/:id", menuItemsController.deleteMenuItem);
+router.delete(
+  "/:id/customization/:customid",
+  menuItemsController.deleteMenuCustomization
+);
 
 module.exports = router;

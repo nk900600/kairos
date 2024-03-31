@@ -42,9 +42,64 @@ class MenuItemsController {
       if (!menuItem) {
         return res.status(404).json({ message: "MenuItem not found" });
       }
-      res.json(menuItem);
+      return res.json(menuItem);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.status(500).json({ message: err.message });
+    }
+  }
+  async getMenuCustomization(req, res) {
+    try {
+      const menuItem = await Customization.findByPk(req.params.customid, {
+        include: [CustomizationChoice],
+      });
+
+      if (!menuItem) {
+        return res.status(404).json({ message: "Customization not found" });
+      }
+      return res.json(menuItem);
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  async updateMenuCustomization(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      const menuItem = await Customization.findByPk(req.params.customid);
+      if (!menuItem) {
+        return res.status(404).send("Customization item not found");
+      }
+
+      const customization = await Customization.update(
+        {
+          ...req.body,
+        },
+        { transaction, userId: 1, where: { id: req.params.customid } }
+      );
+      console.log("1");
+
+      if (req.body?.choices && req.body?.choices.length > 0) {
+        const choicePromises = req.body?.choices.map((choiceData) => {
+          return CustomizationChoice.update(
+            {
+              ...choiceData,
+            },
+            {
+              transaction,
+              userId: 1,
+              where: { CustomizationId: req.params.customid },
+            }
+          );
+        });
+
+        await Promise.all(choicePromises);
+      }
+
+      transaction.commit();
+      return res.json(customization);
+    } catch (err) {
+      transaction.rollback();
+      return res.status(500).json({ message: err.message });
     }
   }
 
@@ -180,6 +235,21 @@ class MenuItemsController {
       if (!menuItem) {
         return res.status(404).send("Menu item not found");
       }
+      const customizations = await Customization.findAll({
+        where: { MenuItemId: menuItemId },
+      });
+
+      await Promise.all(
+        customizations.map((customization) =>
+          CustomizationChoice.destroy({
+            where: { CustomizationId: customization.id },
+          })
+        )
+      );
+
+      await Customization.destroy({
+        where: { menuItemId: menuItemId },
+      });
 
       await menuItem.destroy();
 
@@ -187,6 +257,25 @@ class MenuItemsController {
     } catch (error) {
       console.error("Error deleting menu item:", error);
       res.status(500).send("Error deleting menu item");
+    }
+  }
+  async deleteMenuCustomization(req, res) {
+    try {
+      const customization = await Customization.findByPk(req.params.customid);
+      if (!customization) {
+        return res.status(404).send("Customization item not found");
+      }
+
+      await CustomizationChoice.destroy({
+        where: { CustomizationId: customization.id },
+      });
+
+      await customization.destroy();
+
+      res.send("Customization item deleted successfully");
+    } catch (error) {
+      console.error("Error deleting Customization item:", error);
+      res.status(500).send("Error deleting Customization item");
     }
   }
 }
