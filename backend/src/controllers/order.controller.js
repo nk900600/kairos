@@ -6,9 +6,9 @@ const {
   OrderItemCustomizationsChoice,
 } = require("../models/order.model");
 
-const OrderController = {
+class OrderController {
   // Create a new order
-  create: async (req, res) => {
+  async create(req, res) {
     const { orderItems, ...orderDetails } = req.body;
 
     const transaction = await sequelize.transaction();
@@ -70,10 +70,10 @@ const OrderController = {
       await transaction.rollback();
       return res.status(500).json({ message: error.message });
     }
-  },
+  }
 
   // Retrieve all orders
-  findAll: async (req, res) => {
+  async findAll(req, res) {
     try {
       const order = await Order.findAll({
         include: [
@@ -92,10 +92,74 @@ const OrderController = {
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
-  },
+  }
+
+  async createOrderItem(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      if (!req.body?.orderItems) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      const order = await Order.findByPk(req.params.id, {});
+
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const orderItemPromises = req.body?.orderItems.map(async (item) => {
+        const { customizations, ...itemDetails } = item;
+        const orderItem = await OrderItem.create(
+          {
+            ...itemDetails,
+            OrderId: order.id,
+          },
+          { transaction, userId: 1 }
+        );
+
+        if (customizations && customizations.length > 0) {
+          const customizationPromises = customizations.map(
+            (customizationChoiceId) =>
+              OrderItemCustomizationsChoice.create(
+                {
+                  OrderItemId: orderItem.id,
+                  CustomizationChoiceId: customizationChoiceId,
+                },
+                { transaction, userId: 1 }
+              )
+          );
+          await Promise.all(customizationPromises);
+        }
+
+        return orderItem;
+      });
+
+      await Promise.all(orderItemPromises);
+
+      await transaction.commit();
+
+      const updatedOrder = await Order.findByPk(order.id, {
+        include: [
+          {
+            model: OrderItem,
+            as: "orderItems",
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
+      });
+
+      return res.status(200).json(updatedOrder);
+    } catch (error) {
+      await transaction.rollback();
+      return res.status(500).json({ message: error.message });
+    }
+  }
 
   // Retrieve a single order by id
-  findOne: async (req, res) => {
+  async findOne(req, res) {
     try {
       const order = await Order.findByPk(req.params.id, {
         include: [
@@ -118,27 +182,28 @@ const OrderController = {
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
-  },
-
-  // Update an order
-  update: async (req, res) => {
+  }
+  async findOneOrderItem(req, res) {
     try {
-      const { id } = req.params;
-      const [updated] = await Order.update(req.body, {
-        where: { id: id },
+      const orderItem = await OrderItem.findByPk(req.params.id, {
+        include: [
+          {
+            model: CustomizationChoice,
+          },
+        ],
       });
-      if (updated) {
-        const updatedOrder = await Order.findByPk(id);
-        return res.status(200).json(updatedOrder);
+
+      if (!orderItem) {
+        return res.status(404).json({ message: "OrderItem not found" });
       }
-      throw new Error("Order not found");
+      return res.status(200).json(orderItem);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
-  },
+  }
 
   // Delete an order
-  delete: async (req, res) => {
+  async delete(req, res) {
     try {
       const { id } = req.params;
       const deleted = await Order.destroy({
@@ -151,7 +216,61 @@ const OrderController = {
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
-  },
-};
+  }
 
-module.exports = OrderController;
+  async updateOrderItem(req, res) {
+    const { orderItemId } = req.params;
+
+    try {
+      const orderItem = await OrderItem.findByPk(orderItemId);
+      if (!orderItem) {
+        return res.status(404).json({ message: "Order item not found" });
+      }
+
+      if (req.body?.isCompleted) {
+        orderItem.isCompleted = req.body?.isCompleted;
+        await orderItem.save();
+      }
+      if ("quantity" in req.body) {
+        if (req.body?.quantity == 0) {
+          const orderItem = await OrderItem.destroy({
+            where: { id: orderItemId },
+          });
+          return res.status(200).json(orderItem);
+        }
+
+        orderItem.quantity = req.body?.quantity;
+        await orderItem.save();
+      }
+
+      return res.status(200).json(orderItem);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async updateCustomization(req, res) {
+    const { orderItemId } = req.params;
+    const { customizations } = req.body;
+
+    try {
+      await OrderItemCustomizationsChoice.destroy({
+        where: { OrderItemId: orderItemId },
+      });
+
+      // Create new customizations
+      const newCustomizations = customizations.map((customization) => ({
+        CustomizationChoiceId: customization,
+        OrderItemId: orderItemId,
+      }));
+      const items = await OrderItemCustomizationsChoice.bulkCreate(
+        newCustomizations
+      );
+      return res.status(200).json(items);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+}
+
+module.exports = new OrderController();
