@@ -2,6 +2,18 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../db/db"); // Adjust the path to your database configuration file
 const { Employee } = require("./employee.model");
 
+const LeaveStatus = Object.freeze({
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+});
+
+const LeaveDurationType = Object.freeze({
+  PENDING: "Pending",
+  FULL_DAY: "Full Day",
+  HALF_DAY: "Half Day",
+});
+
 // Define the LeaveType model
 const LeaveType = sequelize.define(
   "LeaveType",
@@ -9,6 +21,7 @@ const LeaveType = sequelize.define(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     description: DataTypes.STRING,
     numLeavesAvailable: {
@@ -19,7 +32,7 @@ const LeaveType = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Firms", // Assumes you have a Users table
+        model: "Firms", // Assumes you havei a Users table
         key: "id",
       },
     },
@@ -39,19 +52,9 @@ const LeaveType = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
   }
 );
 
@@ -74,11 +77,11 @@ const Leave = sequelize.define(
     },
     reason: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM("Pending", "Approved", "Rejected"),
-      defaultValue: "Pending",
+      type: DataTypes.ENUM(...Object.values(LeaveStatus)),
+      defaultValue: LeaveStatus.PENDING,
     },
     appliedOn: {
       type: DataTypes.DATE,
@@ -87,8 +90,9 @@ const Leave = sequelize.define(
     // Foreign key for managerId will be added below
     comments: DataTypes.STRING,
     leaveDurationType: {
-      type: DataTypes.ENUM("Full Day", "Half Day"),
+      type: DataTypes.ENUM(...Object.values(LeaveDurationType)),
       allowNull: false,
+      defaultValue: LeaveDurationType.FULL_DAY,
     },
     firmId: {
       type: DataTypes.INTEGER,
@@ -114,27 +118,30 @@ const Leave = sequelize.define(
         key: "id",
       },
     },
-    removedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "Employees",
-        key: "id",
-      },
-    },
-    // Additional fields for halfDayDetails and attachments can be added as needed
   },
   {
     timestamps: true,
-    paranoid: true,
-    deletedAt: "removedAt",
+    indexes: [
+      {
+        unique: true,
+        fields: ["createdBy", "startDate"],
+      },
+    ],
   }
 );
 
 // Define associations
 Leave.belongsTo(LeaveType);
-Leave.belongsTo(Employee, { as: "employee" });
-Leave.belongsTo(Employee, { as: "manager" });
+Leave.belongsTo(Employee, { as: "manager", allowNull: false });
+
+Leave.beforeCreate((leave, options) => {
+  leave.createdBy = options.userId;
+});
+
+Leave.beforeUpdate((table, options) => {
+  table.updatedBy = options.userId;
+});
+
 // Leave.sync({});
 // LeaveType.sync({});
-module.exports = { Leave, LeaveType };
+module.exports = { Leave, LeaveType, LeaveStatus, LeaveDurationType };

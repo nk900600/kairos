@@ -1,67 +1,90 @@
-const Leave = require("./../models/leave.model"); // Path to your Leave model
+const { calculateDuration } = require("../utils/util");
+const { Leave, LeaveStatus } = require("./../models/leave.model"); // Path to your Leave model
 
 class LeaveController {
   // Create a new leave request
   async createLeave(req, res) {
-    const newLeave = new Leave(req.body);
     try {
-      const savedLeave = await newLeave.save();
-      res.status(201).json(savedLeave);
-    } catch (err) {
-      res.status(400).json({ message: err.message });
+      if (
+        !req.body?.startDate ||
+        !req.body?.endDate ||
+        !req.body?.LeaveTypeId
+      ) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const duration = calculateDuration(req.body.startDate, req.body.endDate);
+
+      const leaveType = await Leave.create(
+        { ...req.body, duration, firmId: 1 },
+        { userId: 1 }
+      );
+      return res.status(201).json(leaveType);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 
   // Retrieve all leave requests
   async getAllLeaves(req, res) {
     try {
-      const leaves = await Leave.find();
-      res.json(leaves);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+      const leaveTypes = await Leave.findAll();
+      return res.status(200).json(leaveTypes);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 
   // Retrieve a single leave request by ID
   async getLeave(req, res) {
     try {
-      const leave = await Leave.findById(req.params.id);
-      if (!leave) {
-        return res.status(404).json({ message: "Leave request not found" });
+      const leave = await Leave.findByPk(req.params.id, {});
+      if (leave) {
+        res.json(leave);
+      } else {
+        res.status(404).json({ error: "leave not found" });
       }
-      res.json(leave);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
   }
 
   // Update a leave request
   async updateLeave(req, res) {
     try {
-      const updatedLeave = await Leave.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true }
-      );
-      if (!updatedLeave) {
-        return res.status(404).json({ message: "Leave request not found" });
+      if (!req.body?.startDate || !req.body?.endDate) {
+        return res.status(400).json({ message: "Missing required fields" });
       }
-      res.json(updatedLeave);
-    } catch (err) {
-      res.status(400).json({ message: err.message });
+
+      const leaveType = await Leave.findByPk(req.params.id);
+      if (!leaveType) {
+        return res.status(404).json({ message: "LeaveType not found" });
+      }
+
+      if (leaveType.status != LeaveStatus.PENDING) {
+        return res.status(404).json({ message: "Leave is marked as solved" });
+      }
+
+      const duration = calculateDuration(req.body.startDate, req.body.endDate);
+
+      await leaveType.update({ ...req.body, duration }, { userId: 1 });
+      return res.status(200).json(leaveType);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 
   // Delete a leave request
   async deleteLeave(req, res) {
     try {
-      const deletedLeave = await Leave.findByIdAndDelete(req.params.id);
-      if (!deletedLeave) {
-        return res.status(404).json({ message: "Leave request not found" });
+      const leaveType = await Leave.findByPk(req.params.id);
+      if (!leaveType) {
+        return res.status(404).json({ message: "LeaveType not found" });
       }
-      res.json({ message: "Leave request deleted" });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+      await leaveType.destroy();
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 }

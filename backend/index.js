@@ -19,6 +19,7 @@ async function init() {
   const documentRoutes = require("./src/routes/document.routes");
   const leaveRoutes = require("./src/routes/leave.routes");
   const tableRoutes = require("./src/routes/table.routes");
+  const leaveTypesRoutes = require("./src/routes/leavesTypes.routes");
   const tableSessionRoutes = require("./src/routes/tableSession.routes");
 
   const app = express();
@@ -30,6 +31,7 @@ async function init() {
   app.use("/api/employees", employeeRoutes);
   app.use("/api/menus", menuItemRoutes);
   app.use("/api/orders", orderRoutes);
+  app.use("/api/leave-types", leaveTypesRoutes);
   app.use("/api/docs", documentRoutes);
   app.use("/api/documents", documentRoutes);
   app.use("/api/leaves", leaveRoutes);
