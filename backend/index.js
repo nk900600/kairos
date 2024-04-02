@@ -9,6 +9,11 @@ dotenv.config({ path: `./env/.env.common` });
 const sequelize = require("./src/db/db");
 const initializeRoles = require("./src/utils/create-roles");
 const initializeFirmTypes = require("./src/utils/create-firm-types");
+const {
+  Subscription,
+  FirmSubscription,
+} = require("./src/models/subscription.model");
+const initializeSubsription = require("./src/utils/create-subscription");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -21,6 +26,7 @@ async function init() {
   const tableRoutes = require("./src/routes/table.routes");
   const leaveTypesRoutes = require("./src/routes/leavesTypes.routes");
   const tableSessionRoutes = require("./src/routes/tableSession.routes");
+  const firmSubscriptionRoutes = require("./src/routes/firmSubscription.routes");
 
   const app = express();
   const port = 3000;
@@ -37,12 +43,14 @@ async function init() {
   app.use("/api/leaves", leaveRoutes);
   app.use("/api/tables", tableRoutes);
   app.use("/api/tables-session", tableSessionRoutes);
+  app.use("/api/firm-subscriptions", firmSubscriptionRoutes);
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
 
   await initializeRoles();
   await initializeFirmTypes();
+  await initializeSubsription();
   // await sequelize.sync({ alter: true });
 }
 

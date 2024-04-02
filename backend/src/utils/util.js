@@ -5,4 +5,15 @@ function calculateDuration(startDate, endDate) {
   return duration;
 }
 
-module.exports = { calculateDuration };
+function calculateNextBillingDate(billingCycle) {
+  const currentDate = new Date();
+  if (billingCycle === "monthly") {
+    return new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+  } else if (billingCycle === "annually") {
+    return new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
+  }
+}
+
+
+
+module.exports = { calculateDuration, calculateNextBillingDate };
