@@ -354,9 +354,13 @@ class AuthController {
 
   generateToken(tokenObj) {
     // Generate a token for authentication
-    const token = jwt.sign({ ...tokenObj }, process.env.JWT_SECRET, {
-      expiresIn: "15d",
-    }); // Adjust the secret and expiration as needed
+    const token = jwt.sign(
+      { user: tokenObj.dataValues },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "15d",
+      }
+    ); // Adjust the secret and expiration as needed
 
     return token;
   }
