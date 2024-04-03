@@ -28,6 +28,7 @@ async function init() {
   const leaveTypesRoutes = require("./src/routes/leavesTypes.routes");
   const tableSessionRoutes = require("./src/routes/tableSession.routes");
   const firmSubscriptionRoutes = require("./src/routes/firmSubscription.routes");
+  const desginationRoutes = require("./src/routes/designation.routes");
 
   const app = express();
   const port = 3000;
@@ -44,6 +45,7 @@ async function init() {
   app.use("/api/leaves", leaveRoutes);
   app.use("/api/tables", tableRoutes);
   app.use("/api/feedback", feedbackRoute);
+  app.use("/api/designations", desginationRoutes);
   app.use("/api/tables-session", tableSessionRoutes);
   app.use("/api/firm-subscriptions", firmSubscriptionRoutes);
   app.listen(port, () => {

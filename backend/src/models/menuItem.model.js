@@ -36,6 +36,7 @@ const MenuItem = sequelize.define(
       allowNull: false,
     },
     description: DataTypes.STRING,
+    calorieCount: DataTypes.INTEGER,
     price: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     currency: {
       type: DataTypes.STRING,

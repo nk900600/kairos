@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const sequelize = require("../db/db");
 const { CustomizationChoice } = require("../models/menuItem.model");
 const {
@@ -269,6 +270,37 @@ class OrderController {
       return res.status(200).json(items);
     } catch (error) {
       return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async GetOrderBetweenDatesRange(req, res) {
+    const { startDate, endDate } = req.query;
+
+    try {
+      // Validate the query parameters
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          error: "Please provide both startDate and endDate query parameters.",
+        });
+      }
+
+      // Query the database for average ratings
+      const orders = await Order.findAll({
+        where: {
+          orderDate: {
+            [Op.between]: [new Date(startDate), new Date(endDate)],
+          },
+        },
+        order: [
+          ["orderDate", "ASC"], // Order by the orderDate in ascending order
+        ],
+      });
+      // Format the response
+
+      return res.status(200).json(orders);
+    } catch (error) {
+      console.error("Error fetching average ratings:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }

@@ -3,6 +3,7 @@ const router = express.Router();
 const OrderController = require("../controllers/order.controller");
 
 router.post("/", OrderController.create);
+router.get("/get-orders", OrderController.GetOrderBetweenDatesRange);
 router.post("/:id/order-items", OrderController.createOrderItem);
 router.get("/", OrderController.findAll);
 router.get("/order-items/:id", OrderController.findOneOrderItem);
