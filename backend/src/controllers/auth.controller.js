@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const geoip = require("geoip-lite");
 const { mobileNumberRegex, emailRegex } = require("../utils/const");
 const sequelize = require("../db/db");
+const RefreshToken = require("../models/refreshTokens.model");
 
 class AuthController {
   constructor() {
@@ -16,6 +17,10 @@ class AuthController {
     this.onboarding = this.onboarding.bind(this);
     this.verifyOtp = this.verifyOtp.bind(this);
     this.generateToken = this.generateToken.bind(this);
+    this.refreshAccessToken = this.refreshAccessToken.bind(this);
+    this.getRefreshToken = this.getRefreshToken.bind(this);
+    this.generateAndStoreRefreshToken =
+      this.generateAndStoreRefreshToken.bind(this);
   }
 
   async signup(req, res) {
@@ -53,8 +58,10 @@ class AuthController {
       const otpVerified = await this.verifyOtp(req.body);
       if (otpVerified) {
         response.employee = await this.onboarding(req.body, transaction);
-        console.log(response.employee);
-        response.token = this.generateToken(req.body);
+        response.token = this.generateToken(response.employee);
+        response.refreshToken = await this.generateAndStoreRefreshToken(
+          response.employee
+        );
       } else {
         return res.status(401).json({ message: "OTP verification failed" });
       }
@@ -85,7 +92,10 @@ class AuthController {
       }
       const otpVerified = await this.verifyOtp(req.body);
       if (otpVerified) {
-        response.token = this.generateToken(req.body);
+        response.token = this.generateToken(isEmployee);
+        response.refreshToken = await this.generateAndStoreRefreshToken(
+          isEmployee
+        );
       } else {
         return res.status(401).json({ message: "OTP verification failed" });
       }
@@ -280,10 +290,72 @@ class AuthController {
     }
   }
 
+  async logout(req, res) {
+    try {
+      const refreshToken = req.headers["x-refresh-token"];
+      await RefreshToken.destroy({ where: { token: refreshToken } });
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ error: "Error logging out" });
+    }
+  }
+
+  async getRefreshToken(req, res) {
+    try {
+      const refreshToken = req.headers["x-refresh-token"];
+
+      const newAccessToken = await this.refreshAccessToken(refreshToken);
+      return res.json({ accessToken: newAccessToken });
+    } catch (error) {
+      res.status(401).json({ error: error.message });
+    }
+  }
+
+  async refreshAccessToken(refreshToken) {
+    try {
+      // Verify the refresh token
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      console.log(decoded, "decoded");
+      // Check if the refresh token exists in the database and is not expired
+      const storedToken = await RefreshToken.findOne({
+        where: { token: refreshToken },
+      });
+      if (!storedToken || storedToken.expiryDate < new Date()) {
+        throw new Error("Invalid or expired refresh token");
+      }
+
+      const user = await Employee.findOne({
+        where: { id: decoded.user },
+      });
+
+      const newAccessToken = await this.generateToken(user);
+
+      return newAccessToken;
+    } catch (error) {
+      throw new Error("Invalid refresh token");
+    }
+  }
+
+  async generateAndStoreRefreshToken(user) {
+    // Generate a refresh token
+    const refreshToken = jwt.sign({ user: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
+
+    // Store the refresh token in the database
+    await RefreshToken.create({
+      token: refreshToken,
+      employeeId: user.id,
+      expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    });
+    console.log(refreshToken);
+    return refreshToken;
+  }
+
   generateToken(tokenObj) {
     // Generate a token for authentication
     const token = jwt.sign({ ...tokenObj }, process.env.JWT_SECRET, {
-      expiresIn: "300d",
+      expiresIn: "15d",
     }); // Adjust the secret and expiration as needed
 
     return token;
