@@ -22,6 +22,7 @@ async function init() {
   const menuItemRoutes = require("./src/routes/menuItem.routes");
   const orderRoutes = require("./src/routes/order.routes");
   const documentRoutes = require("./src/routes/document.routes");
+  const feedbackRoute = require("./src/routes/feedback.routes");
   const leaveRoutes = require("./src/routes/leave.routes");
   const tableRoutes = require("./src/routes/table.routes");
   const leaveTypesRoutes = require("./src/routes/leavesTypes.routes");
@@ -42,6 +43,7 @@ async function init() {
   app.use("/api/documents", documentRoutes);
   app.use("/api/leaves", leaveRoutes);
   app.use("/api/tables", tableRoutes);
+  app.use("/api/feedback", feedbackRoute);
   app.use("/api/tables-session", tableSessionRoutes);
   app.use("/api/firm-subscriptions", firmSubscriptionRoutes);
   app.listen(port, () => {
@@ -58,7 +60,7 @@ init();
 
 // let sql = "ALTER TABLE your_table_name\n";
 // for (let i = 1; i <= 60; i++) {
-//   sql += `  DROP INDEX \`tableName_${i}\`${i < 50 ? "," : ""}\n`;
+//   sql += `  DROP INDEX \`email_${i}\`${i < 60 ? "," : ""}\n`;
 // }
 
 // console.log(sql);

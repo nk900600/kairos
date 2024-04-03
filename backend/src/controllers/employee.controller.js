@@ -9,7 +9,7 @@ class EmployeeController {
       const employees = await Employee.findAll({
         include: [Role, Firm, Designation],
       });
-      res.json(employees);
+      return res.status(200).json(employees);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
