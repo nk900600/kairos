@@ -14,6 +14,7 @@ const {
   FirmSubscription,
 } = require("./src/models/subscription.model");
 const initializeSubsription = require("./src/utils/create-subscription");
+const authMiddleware = require("./src/middleware/auth.middleware");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -34,20 +35,20 @@ async function init() {
   const port = 3000;
 
   app.use(bodyParser.json());
-  app.use("/api/firms", firmRoutes);
+  app.use("/api/firms", authMiddleware, firmRoutes);
   app.use("/api/auth", authRoutes);
-  app.use("/api/employees", employeeRoutes);
-  app.use("/api/menus", menuItemRoutes);
-  app.use("/api/orders", orderRoutes);
-  app.use("/api/leave-types", leaveTypesRoutes);
-  app.use("/api/docs", documentRoutes);
-  app.use("/api/documents", documentRoutes);
-  app.use("/api/leaves", leaveRoutes);
-  app.use("/api/tables", tableRoutes);
-  app.use("/api/feedback", feedbackRoute);
-  app.use("/api/designations", desginationRoutes);
-  app.use("/api/tables-session", tableSessionRoutes);
-  app.use("/api/firm-subscriptions", firmSubscriptionRoutes);
+  app.use("/api/employees", authMiddleware, employeeRoutes);
+  app.use("/api/menus", authMiddleware, menuItemRoutes);
+  app.use("/api/orders", authMiddleware, orderRoutes);
+  app.use("/api/leave-types", authMiddleware, leaveTypesRoutes);
+  // app.use("/api/docs", authMiddleware,documentRoutes);
+  // app.use("/api/documents", documentRoutes);
+  app.use("/api/leaves", authMiddleware, leaveRoutes);
+  app.use("/api/tables", authMiddleware, tableRoutes);
+  app.use("/api/feedback", authMiddleware, feedbackRoute);
+  app.use("/api/designations", authMiddleware, desginationRoutes);
+  app.use("/api/tables-session", authMiddleware, tableSessionRoutes);
+  app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });

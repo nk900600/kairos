@@ -16,7 +16,7 @@ class OrderController {
 
     try {
       const order = await Order.create(orderDetails, {
-        userId: 1,
+        userId: req.user.id,
       });
 
       // Inside the createOrder method
@@ -28,7 +28,7 @@ class OrderController {
             ...itemDetails,
             OrderId: order.id,
           },
-          { transaction, userId: 1 }
+          { transaction, userId: req.user.id }
         );
 
         if (customizations && customizations.length > 0) {
@@ -39,7 +39,7 @@ class OrderController {
                   OrderItemId: orderItem.id,
                   CustomizationChoiceId: customizationChoiceId,
                 },
-                { transaction, userId: 1 }
+                { transaction, userId: req.user.id }
               )
           );
           await Promise.all(customizationPromises);
@@ -114,7 +114,7 @@ class OrderController {
             ...itemDetails,
             OrderId: order.id,
           },
-          { transaction, userId: 1 }
+          { transaction, userId: req.user.id }
         );
 
         if (customizations && customizations.length > 0) {
@@ -125,7 +125,7 @@ class OrderController {
                   OrderItemId: orderItem.id,
                   CustomizationChoiceId: customizationChoiceId,
                 },
-                { transaction, userId: 1 }
+                { transaction, userId: req.user.id }
               )
           );
           await Promise.all(customizationPromises);

@@ -16,8 +16,8 @@ class LeaveController {
       const duration = calculateDuration(req.body.startDate, req.body.endDate);
 
       const leaveType = await Leave.create(
-        { ...req.body, duration, firmId: 1 },
-        { userId: 1 }
+        { ...req.body, duration, firmId: req.user.firmId },
+        { userId: req.user.id }
       );
       return res.status(201).json(leaveType);
     } catch (error) {
@@ -67,7 +67,10 @@ class LeaveController {
 
       const duration = calculateDuration(req.body.startDate, req.body.endDate);
 
-      await leaveType.update({ ...req.body, duration }, { userId: 1 });
+      await leaveType.update(
+        { ...req.body, duration },
+        { userId: req.user.id }
+      );
       return res.status(200).json(leaveType);
     } catch (error) {
       return res.status(500).json({ message: error.message });

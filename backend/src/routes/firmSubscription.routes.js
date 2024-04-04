@@ -17,12 +17,6 @@ router.put("/:id", FirmSubscriptionController.updateFirmSubscription);
 // Delete a FirmSubscription
 router.delete("/:id", FirmSubscriptionController.deleteFirmSubscription);
 
-// Get FirmSubscriptions by Firm ID
-router.get(
-  "/firms/:firmId/subscriptions",
-  FirmSubscriptionController.getFirmSubscriptionsByFirmId
-);
-
 // Renew a FirmSubscription
 router.post("/:id/renew", FirmSubscriptionController.renewFirmSubscription);
 

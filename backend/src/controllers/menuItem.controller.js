@@ -74,9 +74,8 @@ class MenuItemsController {
         {
           ...req.body,
         },
-        { transaction, userId: 1, where: { id: req.params.customid } }
+        { transaction, userId: req.user.id, where: { id: req.params.customid } }
       );
-      console.log("1");
 
       if (req.body?.choices && req.body?.choices.length > 0) {
         const choicePromises = req.body?.choices.map((choiceData) => {
@@ -86,7 +85,7 @@ class MenuItemsController {
             },
             {
               transaction,
-              userId: 1,
+              userId: req.user.id,
               where: { CustomizationId: req.params.customid },
             }
           );
@@ -145,7 +144,7 @@ class MenuItemsController {
           imageUrl,
           firmId,
         },
-        { transaction, userId: 1 }
+        { transaction, userId: req.user.id }
       );
 
       let data = [];
@@ -163,7 +162,7 @@ class MenuItemsController {
                 ...customizationData,
                 menuItemId: menuItem.id,
               },
-              { transaction, userId: 1 }
+              { transaction, userId: req.user.id }
             );
 
             if (
@@ -182,7 +181,7 @@ class MenuItemsController {
                       ...choiceData,
                       CustomizationId: customization.id,
                     },
-                    { transaction, userId: 1 }
+                    { transaction, userId: req.user.id }
                   );
                 }
               );
@@ -217,7 +216,7 @@ class MenuItemsController {
         return res.status(404).send("Menu item not found");
       }
 
-      await menuItem.update(req.body, { userId: 1 });
+      await menuItem.update(req.body, { userId: req.user.id });
       return res.status(201).json(menuItem);
     } catch (error) {
       console.error("Error updating menu item:", error);

@@ -16,7 +16,8 @@ class FirmSubscriptionController {
       const firmSubscription = await FirmSubscription.create({
         ...req.body,
         nextBillingDate,
-        FirmId: 1,
+        lastBillingDate: new Date(),
+        FirmId: req.user.firmId,
       });
       return res.status(201).json(firmSubscription);
     } catch (error) {
@@ -79,19 +80,6 @@ class FirmSubscriptionController {
     }
   }
 
-  // Get FirmSubscriptions by Firm ID
-  static async getFirmSubscriptionsByFirmId(req, res) {
-    try {
-      const firmSubscriptions = await FirmSubscription.findAll({
-        where: { firmId: req.params.firmId },
-        include: [Subscription, Firm],
-      });
-      return res.status(200).json(firmSubscriptions);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
   // Renew a FirmSubscription
   static async renewFirmSubscription(req, res) {
     try {
@@ -102,7 +90,16 @@ class FirmSubscriptionController {
         return res.status(400).json({ message: "subscription not found" });
       }
 
+      if (firmSubscriptions && firmSubscriptions.isActive) {
+        return res.status(400).json({ message: "subscription already active" });
+      }
+
+      let nextBillingDate = calculateNextBillingDate(
+        firmSubscriptions.billingCycle
+      );
+
       firmSubscriptions.isActive = true;
+      firmSubscriptions.nextBillingDate = nextBillingDate;
       firmSubscriptions.save();
       return res.status(200).json(firmSubscriptions);
     } catch (error) {
@@ -142,11 +139,16 @@ class FirmSubscriptionController {
       }
 
       const firmSubscriptions = await FirmSubscription.findOne({
-        where: { firmId: 1 },
+        where: { firmId: req.user.firmId },
       });
 
-      if (firmSubscriptions) {
+      if (firmSubscriptions && firmSubscriptions.trialStartDate) {
         return res.status(400).json({ message: "Trail already availed" });
+      }
+      if (firmSubscriptions) {
+        return res
+          .status(400)
+          .json({ message: "Already have a active subscription" });
       }
 
       const currentDate = new Date(); // Get the current date
@@ -159,7 +161,7 @@ class FirmSubscriptionController {
         trialStartDate: new Date(),
         trialEndDate: futureDate,
         nextBillingDate: futureDate,
-        FirmId: 1,
+        FirmId: req.user.firmId,
       });
       return res.status(201).json(firmSubscription);
     } catch (error) {

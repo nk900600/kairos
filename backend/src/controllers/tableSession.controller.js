@@ -24,10 +24,10 @@ class TableSessionController {
       const newSession = await TableSession.create(
         {
           status: SessionStatus.ACTIVE,
-          firmId: 1, // From Token
+          firmId: req.user.firmId, // From Token
           ...req.body,
         },
-        { user: 1 } // for Tokern
+        { user: req.user.id } // for Tokern
       );
       return res.status(201).json(newSession);
     } catch (error) {

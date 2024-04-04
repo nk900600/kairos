@@ -8,6 +8,8 @@ const { mobileNumberRegex, emailRegex } = require("../utils/const");
 const sequelize = require("../db/db");
 const RefreshToken = require("../models/refreshTokens.model");
 
+const TOKEN_EXPIRY = "1d";
+const TOKEN_REFRESH_EXPIRY = "7d";
 class AuthController {
   constructor() {
     this.generateOtp = this.generateOtp.bind(this);
@@ -205,9 +207,11 @@ class AuthController {
           existingOtpRecord.cooldownUntil &&
           existingOtpRecord.cooldownUntil > new Date()
         ) {
+          existingOtpRecord.otpValue = null;
+          existingOtpRecord.save();
           return {
             success: false,
-            message: "Too many failed attempts. Please try again later.",
+            message: "Too many failed attempts. Please try again after 10 mins later.",
           };
         }
 
@@ -339,7 +343,7 @@ class AuthController {
   async generateAndStoreRefreshToken(user) {
     // Generate a refresh token
     const refreshToken = jwt.sign({ user: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
+      expiresIn: TOKEN_REFRESH_EXPIRY,
     });
 
     // Store the refresh token in the database
@@ -358,7 +362,7 @@ class AuthController {
       { user: tokenObj.dataValues },
       process.env.JWT_SECRET,
       {
-        expiresIn: "15d",
+        expiresIn: TOKEN_EXPIRY,
       }
     ); // Adjust the secret and expiration as needed
 

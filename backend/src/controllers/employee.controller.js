@@ -88,7 +88,7 @@ class EmployeeController {
           firmId: req.body.firmId,
           designationId: req.body.designation,
         },
-        { userId: 1, transaction }
+        { userId: req.user.id, transaction }
       );
       await transaction.commit();
       return res.status(201).json(employee);
@@ -129,8 +129,7 @@ class EmployeeController {
             firmId: req.body.firmId,
             designationId: req.body.designation,
           },
-          // TODO: take id from token
-          { userId: 1 }
+          { userId: req.user.id }
         );
         return res.json(employee);
       } else {
@@ -148,7 +147,7 @@ class EmployeeController {
       });
       if (employee) {
         // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
-        await employee.destroy({ userId: 1 });
+        await employee.destroy({ userId: req.user.id });
         return res.status(204).send(); // No content to send back
       } else {
         return res.status(404).json({ error: "Employee not found" });

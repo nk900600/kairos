@@ -48,8 +48,8 @@ class TableController {
       }
 
       const tables = await Table.create(
-        { ...req.body, firmId: 1 },
-        { userId: 1 }
+        { ...req.body, firmId: req.user.firmId },
+        { userId: req.user.id }
       );
       return res.status(201).json(tables);
     } catch (error) {
@@ -81,7 +81,7 @@ class TableController {
       const table = await Table.findByPk(req.params.id, {});
       if (table) {
         // Optionally, you can perform additional actions before deleting, such as logging or unlinking associations
-        await table.destroy({ userId: 1 });
+        await table.destroy({ userId: req.user.id });
         return res.status(204).send(); // No content to send back
       } else {
         return res.status(404).json({ error: "table not found" });

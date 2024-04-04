@@ -9,8 +9,8 @@ class LeaveTypeController {
       }
 
       const leaveType = await LeaveType.create(
-        { ...req.body, firmId: 1 },
-        { userId: 1 }
+        { ...req.body, firmId: req.user.firmId },
+        { userId: req.user.id }
       );
       return res.status(201).json(leaveType);
     } catch (error) {

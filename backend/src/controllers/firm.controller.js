@@ -32,7 +32,7 @@ class FirmController {
       if (!firm) {
         return res.status(404).send("Firm not found");
       }
-      await firm.update(req.body, { userId: 1 });
+      await firm.update(req.body, { userId: req.user.id });
       res.json(firm);
     } catch (error) {
       console.error("Error updating firm:", error);
@@ -48,7 +48,7 @@ class FirmController {
       if (!firm) {
         return res.status(404).send("Firm not found");
       }
-      await firm.destroy({ userId: 1 });
+      await firm.destroy({ userId: req.user.id });
       res.send("Firm deleted successfully");
     } catch (error) {
       console.error("Error deleting firm:", error);

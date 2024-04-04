@@ -135,7 +135,10 @@ class FeedbackController {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      const feedback = await Feedback.create({ ...req.body, FirmId: 1 });
+      const feedback = await Feedback.create({
+        ...req.body,
+        FirmId: req.user.firmId,
+      });
       return res.status(201).json(feedback);
     } catch (error) {
       return res.status(400).json({ error: error + "Error creating feedback" });

@@ -1,4 +1,5 @@
 const { Designation } = require("../models/employee.model");
+const { Firm } = require("../models/firm.model");
 
 class DesignationController {
   // Create a new designation
@@ -8,14 +9,18 @@ class DesignationController {
         return res.status(400).json({ message: "Missing required fields" });
       }
       const { title } = req.body;
+      const firm = await Firm.findByPk(req.user.firmId);
+
       const designation = await Designation.create({
         title,
-        firmTypeId: 1,
-        firmId: 1,
+        firmTypeId: firm.dataValues.type,
+        firmId: req.user.firmId,
       });
       return res.status(201).json(designation);
     } catch (error) {
-      return res.status(400).json({ error: "Error creating designation" });
+      return res
+        .status(400)
+        .json({ error: error + "Error creating designation" });
     }
   }
 
