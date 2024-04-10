@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Bell,
   CalendarClock,
@@ -36,7 +36,12 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import { Input } from "../components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "../components/ui/sheet";
 import { NavLink, Outlet, Route, Routes } from "react-router-dom";
 import TableComponent from "./tables";
 import MenusComponent from "./menus";
@@ -51,35 +56,30 @@ const allMenuItems = [
     iconbig: <Home className="h-5 w-5" />,
     label: "Dashboard",
     link: "/dashboard",
-    isSelected: false,
   },
   {
     iconSmall: <Ratio className="h-4 w-4" />,
     iconbig: <Ratio className="h-5 w-5" />,
     label: "Tables",
     link: "/tables",
-    isSelected: false,
   },
   {
     iconSmall: <ScrollText className="h-4 w-4" />,
     iconbig: <ScrollText className="h-5 w-5" />,
     label: "Menu",
     link: "/menus",
-    isSelected: false,
   },
   {
     iconSmall: <ShoppingBag className="h-4 w-4" />,
     iconbig: <ShoppingBag className="h-5 w-5" />,
     label: "Orders",
     link: "/orders",
-    isSelected: false,
   },
   {
     iconSmall: <CookingPot className="h-4 w-4" />,
     iconbig: <CookingPot className="h-5 w-5" />,
     label: "Chef's Panel",
     link: "/chef-panel",
-    isSelected: false,
   },
 ];
 const allMenuItemsCompany = [
@@ -88,24 +88,26 @@ const allMenuItemsCompany = [
     iconbig: <Users className="h-5 w-5" />,
     label: "Employees",
     link: "/employees",
-    isSelected: false,
   },
   {
     iconSmall: <CalendarClock className="h-4 w-4" />,
     iconbig: <CalendarClock className="h-5 w-5" />,
     label: "Leaves",
     link: "/leaves",
-    isSelected: true,
   },
   {
     iconSmall: <CalendarDays className="h-4 w-4" />,
     iconbig: <CalendarDays className="h-5 w-5" />,
     label: "Calender",
     link: "/employees",
-    isSelected: false,
   },
 ];
 export function Dashboard() {
+  const [sheetopen, setSheetOpen] = useState(false);
+
+  const handleSheetClick = (e: any) => {
+    setSheetOpen(!sheetopen);
+  };
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -130,11 +132,13 @@ export function Dashboard() {
                 return (
                   <NavLink
                     to={item.link}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary ${
-                      item.isSelected
-                        ? "bg-muted text-primary"
-                        : "text-muted-foreground"
-                    }`}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary ${
+                        isActive
+                          ? "bg-muted text-primary"
+                          : "text-muted-foreground"
+                      }`
+                    }
                   >
                     {item.iconSmall}
                     {item.label}
@@ -147,11 +151,13 @@ export function Dashboard() {
                 return (
                   <NavLink
                     to={item.link}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary ${
-                      item.isSelected
-                        ? "bg-muted text-primary"
-                        : "text-muted-foreground"
-                    }`}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-3 py-2  transition-all hover:text-primary ${
+                        isActive
+                          ? "bg-muted text-primary"
+                          : "text-muted-foreground"
+                      }`
+                    }
                   >
                     {item.iconSmall}
                     {item.label}
@@ -204,12 +210,15 @@ export function Dashboard() {
                 {allMenuItems.map((item) => {
                   return (
                     <NavLink
+                      onClick={handleSheetClick}
                       to={item.link}
-                      className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
-                        item.isSelected
-                          ? "text-foreground bg-muted"
-                          : "text-muted-foreground"
-                      }`}
+                      className={({ isActive }) =>
+                        `mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
+                          isActive
+                            ? "text-foreground bg-muted"
+                            : "text-muted-foreground"
+                        }`
+                      }
                     >
                       {" "}
                       {item.iconbig}
@@ -226,11 +235,13 @@ export function Dashboard() {
                   return (
                     <NavLink
                       to={item.link}
-                      className={`mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
-                        item.isSelected
-                          ? "text-foreground bg-muted"
-                          : "text-muted-foreground"
-                      }`}
+                      className={({ isActive }) =>
+                        `mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
+                          isActive
+                            ? "text-foreground bg-muted"
+                            : "text-muted-foreground"
+                        }`
+                      }
                     >
                       {item.iconbig}
                       {item.label}
@@ -238,7 +249,7 @@ export function Dashboard() {
                   );
                 })}
               </nav>
-              <div className="mt-auto">
+              {/* <div className="mt-auto">
                 <Card>
                   <CardHeader>
                     <CardTitle>Upgrade to Pro</CardTitle>
@@ -253,7 +264,7 @@ export function Dashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-              </div>
+              </div> */}
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
