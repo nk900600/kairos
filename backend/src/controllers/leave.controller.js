@@ -1,5 +1,5 @@
 const { calculateDuration } = require("../utils/util");
-const { Leave, LeaveStatus } = require("./../models/leave.model"); // Path to your Leave model
+const { Leave, LeaveStatus, LeaveType } = require("./../models/leave.model"); // Path to your Leave model
 
 class LeaveController {
   // Create a new leave request
@@ -28,7 +28,7 @@ class LeaveController {
   // Retrieve all leave requests
   async getAllLeaves(req, res) {
     try {
-      const leaveTypes = await Leave.findAll();
+      const leaveTypes = await Leave.findAll({ include: LeaveType });
       return res.status(200).json(leaveTypes);
     } catch (error) {
       return res.status(500).json({ message: error.message });
@@ -38,7 +38,7 @@ class LeaveController {
   // Retrieve a single leave request by ID
   async getLeave(req, res) {
     try {
-      const leave = await Leave.findByPk(req.params.id, {});
+      const leave = await Leave.findByPk(req.params.id, { include: LeaveType });
       if (leave) {
         res.json(leave);
       } else {
