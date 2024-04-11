@@ -1,7 +1,9 @@
 import {
   ArrowLeft,
+  CirclePlus,
   CircleUser,
   Filter,
+  ListFilter,
   Pencil,
   Plus,
   Search,
@@ -184,9 +186,44 @@ export default function ContactsComponent() {
           <ArrowLeft className="h-4 w-4" />
           <span className="sr-only">Back</span>
         </Button>
-        <h1 className="flex-1 shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight sm:grow-0">
+        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           All Employees
         </h1>
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2 h-8 ">
+                <ListFilter className="h-4 w-4" />
+                <span className="hidden sm:block">Filters</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Desigination</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              {allDesignation.map((data, i) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    checked={data.isChecked}
+                    onCheckedChange={(e) => handleOnCheck(e, data, i)}
+                  >
+                    {data.value}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DrawerDialogComponent
+            title="Add Employee"
+            description="Create new profile here. Click save when you're done"
+            triggerButton={
+              <Button variant="default" className="gap-2 h-8 ">
+                <CirclePlus className="h-4 w-4" />
+                <span className="hidden sm:block">Add new</span>
+              </Button>
+            }
+          ></DrawerDialogComponent>
+        </div>
       </div>
       <Card>
         <CardHeader>
@@ -204,41 +241,6 @@ export default function ContactsComponent() {
                 </div>
               </form>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon">
-                  <Filter className="h-3 w-3" />
-                  <span className="sr-only">Filters</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Desigination</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-
-                {allDesignation.map((data, i) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      checked={data.isChecked}
-                      onCheckedChange={(e) => handleOnCheck(e, data, i)}
-                    >
-                      {data.value}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="default" size="icon">
-              <DrawerDialogComponent
-                title="Add Employee"
-                description="Create new profile here. Click save when you're done"
-                triggerButton={
-                  <Button variant="default" size={"icon"}>
-                    <Plus className="h-3 w-3" />
-                    <span className="sr-only">Add new </span>
-                  </Button>
-                }
-              ></DrawerDialogComponent>
-            </Button>
           </div>
         </CardHeader>
         <CardContent className="grid gap-8">
@@ -246,7 +248,10 @@ export default function ContactsComponent() {
             return (
               <div className="flex items-center gap-4  cursor-pointer ">
                 <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                  <AvatarImage
+                    src="https://avatar.iran.liara.run/public"
+                    alt="Avatar"
+                  />
                   <AvatarFallback>{employee.employee}</AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">

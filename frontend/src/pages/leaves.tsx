@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CalendarPlus,
   CalendarX2,
+  CirclePlus,
   CircleUser,
   Filter,
   Pencil,
@@ -324,9 +325,9 @@ export default function LeavesComponent() {
         {addButtonLabel && (
           <DrawerDialogComponent
             triggerButton={
-              <Button variant="default" className=" h-8 ">
-                <Plus className="h-4 w-4" />
-                {addButtonLabel}
+              <Button variant="default" className=" h-8  gap-2">
+                <CirclePlus className="h-4 w-4" />
+                <span className="hidden sm:block">{addButtonLabel} </span>
               </Button>
             }
             title={
@@ -364,10 +365,10 @@ export default function LeavesComponent() {
                     <p className="text-sm font-medium leading-none">
                       From {leave.startDate} To {leave.endDate}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {leave.reason}
                     </p>
                   </div>
@@ -389,14 +390,14 @@ export default function LeavesComponent() {
                   <p className="text-sm font-medium leading-none">
                     From {leave.startDate} To {leave.endDate}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Reason : {leave.reason}
                   </p>
                   {leave.status !== "Pending" && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Comments : {leave.comments}
                     </p>
                   )}
@@ -424,10 +425,10 @@ export default function LeavesComponent() {
                   <p className="text-sm font-medium leading-none">
                     {leave.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {leave.description}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {leave.numLeavesAvailable + " Days"}
                   </p>
                 </div>

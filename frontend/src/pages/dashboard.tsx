@@ -308,7 +308,7 @@ export function Dashboard() {
             {/* <Route path="/" element={<Navigate to="/dashboard" />} /> */}
           </Routes>
 
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <h1 className="text-lg font-semibold md:text-2xl">Inventory</h1>
           </div>
 
@@ -325,7 +325,7 @@ export function Dashboard() {
               </p>
               <Button className="mt-4">Add Product</Button>
             </div>
-          </div>
+          </div> */}
         </main>
       </div>
     </div>
