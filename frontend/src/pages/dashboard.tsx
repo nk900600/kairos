@@ -49,6 +49,7 @@ import OrdersComponent from "./orders";
 import ChefsPanelComponent from "./chefsPanel";
 import ContactsComponent from "./contacts";
 import LeavesComponent from "./leaves";
+import CalenderComponent from "./calender";
 
 const allMenuItems = [
   {
@@ -99,7 +100,7 @@ const allMenuItemsCompany = [
     iconSmall: <CalendarDays className="h-4 w-4" />,
     iconbig: <CalendarDays className="h-5 w-5" />,
     label: "Calender",
-    link: "/employees",
+    link: "/calender",
   },
 ];
 export function Dashboard() {
@@ -304,6 +305,7 @@ export function Dashboard() {
             <Route path="/orders" Component={OrdersComponent} />
             <Route path="/employees" Component={ContactsComponent} />
             <Route path="/leaves" Component={LeavesComponent} />
+            <Route path="/calender" Component={CalenderComponent} />
             <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
             {/* <Route path="/" element={<Navigate to="/dashboard" />} /> */}
           </Routes>

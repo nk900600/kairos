@@ -270,7 +270,7 @@ export default function TableComponent() {
                     <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
                       <div className=" flex w-full items-center gap-3 rounded-md ">
                         <Ratio className=" h-6 w-6 " />
-                        <div className="flex-1">
+                        <div className="flex-col">
                           <CardTitle className="text-base">
                             {table.tableName}
                           </CardTitle>
@@ -279,7 +279,7 @@ export default function TableComponent() {
                             Seats {table.capacity}
                           </CardDescription>
                         </div>
-                        <div className="flex-2">
+                        <div className="flex-1">
                           <Badge> {table.status}</Badge>
                         </div>
                         <div className="ml-auto">
@@ -343,13 +343,14 @@ export default function TableComponent() {
                       <div className=" flex w-full items-center gap-3 rounded-md ">
                         <Ratio className=" h-6 w-6 " />
 
-                        <div className="grid gap-1">
-                          <p className="text-sm font-medium leading-none">
+                        <div className="flex-col">
+                          <CardTitle className="text-base">
                             {table.tableName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
+                          </CardTitle>
+
+                          <CardDescription className="text-xs">
                             Seats {table.capacity}
-                          </p>
+                          </CardDescription>
                         </div>
                         <div className="flex-1">
                           <Badge variant={"secondary"}> {table.status}</Badge>
@@ -408,14 +409,14 @@ export default function TableComponent() {
                     <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
                       <div className=" flex w-full items-center gap-3 rounded-md ">
                         <Ratio className=" h-6 w-6 " />
-
-                        <div className="grid gap-1">
-                          <p className="text-sm font-medium leading-none">
+                        <div className="flex-col">
+                          <CardTitle className="text-base">
                             {table.tableName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
+                          </CardTitle>
+
+                          <CardDescription className="text-xs">
                             Seats {table.capacity}
-                          </p>
+                          </CardDescription>
                         </div>
                         <div className="flex-1">
                           {table.status === "Available" && (

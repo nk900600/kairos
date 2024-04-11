@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "..//components/ui/avatar";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
@@ -360,18 +361,24 @@ export default function LeavesComponent() {
             (leave) => {
               return (
                 <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                  <CalendarClock />
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                  <CalendarClock className="h-6 w-6" />
+
+                  <div className="flex-col flex-1">
+                    <CardTitle className="text-base">
+                      {" "}
                       From {leave.startDate} To {leave.endDate}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {leave.reason}
-                    </p>
+                    </CardTitle>
+
+                    <CardDescription className="text-xs">
+                      <p className="text-sm text-muted-foreground">
+                        {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Reason: {leave.reason}
+                      </p>
+                    </CardDescription>
                   </div>
+
                   <Badge variant="outline">Pending</Badge>
                 </div>
               );
@@ -382,10 +389,38 @@ export default function LeavesComponent() {
           {AllLeaves.map((leave) => {
             return (
               <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                {leave.status === "Pending" && <CalendarClock />}
-                {leave.status === "Approved" && <CalendarCheck2 />}
-                {leave.status === "Rejected" && <CalendarX2 />}
+                {leave.status === "Pending" && (
+                  <CalendarClock className="h-6 w-6" />
+                )}
+                {leave.status === "Approved" && (
+                  <CalendarCheck2 className="h-6 w-6" />
+                )}
+                {leave.status === "Rejected" && (
+                  <CalendarX2 className="h-6 w-6" />
+                )}
 
+                <div className="flex-col flex-1">
+                  <CardTitle className="text-base">
+                    {" "}
+                    From {leave.startDate} To {leave.endDate}
+                  </CardTitle>
+
+                  <CardDescription className="text-xs">
+                    <p className="text-sm text-muted-foreground">
+                      {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Reason : {leave.reason}
+                    </p>
+                    {leave.status !== "Pending" && (
+                      <p className="text-sm text-muted-foreground">
+                        Comments : {leave.comments}
+                      </p>
+                    )}
+                  </CardDescription>
+                </div>
+
+                {/* 
                 <div className="flex-1 space-y-1">
                   <p className="text-sm font-medium leading-none">
                     From {leave.startDate} To {leave.endDate}
@@ -401,7 +436,7 @@ export default function LeavesComponent() {
                       Comments : {leave.comments}
                     </p>
                   )}
-                </div>
+                </div> */}
                 {leave.status === "Pending" && (
                   <Badge variant="outline">Pending</Badge>
                 )}
@@ -419,9 +454,22 @@ export default function LeavesComponent() {
           {allPolicy.map((leave) => {
             return (
               <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                <CalendarPlus />
+                <CalendarPlus className="h-6 w-6" />
 
-                <div className="flex-1 space-y-1">
+                <div className="flex-col">
+                  <CardTitle className="text-base">{leave.name}</CardTitle>
+
+                  <CardDescription className="text-xs">
+                    <p className="text-sm text-muted-foreground">
+                      {leave.description}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {leave.numLeavesAvailable + " Days"}
+                    </p>
+                  </CardDescription>
+                </div>
+
+                {/* <div className="flex-1 space-y-1">
                   <p className="text-sm font-medium leading-none">
                     {leave.name}
                   </p>
@@ -431,7 +479,7 @@ export default function LeavesComponent() {
                   <p className="text-sm text-muted-foreground">
                     {leave.numLeavesAvailable + " Days"}
                   </p>
-                </div>
+                </div> */}
               </div>
             );
           })}
