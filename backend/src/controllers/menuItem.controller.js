@@ -3,6 +3,7 @@ const {
   MenuItem,
   Customization,
   CustomizationChoice,
+  Category,
 } = require("./../models/menuItem.model"); // Update the path as necessary
 
 class MenuItemsController {
@@ -10,15 +11,27 @@ class MenuItemsController {
   async getAllMenuItems(req, res) {
     try {
       const menuItems = await MenuItem.findAll({
-        include: {
-          model: Customization,
-          include: [
-            {
-              model: CustomizationChoice,
-            },
-          ],
-        },
+        include: [
+          {
+            model: Customization,
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
       });
+
+      return res.json(menuItems);
+    } catch (error) {
+      console.error("Error fetching menu items:", error);
+      return res.status(500).send("Error fetching menu items");
+    }
+  }
+  async getAllCategories(req, res) {
+    try {
+      const menuItems = await Category.findAll({});
 
       return res.json(menuItems);
     } catch (error) {

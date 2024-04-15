@@ -6,6 +6,8 @@ const {
   OrderItem,
   OrderItemCustomizationsChoice,
 } = require("../models/order.model");
+const { TableSession } = require("../models/tableSession.model");
+const { Table } = require("../models/table.model");
 
 class OrderController {
   // Create a new order
@@ -84,6 +86,15 @@ class OrderController {
             include: [
               {
                 model: CustomizationChoice,
+              },
+            ],
+          },
+          {
+            model: TableSession,
+            include: [
+              {
+                model: Table,
+                as: "table",
               },
             ],
           },

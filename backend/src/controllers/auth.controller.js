@@ -8,8 +8,8 @@ const { mobileNumberRegex, emailRegex } = require("../utils/const");
 const sequelize = require("../db/db");
 const RefreshToken = require("../models/refreshTokens.model");
 
-const TOKEN_EXPIRY = "1d";
-const TOKEN_REFRESH_EXPIRY = "7d";
+const TOKEN_EXPIRY = "365d";
+const TOKEN_REFRESH_EXPIRY = "365d";
 class AuthController {
   constructor() {
     this.generateOtp = this.generateOtp.bind(this);
@@ -211,7 +211,8 @@ class AuthController {
           existingOtpRecord.save();
           return {
             success: false,
-            message: "Too many failed attempts. Please try again after 10 mins later.",
+            message:
+              "Too many failed attempts. Please try again after 10 mins later.",
           };
         }
 

@@ -1,3 +1,4 @@
+const { Table } = require("../models/table.model.js");
 const {
   TableSession,
   SessionStatus,
@@ -101,7 +102,12 @@ class TableSessionController {
   }
   async getallSession(req, res) {
     try {
-      const sessions = await TableSession.findAll();
+      const sessions = await TableSession.findAll({
+        include: {
+          model: Table,
+          as: "table",
+        },
+      });
       return res.status(200).json(sessions);
     } catch (error) {
       return res.status(500).json({ message: error.message });
