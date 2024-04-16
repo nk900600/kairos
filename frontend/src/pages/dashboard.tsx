@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Bell,
+  BookOpenText,
   CalendarClock,
   CalendarDays,
   CircleUser,
@@ -10,12 +11,14 @@ import {
   Menu,
   Package,
   Package2,
+  Plus,
   Ratio,
   ReceiptText,
   ScrollText,
   Search,
   ShoppingBag,
   ShoppingCart,
+  Sun,
   Users,
 } from "lucide-react";
 import { Badge } from "../components/ui/badge";
@@ -65,8 +68,8 @@ const allMenuItems = [
     link: "/tables",
   },
   {
-    iconSmall: <ScrollText className="h-4 w-4" />,
-    iconbig: <ScrollText className="h-5 w-5" />,
+    iconSmall: <BookOpenText className="h-4 w-4" />,
+    iconbig: <BookOpenText className="h-5 w-5" />,
     label: "Menu",
     link: "/menus",
   },
@@ -110,7 +113,7 @@ export function Dashboard() {
     setSheetOpen(!sheetopen);
   };
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] pb-12 md:pb-0">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -250,27 +253,11 @@ export function Dashboard() {
                   );
                 })}
               </nav>
-              {/* <div className="mt-auto">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upgrade to Pro</CardTitle>
-                    <CardDescription>
-                      Unlock all features and get unlimited access to our
-                      support team.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button size="sm" className="w-full">
-                      Upgrade
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div> */}
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
             <form>
-              <div className="relative">
+              <div className="relative hidden md:flex">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
@@ -278,8 +265,22 @@ export function Dashboard() {
                   className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
                 />
               </div>
+              <div className="flex items-center gap-2  justify-center text-lg font-semibold md:hidden ">
+                <Package2 className="h-6 w-6" />
+                <span>Acme Inc</span>
+              </div>
+              {/* <p className="text-sm text-muted-foreground   py-2 ">
+                My Business
+              </p> */}
             </form>
           </div>
+          <Button
+            variant={"default"}
+            className="ml-auto h-8 gap-2 hidden md:flex "
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Order</span>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
@@ -329,6 +330,48 @@ export function Dashboard() {
             </div>
           </div> */}
         </main>
+
+        <nav className="fixed bottom-0 inset-x-0 flex items-center justify-center h-14 bg-muted border-t border-gray-200/40 border-gray-200 dark:bg-gray-950/50 dark:border-gray-950 dark:border-gray-950/40 md:hidden">
+          <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">
+            <NavLink
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center active gap-1 ${
+                  isActive ? " text-primary" : ""
+                }`
+              }
+              to={"/dashboard"}
+            >
+              <Home className="h-5 w-5" />
+              Home
+            </NavLink>
+          </div>
+          <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">
+            <NavLink
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center active gap-1 ${
+                  isActive ? " text-primary" : ""
+                }`
+              }
+              to={"/orders"}
+            >
+              <Plus className="h-5 w-5" />
+              Orders
+            </NavLink>
+          </div>
+          <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">
+            <NavLink
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center active gap-1 ${
+                  isActive ? " text-primary" : ""
+                }`
+              }
+              to={"/tables"}
+            >
+              <Ratio className="h-5 w-5" />
+              Tables
+            </NavLink>
+          </div>
+        </nav>
       </div>
     </div>
   );
