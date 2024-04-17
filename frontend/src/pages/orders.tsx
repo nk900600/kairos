@@ -60,6 +60,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
+import { useSwipeable } from "react-swipeable";
+import { useState } from "react";
 
 const AllTables = [
   {
@@ -652,6 +654,19 @@ const allOrders = [
   },
 ];
 export default function OrdersComponent() {
+  const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
+  let sheetProps: any = {
+    open: isOpen,
+    onOpenChange: (data: any) => {
+      setOpen(data);
+    },
+  };
+  const handlers = useSwipeable({
+    onSwipedRight: (eventData: any) => {
+      console.log(eventData);
+      setOpen(false);
+    },
+  });
   return (
     <>
       <Breadcrumb>
@@ -711,7 +726,7 @@ export default function OrdersComponent() {
             {allOrders.map((order: any) => {
               return (
                 <>
-                  <Sheet>
+                  <Sheet {...sheetProps}>
                     <SheetTrigger asChild>
                       <Card
                         key="1"
@@ -798,7 +813,9 @@ export default function OrdersComponent() {
                         </CardFooter>
                       </Card>
                     </SheetTrigger>
-                    <SheetDemo></SheetDemo>
+                    <SheetContent className="w-full" {...handlers}>
+                      <SheetDemo></SheetDemo>
+                    </SheetContent>
                   </Sheet>
                 </>
               );
@@ -814,7 +831,7 @@ export default function OrdersComponent() {
 
 export function SheetDemo() {
   return (
-    <SheetContent className="w-full">
+    <>
       <SheetHeader className="mb-4">
         <SheetTitle>Order - Oe31b70H</SheetTitle>
         <SheetDescription>Date: November 23, 2023.</SheetDescription>
@@ -905,7 +922,7 @@ export function SheetDemo() {
           </dl>
         </div>
       </CardContent>
-    </SheetContent>
+    </>
   );
 }
 

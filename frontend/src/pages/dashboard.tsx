@@ -53,6 +53,7 @@ import ChefsPanelComponent from "./chefsPanel";
 import ContactsComponent from "./contacts";
 import LeavesComponent from "./leaves";
 import CalenderComponent from "./calender";
+import { useSwipeable } from "react-swipeable";
 
 const allMenuItems = [
   {
@@ -107,11 +108,23 @@ const allMenuItemsCompany = [
   },
 ];
 export function Dashboard() {
-  const [sheetopen, setSheetOpen] = useState(false);
-
+  const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   const handleSheetClick = (e: any) => {
-    setSheetOpen(!sheetopen);
+    setOpen(false);
   };
+  let sheetProps: any = {
+    open: isOpen,
+    onOpenChange: (data: any) => {
+      setOpen(data);
+    },
+  };
+  const handlers = useSwipeable({
+    onSwipedLeft: (eventData: any) => {
+      console.log(eventData);
+      setOpen(false);
+    },
+  });
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] pb-12 md:pb-0">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -190,7 +203,7 @@ export function Dashboard() {
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
+          <Sheet {...sheetProps}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -201,11 +214,15 @@ export function Dashboard() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent
+              {...handlers}
+              side="left"
+              className="flex flex-col q-full"
+            >
               <nav className="grid gap-2 text-lg font-medium">
-                <div className="flex items-center gap-2 text-lg font-semibold">
+                <div className="flex items-center gap-2 text-lg font-semibold mb-4">
                   <Package2 className="h-6 w-6" />
-                  <span className="sr-only">Acme Inc</span>
+                  <span className="">Acme Inc</span>
                 </div>
                 <p className="text-sm text-muted-foreground   py-2 ">
                   My Business
@@ -238,6 +255,7 @@ export function Dashboard() {
                 {allMenuItemsCompany.map((item) => {
                   return (
                     <NavLink
+                      onClick={handleSheetClick}
                       to={item.link}
                       className={({ isActive }) =>
                         `mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2  hover:text-foreground ${
@@ -355,7 +373,7 @@ export function Dashboard() {
               to={"/orders"}
             >
               <Plus className="h-5 w-5" />
-              Orders
+              New Order
             </NavLink>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">
@@ -365,10 +383,13 @@ export function Dashboard() {
                   isActive ? " text-primary" : ""
                 }`
               }
-              to={"/tables"}
+              to={"/tables?mytables=true"}
             >
               <Ratio className="h-5 w-5" />
-              Tables
+              <span className="absolute top-0 right-14 inline-flex items-center justify-center px-1.5 py-1 text-xs font-semibold leading-none bg-red-500 text-white rounded-full">
+                2
+              </span>
+              My Tables
             </NavLink>
           </div>
         </nav>

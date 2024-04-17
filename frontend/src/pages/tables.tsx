@@ -44,9 +44,11 @@ import {
 } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { DrawerDialogComponent } from "../common/drawerDialog";
+
+import { useLocation } from "react-router-dom";
 
 const Alltables = [
   {
@@ -179,11 +181,24 @@ const AllDesgination = [
   },
 ];
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 export default function TableComponent() {
+  let query = useQuery();
+
   const [tables] = useState(Alltables);
+  const [tabValue, setTableValue] = useState("available");
   const handleClick = (e: any) => {
     console.log(e);
+    setTableValue(e);
   };
+
+  useEffect(() => {
+    let mytables = query.get("mytables");
+    if (mytables) setTableValue("occupied");
+  }, []);
 
   const handleOnCheck = (e: any, data: any, i: number) => {};
   return (
@@ -240,7 +255,7 @@ export default function TableComponent() {
 
           <DrawerDialogComponent
             triggerButton={
-              <Button variant="default" className=" h-8  gap-2">
+              <Button variant="outline" className=" h-8  gap-2">
                 <CirclePlus className="h-4 w-4" />
                 <span className="hidden sm:block">Add Table</span>
               </Button>
@@ -251,13 +266,17 @@ export default function TableComponent() {
         </div>
       </div>
       <Tabs
-        defaultValue="available"
+        defaultValue={tabValue}
+        value={tabValue}
         onValueChange={handleClick}
         className="w-full"
       >
         <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-3">
           <TabsTrigger value="available">Available</TabsTrigger>
-          <TabsTrigger value="occupied">Occupied / Reserved</TabsTrigger>
+          <TabsTrigger value="occupied">
+            <span className="hidden sm:block">Occupied / Reserved</span>
+            <span className="block sm:hidden">Occ / Res</span>
+          </TabsTrigger>
           <TabsTrigger value="others">Others</TabsTrigger>
         </TabsList>
         <TabsContent value="available">
@@ -279,9 +298,9 @@ export default function TableComponent() {
                             Seats {table.capacity}
                           </CardDescription>
                         </div>
-                        <div className="flex-1">
+                        {/* <div className="flex-1">
                           <Badge> {table.status}</Badge>
-                        </div>
+                        </div> */}
                         <div className="ml-auto">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -320,7 +339,7 @@ export default function TableComponent() {
                         size="sm"
                         className="w-full gap-2"
                       >
-                        <CirclePlus className="h-4 w-4" />
+                        {/* <CirclePlus className="h-4 w-4" /> */}
                         <span>Create Order </span>
                       </Button>
                     </CardFooter>
@@ -369,12 +388,23 @@ export default function TableComponent() {
                     </CardHeader>
                     <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
                       <div className="flex items-center">
-                        <UserIcon className="h-4 w-4 mr-1.5" />
-                        <div className="text-sm">Assigned to: John Smith</div>
+                        <UserIcon className="h-3 w-3 mr-1.5" />
+                        <div className="text-sm">
+                          <span className="text-muted-foreground text-xs">
+                            Assigned to:
+                          </span>{" "}
+                          <span> John Smith</span>
+                        </div>
                       </div>
                       <div className="flex items-center">
-                        <ClockIcon className="h-4 w-4 mr-1.5" />
-                        <div className="text-sm">Timer: 20 mins 52 sec</div>
+                        <ClockIcon className="h-3 w-3 mr-1.5" />
+                        <div className="text-sm">
+                          <span className="text-muted-foreground text-xs">
+                            Timer:
+                          </span>
+                          {"  "}
+                          <span>20 mins 52 sec</span>
+                        </div>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
@@ -387,8 +417,8 @@ export default function TableComponent() {
                         size="sm"
                         className="w-full gap-2"
                       >
-                        <CirclePlus className="h-4 w-4" />
-                        <span className="hidden sm:block">New Order </span>
+                        {/* <CirclePlus className="h-4 w-4" /> */}
+                        <span className="">New Order </span>
                       </Button>
                     </CardFooter>
                   </Card>
@@ -449,8 +479,14 @@ export default function TableComponent() {
                     </CardHeader>
                     <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
                       <div className="flex items-center">
-                        <ClockIcon className="h-4 w-4 mr-1.5" />
-                        <div className="text-sm">Timer: 20 mins 52 sec</div>
+                        <ClockIcon className="h-3 w-3 mr-1.5" />
+                        <div className="text-sm">
+                          <span className="text-muted-foreground text-xs">
+                            Timer:
+                          </span>
+                          {"  "}
+                          <span>20 mins 52 sec</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
