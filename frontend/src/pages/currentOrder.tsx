@@ -1,64 +1,26 @@
 import {
-  AlignRight,
-  ArrowLeft,
   ArrowRight,
-  BookOpenText,
-  ChevronUpIcon,
-  Cross,
   MinusIcon,
   PackageIcon,
   PlusIcon,
-  ScrollText,
-  Search,
   SquarePercent,
-  Users,
-  X,
-  XIcon,
 } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "../components/ui/breadcrumb";
-import { NavLink, Navigate } from "react-router-dom";
+
 import { ReactComponent as VegIcon } from "../VegIcon.svg";
-import { Input } from "../components/ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../components/ui/accordion";
-import { Label } from "../components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../components/ui/popover";
+
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "../components/ui/sheet";
 import { Separator } from "../components/ui/separator";
-import { useEffect, useState } from "react";
-import { Badge } from "../components/ui/badge";
+import { useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import { isReturnStatement } from "typescript";
 import {
   Select,
   SelectContent,
@@ -70,7 +32,7 @@ import {
 } from "../components/ui/select";
 
 const items = [1, 2, 3, 4];
-export const CurrentOrder = ({ count, menu }: any) => {
+export const CurrentOrder = ({ count = 0, menu }: any) => {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   let sheetProps: any = {
     open: isOpen,
@@ -94,7 +56,7 @@ export const CurrentOrder = ({ count, menu }: any) => {
         )}
 
         {!count ? (
-          <span className="text-sm font-semibold pl-4">Add</span>
+          <span className={`text-sm font-semibold pl-4`}>Add</span>
         ) : (
           <span className="text-sm font-semibold">{count}</span>
         )}

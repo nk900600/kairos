@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   BookOpenText,
   ChevronUpIcon,
+  CirclePlus,
   Cross,
   MinusIcon,
   PackageIcon,
@@ -56,6 +57,9 @@ import { useEffect, useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { useSwipeable } from "react-swipeable";
 import { CurrentOrder } from "./currentOrder";
+import { DrawerDialogComponent } from "../common/drawerDialog";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 
 const currencyMap = new Map([["INR", "₹"]]);
 const allCategory = [
@@ -361,7 +365,36 @@ const AllMenu = [
   },
 ];
 
-export default function MenusComponent() {
+export function MenuHeaderComponent() {
+  return (
+    <>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/menus", label: "Menu" },
+        ]}
+      />
+      <div className="flex items-center gap-4">
+        <GoBackButton />
+        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+          All Menus
+        </h1>
+        <DrawerDialogComponent
+          triggerButton={
+            <Button variant="outline" className=" h-8  gap-2">
+              <CirclePlus className="h-4 w-4" />
+              <span className="hidden sm:block">Add Item</span>
+            </Button>
+          }
+          title={"Add Item"}
+          description={"A new menu itmes"}
+        ></DrawerDialogComponent>
+      </div>
+    </>
+  );
+}
+
+export default function MenusComponent({ canPlaceOrder = false }) {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [allMenus, setAllMenus] = useState(AllMenu);
   const [countMap, setcountMap] = useState<any>({});
@@ -378,34 +411,14 @@ export default function MenusComponent() {
     setMenuOpen(w);
   };
 
+  const categoriesProps = {
+    handleOpenMenu,
+    isMenuOpen,
+  };
+
   return (
     <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>Menu</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
-        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-          All Menus
-        </h1>
-      </div>
+      {!canPlaceOrder && <MenuHeaderComponent />}
 
       <div>
         <div className="flex h-14 items-center gap-2  lg:h-[60px] lg:gap-4">
@@ -433,7 +446,7 @@ export default function MenusComponent() {
               <AccordionItem value="item-1">
                 <AccordionTrigger>{category.title}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="grid gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2  gap-4 sm:gap-6 ">
                     {validMenu.map((menu) => {
                       return (
                         <Card
@@ -450,7 +463,7 @@ export default function MenusComponent() {
                                 <VegIcon className="h-5 w-5" />
                               </div>
                               <div className="flex-1">
-                                <CardTitle className="text-base flex-1">
+                                <CardTitle className="text-base flex-1 text-md sm:text-base">
                                   {menu.name}
                                   {!menu.available && (
                                     <Badge
@@ -471,12 +484,8 @@ export default function MenusComponent() {
                               </div>
 
                               <div className="ml-auto">
-                                {/* <AddButton
-                                  count={countMap[menu.id]}
-                                  menu={menu}
-                                ></AddButton> */}
-
-                                <CurrentOrder></CurrentOrder>
+                                <CustomizationButton />
+                                {/* {canPlaceOrder && <CurrentOrder></CurrentOrder>} */}
                               </div>
                             </div>
                           </CardHeader>
@@ -498,53 +507,109 @@ export default function MenusComponent() {
           );
         })}
 
-        <Popover onOpenChange={handleOpenMenu}>
-          <PopoverTrigger asChild>
-            <div className="fixed bottom-4 right-4">
-              <Button
-                variant={isMenuOpen ? "outline" : "default"}
-                size="icon"
-                className="rounded-full"
-              >
-                {isMenuOpen ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <BookOpenText className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 right-10" align="end" side="top">
-            <div className="flex flex-col gap-5">
-              <div className="flex">
-                <Label className="w-full">Accept terms and conditions</Label>
-                <Label>2</Label>
-              </div>
-              <div className="flex">
-                <Label className="w-full">Accept terms and conditions</Label>
-                <Label>2</Label>
-              </div>
-              <div className="flex">
-                <Label className="w-full">Accept terms and conditions</Label>
-                <Label>2</Label>
-              </div>
-              <div className="flex">
-                <Label className="w-full">Accept terms and conditions</Label>
-                <Label>2</Label>
-              </div>
-              <div className="flex h-4">
-                <Label className="w-full">Accept terms and conditions</Label>
-                <Label>2</Label>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {canPlaceOrder && (
+          <>
+            <ShowAllCategories {...categoriesProps}></ShowAllCategories>
+            <ShowCurrentOrder {...categoriesProps}></ShowCurrentOrder>
+          </>
+        )}
       </div>
     </>
   );
 }
 
-export const AddButton = ({ count, menu }: any) => {
+export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
+  return (
+    <Popover onOpenChange={handleOpenMenu}>
+      <PopoverTrigger asChild>
+        <div className="fixed bottom-12 right-4 md:bottom-4">
+          <Button
+            variant={isMenuOpen ? "outline" : "default"}
+            size="icon"
+            className="rounded-full"
+          >
+            {isMenuOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <BookOpenText className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 right-10" align="end" side="top">
+        <div className="flex flex-col gap-5">
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex h-4">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
+  return (
+    <Popover onOpenChange={handleOpenMenu}>
+      <PopoverTrigger asChild>
+        <div className="fixed bottom-4 right-12">
+          <Button
+            variant={isMenuOpen ? "outline" : "default"}
+            size="icon"
+            className="rounded-full"
+          >
+            {isMenuOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <BookOpenText className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 right-10" align="end" side="top">
+        <div className="flex flex-col gap-5">
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+          <div className="flex h-4">
+            <Label className="w-full">Accept terms and conditions</Label>
+            <Label>2</Label>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export const CustomizationButton = ({ count, menu }: any) => {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   let sheetProps: any = {
     open: isOpen,

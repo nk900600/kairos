@@ -1,39 +1,18 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "../components/ui/breadcrumb";
-import { NavLink } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "../components/ui/button";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 export default function CalenderComponent() {
   return (
     <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>Calender</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/calender", label: "Calender" },
+        ]}
+      />
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
+        <GoBackButton />
         <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           Calender
         </h1>

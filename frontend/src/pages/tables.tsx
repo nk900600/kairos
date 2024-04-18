@@ -49,6 +49,8 @@ import { NavLink } from "react-router-dom";
 import { DrawerDialogComponent } from "../common/drawerDialog";
 
 import { useLocation } from "react-router-dom";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 
 const Alltables = [
   {
@@ -203,27 +205,14 @@ export default function TableComponent() {
   const handleOnCheck = (e: any, data: any, i: number) => {};
   return (
     <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>All Tables</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/tables", label: "All Tables" },
+        ]}
+      />
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
+        <GoBackButton />
         <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           All Tables
         </h1>

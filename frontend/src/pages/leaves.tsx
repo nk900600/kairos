@@ -72,6 +72,8 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { DrawerDialogComponent } from "../common/drawerDialog";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 
 const AllPolicy = [
   {
@@ -299,27 +301,14 @@ export default function LeavesComponent() {
   };
   return (
     <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>All Leaves</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/leaves", label: "All Leaves" },
+        ]}
+      />
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
+        <GoBackButton />
         <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           All Leaves
         </h1>

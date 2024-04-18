@@ -15,13 +15,7 @@ import {
 } from "../components/ui/form";
 import { Checkbox } from "../components/ui/checkbox";
 import { ArrowLeft, ClockIcon, Ellipsis, Salad } from "lucide-react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "../components/ui/breadcrumb";
+
 import {
   Tabs,
   TabsContent,
@@ -42,6 +36,8 @@ import { NavLink } from "react-router-dom";
 import { ReactComponent as VegIcon } from "../VegIcon.svg";
 import { CommandSeparator } from "../components/ui/command";
 import { Separator } from "../components/ui/separator";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 
 const AllDesgination = [
   {
@@ -92,27 +88,15 @@ export default function ChefsPanelComponent() {
 
   return (
     <>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/chef-panel", label: "Chef's Panel" },
+        ]}
+      />
 
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>Chef's Panel</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
+        <GoBackButton />
         <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           Chef's Panel
         </h1>

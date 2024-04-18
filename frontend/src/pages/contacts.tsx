@@ -12,14 +12,6 @@ import {
   icons,
 } from "lucide-react";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "../components/ui/breadcrumb";
-import { NavLink, Navigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 
 import { Avatar, AvatarFallback, AvatarImage } from "..//components/ui/avatar";
@@ -44,25 +36,7 @@ import { useState } from "react";
 import * as React from "react";
 
 import { cn } from "../lib/utils";
-// import { useMediaQuery } from "../hooks/use-media-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "../components/ui/drawer";
+
 import { Label } from "../components/ui/label";
 
 import {
@@ -77,6 +51,8 @@ import {
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
 import { DrawerDialogComponent } from "../common/drawerDialog";
+import { GoBackButton } from "./common/goBackButton";
+import { BreadcrumbComponent } from "./common/breadCrumbs";
 
 const AllDesgination = [
   {
@@ -165,27 +141,14 @@ export default function ContactsComponent() {
   return (
     <>
       {" "}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/"}>Dashboard</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <NavLink to={"/menus"}>All Employees</NavLink>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <BreadcrumbComponent
+        list={[
+          { link: "/", label: "Dashboard" },
+          { link: "/employees", label: "All Employees" },
+        ]}
+      />
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className=" h-8 w-8">
-          <ArrowLeft className="h-4 w-4" />
-          <span className="sr-only">Back</span>
-        </Button>
+        <GoBackButton />
         <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
           All Employees
         </h1>
