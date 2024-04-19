@@ -24,6 +24,7 @@ export function DrawerDialogComponent({
   title,
   description,
   triggerButton,
+  isFooter = true,
   children,
 }: any) {
   const [open, setOpen] = useState(false);
@@ -55,11 +56,13 @@ export function DrawerDialogComponent({
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4">{children}</div>
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        {isFooter && (
+          <DrawerFooter className="pt-2">
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        )}
       </DrawerContent>
     </Drawer>
   );

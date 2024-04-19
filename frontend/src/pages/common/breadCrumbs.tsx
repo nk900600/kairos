@@ -14,7 +14,7 @@ type ListType = {
 
 export function BreadcrumbComponent({ list }: any) {
   return (
-    <Breadcrumb className="hidden sm:flex">
+    <Breadcrumb className="">
       <BreadcrumbList>
         {list.map((item: any, index: number) => {
           return (

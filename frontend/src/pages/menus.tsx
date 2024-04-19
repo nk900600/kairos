@@ -9,6 +9,7 @@ import {
   PlusIcon,
   ScrollText,
   Search,
+  ShoppingBag,
   Users,
   X,
   XIcon,
@@ -53,13 +54,17 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 import { Separator } from "../components/ui/separator";
-import { useEffect, useState } from "react";
+import { Children, useEffect, useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { useSwipeable } from "react-swipeable";
-import { CurrentOrder } from "./currentOrder";
+import {
+  CurrentOrder,
+  CurrentOrderContentComponent,
+} from "./placeOrder/currentOrder";
 import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { Checkbox } from "../components/ui/checkbox";
 
 const currencyMap = new Map([["INR", "₹"]]);
 const allCategory = [
@@ -396,6 +401,7 @@ export function MenuHeaderComponent() {
 
 export default function MenusComponent({ canPlaceOrder = false }) {
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isOrderOpen, setOrderOpen] = useState(false);
   const [allMenus, setAllMenus] = useState(AllMenu);
   const [countMap, setcountMap] = useState<any>({});
   const [allCategories, setAllCategories] = useState(allCategory);
@@ -407,13 +413,21 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     });
     setcountMap(countmap);
   }, []);
+
   const handleOpenMenu = (w: any) => {
     setMenuOpen(w);
+  };
+  const handleOpenOrder = (w: any) => {
+    setOrderOpen(w);
   };
 
   const categoriesProps = {
     handleOpenMenu,
     isMenuOpen,
+  };
+  const currentOrdersProps = {
+    handleOpenOrder,
+    isOrderOpen,
   };
 
   return (
@@ -484,7 +498,18 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                               </div>
 
                               <div className="ml-auto">
-                                <CustomizationButton />
+                                <MenuAddButton
+                                  title={
+                                    <SheetTitle className="flex items-center gap-3">
+                                      <VegIcon className="h-5 w-5" />
+                                      {menu.name}
+                                    </SheetTitle>
+                                  }
+                                  description={menu.description}
+                                >
+                                  <CustomizationComponent menu={menu} />
+                                </MenuAddButton>
+
                                 {/* {canPlaceOrder && <CurrentOrder></CurrentOrder>} */}
                               </div>
                             </div>
@@ -510,7 +535,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
         {canPlaceOrder && (
           <>
             <ShowAllCategories {...categoriesProps}></ShowAllCategories>
-            <ShowCurrentOrder {...categoriesProps}></ShowCurrentOrder>
+            <ShowCurrentOrder {...currentOrdersProps}></ShowCurrentOrder>
           </>
         )}
       </div>
@@ -522,12 +547,8 @@ export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
   return (
     <Popover onOpenChange={handleOpenMenu}>
       <PopoverTrigger asChild>
-        <div className="fixed bottom-12 right-4 md:bottom-4">
-          <Button
-            variant={isMenuOpen ? "outline" : "default"}
-            size="icon"
-            className="rounded-full"
-          >
+        <div className="fixed bottom-4 right-4">
+          <Button variant={"default"} size="icon" className="rounded-full">
             {isMenuOpen ? (
               <X className="h-4 w-4" />
             ) : (
@@ -536,7 +557,7 @@ export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
           </Button>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-80 right-10" align="end" side="top">
+      <PopoverContent className="w-60 right-10" align="end" side="top">
         <div className="flex flex-col gap-5">
           <div className="flex">
             <Label className="w-full">Accept terms and conditions</Label>
@@ -564,52 +585,154 @@ export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
   );
 }
 export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
+  const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
+  let sheetProps: any = {
+    open: isOpen,
+    onOpenChange: (data: any) => {
+      setOpen(data);
+    },
+  };
+  const handlers = useSwipeable({
+    onSwipedRight: (eventData: any) => {
+      console.log("fvfvf");
+      setOpen(false);
+    },
+  });
   return (
-    <Popover onOpenChange={handleOpenMenu}>
-      <PopoverTrigger asChild>
-        <div className="fixed bottom-4 right-12">
-          <Button
-            variant={isMenuOpen ? "outline" : "default"}
-            size="icon"
-            className="rounded-full"
-          >
-            {isMenuOpen ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <BookOpenText className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 right-10" align="end" side="top">
-        <div className="flex flex-col gap-5">
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
+    <>
+      <Sheet {...sheetProps}>
+        <SheetTrigger asChild>
+          <div className="fixed bottom-4 right-16">
+            <Button
+              variant={!isMenuOpen ? "outline" : "default"}
+              size="icon"
+              className="rounded-full"
+            >
+              {isMenuOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <>
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-1 text-xs font-semibold leading-none bg-red-500 text-white rounded-full">
+                    2
+                  </span>
+                  <ShoppingBag className="h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex h-4">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </SheetTrigger>
+        <SheetContent className="w-full" {...handlers}>
+          <CurrentOrderContentComponent />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 
-export const CustomizationButton = ({ count, menu }: any) => {
+export const CustomizationComponent = ({ menu }: any) => {
+  return (
+    <CardContent className="p-0 mb-4 mt-3 text-sm">
+      {menu.Customizations.map((item: any, index: number) => {
+        return (
+          <>
+            <div className="grid gap-3">
+              <div>
+                {" "}
+                <div className="font-semibold text-muted-foreground">
+                  {item.name}
+                </div>
+                <div className="font-sm text-muted-foreground">
+                  {item.maxMultiSelect}
+                </div>
+              </div>
+
+              <ul className="grid gap-3">
+                {item.CustomizationChoices.map((options: any) => {
+                  return (
+                    <li className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 w-full justify-between">
+                        <label
+                          htmlFor={options.id}
+                          className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          <div className="flex justify-between ">
+                            <div className="flex gap-5">
+                              {options.dietType == "Vegetarian" && (
+                                <VegIcon></VegIcon>
+                              )}
+                              <span className=" font-semibold">
+                                {options.name}
+                              </span>
+                            </div>
+
+                            {options.additionalPrice != 0 && (
+                              <span>${options.additionalPrice}</span>
+                            )}
+                          </div>
+                        </label>
+                        <Checkbox id={options.id} />
+                      </div>
+                    </li>
+                  );
+                })}
+
+                {/* <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Aqua Filters x <span>1</span>
+                    </span>
+                    <span>$49.00</span>
+                  </li> */}
+              </ul>
+            </div>
+            {index + 1 !== menu.Customizations.length && (
+              <Separator className="my-4" />
+            )}
+          </>
+        );
+      })}
+      {/* 
+        <div className="grid gap-3">
+          <div className="font-semibold">Handler Information</div>
+          <dl className="grid gap-3">
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Name</dt>
+              <dd>Liam Johnson</dd>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Employee Id</dt>
+              <dd>
+                <a href="tel:">890</a>
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <Separator className="my-4" />
+        <div className="grid gap-3">
+          <div className="font-semibold">Customer Information</div>
+          <dl className="grid gap-3">
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Customer</dt>
+              <dd>Liam Johnson</dd>
+            </div>
+            <div className="flex items-center justify-between">
+              <dt className="text-muted-foreground">Phone</dt>
+              <dd>
+                <a href="tel:">+1 234 567 890</a>
+              </dd>
+            </div>
+          </dl>
+        </div> */}
+    </CardContent>
+  );
+};
+
+export function MenuAddButton({
+  count = 0,
+  title,
+  description,
+  children,
+}: any) {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   let sheetProps: any = {
     open: isOpen,
@@ -622,7 +745,6 @@ export const CustomizationButton = ({ count, menu }: any) => {
       setOpen(false);
     },
   });
-
   return (
     <div className="flex items-center space-x-4">
       <div className="rounded-lg border bg-card h-8 flex items-center gap-1">
@@ -632,101 +754,46 @@ export const CustomizationButton = ({ count, menu }: any) => {
           </Button>
         )}
 
-        {!count ? (
-          <span className="text-sm font-semibold pl-4">Add</span>
-        ) : (
-          <span className="text-sm font-semibold">{count}</span>
-        )}
+        {count != 0 && <span className="text-sm font-semibold">{count}</span>}
 
-        <Sheet {...sheetProps}>
+        <DrawerDialogComponent
+          isFooter={false}
+          triggerButton={
+            <Button
+              variant="ghost"
+              size={count == 0 ? "lg" : "icon"}
+              className={" h-8 " + (count == 0 ? "gap-4" : "")}
+            >
+              {count == 0 && (
+                <span className="text-sm font-semibold ">Add</span>
+              )}
+              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+            </Button>
+          }
+          title={title}
+          description={description}
+        >
+          {children}
+        </DrawerDialogComponent>
+
+        {/* <Sheet {...sheetProps}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size={"icon"} className=" h-8 ">
+            <Button
+              variant="ghost"
+              size={count == 0 ? "lg" : "icon"}
+              className={" h-8 " + (count == 0 ? "gap-4" : "")}
+            >
+              {count == 0 && (
+                <span className="text-sm font-semibold ">Add</span>
+              )}
               <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
             </Button>
           </SheetTrigger>
           <SheetContent className="w-full" {...handlers}>
-            <SheetHeader className="mb-4">
-              <SheetTitle className="flex items-center gap-3">
-                <VegIcon className="h-5 w-5" />
-                Paneer masala
-              </SheetTitle>
-              <Separator className="my-2" />
-            </SheetHeader>
-            <CardContent className="p-0 mt-3 text-sm">
-              <div className="grid gap-3">
-                <div className="font-semibold">Order Details</div>
-                <ul className="grid gap-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Glimmer Lamps x <span>2</span>
-                    </span>
-                    <span>$250.00</span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Aqua Filters x <span>1</span>
-                    </span>
-                    <span>$49.00</span>
-                  </li>
-                </ul>
-                <Separator className="my-2" />
-                <ul className="grid gap-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>$299.00</span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>$5.00</span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>$25.00</span>
-                  </li>
-                  <li className="flex items-center justify-between font-semibold">
-                    <span className="text-muted-foreground">Total</span>
-                    <span>$329.00</span>
-                  </li>
-                </ul>
-              </div>
-
-              <Separator className="my-4" />
-              <div className="grid gap-3">
-                <div className="font-semibold">Handler Information</div>
-                <dl className="grid gap-3">
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Name</dt>
-                    <dd>Liam Johnson</dd>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Employee Id</dt>
-                    <dd>
-                      <a href="tel:">890</a>
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              <Separator className="my-4" />
-              <div className="grid gap-3">
-                <div className="font-semibold">Customer Information</div>
-                <dl className="grid gap-3">
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Customer</dt>
-                    <dd>Liam Johnson</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Phone</dt>
-                    <dd>
-                      <a href="tel:">+1 234 567 890</a>
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </CardContent>
+            {children}
           </SheetContent>
-        </Sheet>
+        </Sheet> */}
       </div>
     </div>
   );
-};
+}
