@@ -65,6 +65,7 @@ import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { Checkbox } from "../components/ui/checkbox";
+import { DrawerClose } from "../components/ui/drawer";
 
 const currencyMap = new Map([["INR", "₹"]]);
 const allCategory = [
@@ -631,98 +632,86 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
 
 export const CustomizationComponent = ({ menu }: any) => {
   return (
-    <CardContent className="p-0 mb-4 mt-3 text-sm">
-      {menu.Customizations.map((item: any, index: number) => {
-        return (
-          <>
-            <div className="grid gap-3">
-              <div>
-                {" "}
-                <div className="font-semibold text-muted-foreground">
-                  {item.name}
+    <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
+      <div>
+        {menu.Customizations.map((item: any, index: number) => {
+          return (
+            <>
+              <div className="grid gap-3">
+                <div>
+                  {" "}
+                  <div className="font-semibold text-muted-foreground">
+                    {item.name}
+                  </div>
+                  <div className="font-sm text-muted-foreground">
+                    {item.maxMultiSelect}
+                  </div>
                 </div>
-                <div className="font-sm text-muted-foreground">
-                  {item.maxMultiSelect}
-                </div>
-              </div>
 
-              <ul className="grid gap-3">
-                {item.CustomizationChoices.map((options: any) => {
-                  return (
-                    <li className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 w-full justify-between">
-                        <label
-                          htmlFor={options.id}
-                          className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          <div className="flex justify-between ">
-                            <div className="flex gap-5">
-                              {options.dietType == "Vegetarian" && (
-                                <VegIcon></VegIcon>
+                <ul className="grid gap-3">
+                  {item.CustomizationChoices.map((options: any) => {
+                    return (
+                      <li className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 w-full justify-between">
+                          <label
+                            htmlFor={options.id}
+                            className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            <div className="flex justify-between ">
+                              <div className="flex gap-5">
+                                {options.dietType == "Vegetarian" && (
+                                  <VegIcon></VegIcon>
+                                )}
+                                <span className=" font-semibold">
+                                  {options.name}
+                                </span>
+                              </div>
+
+                              {options.additionalPrice != 0 && (
+                                <span>${options.additionalPrice}</span>
                               )}
-                              <span className=" font-semibold">
-                                {options.name}
-                              </span>
                             </div>
+                          </label>
+                          <Checkbox id={options.id} />
+                        </div>
+                      </li>
+                    );
+                  })}
 
-                            {options.additionalPrice != 0 && (
-                              <span>${options.additionalPrice}</span>
-                            )}
-                          </div>
-                        </label>
-                        <Checkbox id={options.id} />
-                      </div>
-                    </li>
-                  );
-                })}
-
-                {/* <li className="flex items-center justify-between">
+                  {/* <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">
                       Aqua Filters x <span>1</span>
                     </span>
                     <span>$49.00</span>
                   </li> */}
-              </ul>
-            </div>
-            {index + 1 !== menu.Customizations.length && (
-              <Separator className="my-4" />
-            )}
-          </>
-        );
-      })}
-      {/* 
-        <div className="grid gap-3">
-          <div className="font-semibold">Handler Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Name</dt>
-              <dd>Liam Johnson</dd>
-            </div>
+                </ul>
+              </div>
+              {index + 1 !== menu.Customizations.length && (
+                <Separator className="my-4" />
+              )}
+            </>
+          );
+        })}
+      </div>
+      <div className="flex justify-between gap-4">
+        <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
+          <Button variant="ghost" size={"icon"} className="h-10">
+            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+          </Button>
 
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Employee Id</dt>
-              <dd>
-                <a href="tel:">890</a>
-              </dd>
-            </div>
-          </dl>
+          <span className="text-sm font-semibold">{1}</span>
+
+          <Button variant="ghost" size={"icon"} className={" h-10 "}>
+            <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+          </Button>
         </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Customer Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Customer</dt>
-              <dd>Liam Johnson</dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Phone</dt>
-              <dd>
-                <a href="tel:">+1 234 567 890</a>
-              </dd>
-            </div>
-          </dl>
-        </div> */}
+
+        <DrawerClose asChild>
+          <Button size={"lg"} className="h-10 w-full">
+            Add Item - $1230
+          </Button>
+        </DrawerClose>
+      </div>
     </CardContent>
   );
 };
