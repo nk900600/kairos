@@ -52,6 +52,7 @@ import SelectItemsComponent from "../pages/placeOrder/selectItems";
 import SelectTableComponent from "../pages/placeOrder/selectTable";
 import SignUp from "../pages/signUp";
 import Login from "../pages/login";
+import { MainSettings } from "./settings/main";
 
 const allMenuItems = [
   {
@@ -210,6 +211,7 @@ function Sidebar() {
               Component={SelectItemsComponent}
             />
             <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
+            <Route path="/settings" Component={MainSettings} />{" "}
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </Routes>
         </main>

@@ -22,59 +22,59 @@ import {
 } from "../components/ui/input-otp";
 import { useState } from "react";
 import { OtpComponent } from "./common/otp";
+import { Image } from "@radix-ui/react-avatar";
 
 export default function Login() {
   const [currentStep, setCurrentStep] = useState(1);
-
   return (
-    <div className="w-full gap-10  lg:grid lg:min-h-[600px] lg:grid-cols-2 lg:gap-0 xl:min-h-[800px]">
-      <div className="flex items-center h-lvh justify-center p-6 lg:p-10   ">
-        {currentStep == 1 && (
-          <div className="mx-auto sm:w-[350px] w-full space-y-6">
-            <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-bold">
-                Login into your app Account
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                New to my App?{" "}
-                <NavLink to="/signup" className="underline">
-                  Create Account
-                </NavLink>
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Mobile Number</Label>
-                <Input id="username" placeholder="1234567890" required />
+    <div className="w-full h-lvh gap-10  lg:grid  lg:grid-cols-2 lg:gap-0 ">
+      <div className="flex items-center  h-lvh justify-center py-12">
+        <div className="mx-auto grid px-2 w-[350px] gap-6">
+          {currentStep == 1 && (
+            <>
+              <div className="grid gap-2 text-center">
+                <h1 className="text-3xl font-bold">Login</h1>
+                <p className="text-balance text-muted-foreground">
+                  Enter your detail below to login to your account
+                </p>
               </div>
-              <Button
-                className="w-full"
-                type="submit"
-                onClick={() => setCurrentStep(2)}
-              >
-                Send OTP
-              </Button>
-            </div>
-          </div>
-        )}
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="username">Mobile Number</Label>
+                  <Input id="username" placeholder="1234567890" required />
+                </div>
 
-        {currentStep == 2 && (
-          <OtpComponent goBack={() => setCurrentStep(1)}></OtpComponent>
-        )}
-      </div>
-      <div className="hidden lg:flex items-center justify-center p-6 lg:flex lg:bg-muted/40 lg:p-10 dark:lg:bg-gray-800">
-        <div className="mx-auto grid max-w-[350px] gap-3 lg:max-w-[500px]">
-          <blockquote className="text-lg font-semibold leading-snug lg:text-xl lg:leading-normal xl:text-2xl">
-            “The customer service I received was exceptional. The support team
-            went above and beyond to address my concerns.“
-          </blockquote>
-          <div>
-            <div className="font-semibold">Jules Winnfield</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              CEO, Acme Inc
-            </div>
-          </div>
+                <Button
+                  className="w-full"
+                  type="submit"
+                  onClick={() => setCurrentStep(2)}
+                >
+                  Send OTP
+                </Button>
+              </div>
+              <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <NavLink to="/signup" className="underline">
+                  Sign up
+                </NavLink>
+              </div>
+            </>
+          )}
+
+          {currentStep == 2 && (
+            <OtpComponent goBack={() => setCurrentStep(1)}></OtpComponent>
+          )}
         </div>
+      </div>
+
+      <div className="hidden bg-muted lg:block">
+        {/* <Image
+          src="/placeholder.svg"
+          alt="Image"
+          width="1920"
+          height="1080"
+          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+        /> */}
       </div>
     </div>
   );

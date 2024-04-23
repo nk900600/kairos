@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CircleUser,
   CookingPot,
+  DollarSign,
   Home,
   LineChart,
   Menu,
@@ -55,6 +56,7 @@ import LeavesComponent from "./leaves";
 import CalenderComponent from "./calender";
 import { useSwipeable } from "react-swipeable";
 import CreateOrderComponent from "./placeOrder/selectTable";
+import { DashBoardContent } from "./dashboardContent";
 
 const allMenuItems = [
   {
@@ -248,7 +250,9 @@ export function Dashboard() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLoginROute}>
@@ -257,6 +261,7 @@ export function Dashboard() {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
+      <DashBoardContent />
 
       <nav className="fixed bottom-0 inset-x-0 flex items-center justify-center h-14 bg-muted border-t border-gray-200/40 border-gray-200 dark:bg-gray-950/50 dark:border-gray-950 dark:border-gray-950/40 md:hidden">
         <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">

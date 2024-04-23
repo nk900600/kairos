@@ -33,7 +33,7 @@ export function OtpComponent({ goBack }: any) {
           </InputOTP>
         </div>
 
-        <p className="text-gray-500 dark:text-gray-400 text-xs">
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
           Didn't get the OTP?
           <Button variant={"link"} className=" text-xs" type="submit">
             Resend SMS
