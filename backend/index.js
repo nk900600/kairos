@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const cors = require("cors");
 const dotenv = require("dotenv");
 require("./env/.env.dev");
 const envFile = `./env/.env.${process.env.NODE_ENV || "dev"}`;
@@ -32,7 +32,13 @@ async function init() {
   const desginationRoutes = require("./src/routes/designation.routes");
 
   const app = express();
-  const port = 3000;
+  const port = 4200;
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000", // Replace with the URL of your front-end app
+    })
+  );
 
   app.use(bodyParser.json());
   app.use("/api/firms", authMiddleware, firmRoutes);
