@@ -51,6 +51,10 @@ import { DrawerDialogComponent } from "../common/drawerDialog";
 import { useLocation } from "react-router-dom";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTables } from "../redux/actions";
+import { AppDispatch } from "../redux/store";
+import { TableState } from "../redux/reducer";
 
 const Alltables = [
   {
@@ -190,17 +194,20 @@ function useQuery() {
 export default function TableComponent() {
   let query = useQuery();
 
-  const [tables] = useState(Alltables);
+  const tables = useSelector(
+    (state: { table: TableState }) => state.table.alltables
+  );
   const [tabValue, setTableValue] = useState("available");
+  const dispatch = useDispatch();
   const handleClick = (e: any) => {
-    console.log(e);
     setTableValue(e);
   };
 
   useEffect(() => {
     let mytables = query.get("mytables");
     if (mytables) setTableValue("occupied");
-  }, []);
+    dispatch(fetchTables());
+  }, [dispatch]);
 
   const handleOnCheck = (e: any, data: any, i: number) => {};
   return (
@@ -213,7 +220,7 @@ export default function TableComponent() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
           All Tables
         </h1>
 
@@ -271,8 +278,8 @@ export default function TableComponent() {
         <TabsContent value="available">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {tables
-              .filter((table) => table.status == "Available")
-              .map((table) => {
+              .filter((table: any) => table.status == "Available")
+              .map((table: any) => {
                 return (
                   <Card className="flex w-full flex-col items">
                     <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
@@ -341,10 +348,10 @@ export default function TableComponent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {tables
               .filter(
-                (table) =>
+                (table: any) =>
                   table.status == "Occupied" || table.status == "Reserved"
               )
-              .map((table) => {
+              .map((table: any) => {
                 return (
                   <Card className="flex w-full flex-col items">
                     <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
@@ -352,7 +359,7 @@ export default function TableComponent() {
                         <Ratio className=" h-6 w-6 " />
 
                         <div className="flex-col">
-                          <CardTitle className="text-base">
+                          <CardTitle className="text-base ">
                             {table.tableName}
                           </CardTitle>
 
@@ -419,10 +426,10 @@ export default function TableComponent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {tables
               .filter(
-                (table) =>
+                (table: any) =>
                   !["Occupied", "Available", "Reserved"].includes(table.status)
               )
-              .map((table) => {
+              .map((table: any) => {
                 return (
                   <Card className="flex w-full flex-col items">
                     <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
@@ -487,3 +494,7 @@ export default function TableComponent() {
     </>
   );
 }
+
+const AddTable = ({}) => {
+  return <></>;
+};

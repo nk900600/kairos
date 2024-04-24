@@ -19,6 +19,7 @@ import {
 } from "../components/ui/drawer";
 import { Pencil, Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { useMediaQuery } from "../hooks/mediaQuery";
 
 export function DrawerDialogComponent({
   title,
@@ -29,8 +30,8 @@ export function DrawerDialogComponent({
 }: any) {
   const [open, setOpen] = useState(false);
   //TODO:
-  //   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const isDesktop = false;
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  // const isDesktop = false;
 
   if (isDesktop) {
     return (
