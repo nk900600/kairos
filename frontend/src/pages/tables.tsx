@@ -3,9 +3,16 @@ import {
   ArrowLeft,
   CirclePlus,
   ClockIcon,
+  Edit,
+  Edit2,
+  Edit3,
   Ellipsis,
   ListFilter,
+  Pencil,
+  Plug,
+  Plus,
   Ratio,
+  Trash2,
   UserIcon,
   Users,
 } from "lucide-react";
@@ -44,7 +51,7 @@ import {
 } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { DrawerDialogComponent } from "../common/drawerDialog";
 
@@ -52,9 +59,26 @@ import { useLocation } from "react-router-dom";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTables } from "../redux/actions";
+import { addTable, deleteTable, fetchTables } from "../redux/actions";
 import { AppDispatch } from "../redux/store";
 import { TableState } from "../redux/reducer";
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
+
+import React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
+import DrawerContext from "../context/drawerContext";
 
 const Alltables = [
   {
@@ -171,11 +195,6 @@ const AllDesgination = [
     isChecked: true,
   },
   {
-    id: 1,
-    value: "Reserved",
-    isChecked: false,
-  },
-  {
     id: 2,
     value: "Cleaning",
     isChecked: false,
@@ -192,13 +211,16 @@ function useQuery() {
 }
 
 export default function TableComponent() {
+  const { open, setOpen, title, setTitle, setDescription, setCompProps } =
+    useContext(DrawerContext);
   let query = useQuery();
 
   const tables = useSelector(
     (state: { table: TableState }) => state.table.alltables
   );
   const [tabValue, setTableValue] = useState("available");
-  const dispatch = useDispatch();
+  const [openMenu, setOpenMenu] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
   const handleClick = (e: any) => {
     setTableValue(e);
   };
@@ -208,6 +230,56 @@ export default function TableComponent() {
     if (mytables) setTableValue("occupied");
     dispatch(fetchTables());
   }, [dispatch]);
+
+  const handleEditClick = (table: any) => {
+    setOpen(true);
+    setTitle("Edit Table");
+    setDescription(" ");
+    setCompProps({ name: table.tableName, seat: table.capacity });
+  };
+
+  const handleAddClick = (event: any) => {
+    setOpen(true);
+    setTitle("Add Table");
+    setDescription("Please add New Table ");
+  };
+
+  const DropdownMenuList = (table: any) => (
+    <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuLabel>Mark as</DropdownMenuLabel>
+      <DropdownMenuSeparator />
+
+      {AllDesgination.map((data, i) => {
+        return (
+          <DropdownMenuCheckboxItem
+            checked={data.isChecked}
+            onCheckedChange={(e) => handleOnCheck(e, data, i)}
+          >
+            {data.value}
+          </DropdownMenuCheckboxItem>
+        );
+      })}
+
+      <DropdownMenuSeparator />
+      <DropdownMenuItem>
+        <Plus className="mr-2 h-4 w-4 " />
+        <span>Create reservation</span>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={() => handleEditClick(table)}>
+        <>
+          <Pencil className="mr-2 h-4 w-4 " />
+          <span>Edit</span>
+        </>
+      </DropdownMenuItem>
+
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={() => dispatch(deleteTable(table.id))}>
+        <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+        <span>Delete</span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
 
   const handleOnCheck = (e: any, data: any, i: number) => {};
   return (
@@ -224,42 +296,14 @@ export default function TableComponent() {
           All Tables
         </h1>
 
-        <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 h-8 ">
-                <ListFilter className="h-4 w-4" />
-                <span className="hidden sm:block">Filters</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Desigination</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-
-              {AllDesgination.map((data, i) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    checked={data.isChecked}
-                    onCheckedChange={(e) => handleOnCheck(e, data, i)}
-                  >
-                    {data.value}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DrawerDialogComponent
-            triggerButton={
-              <Button variant="outline" className=" h-8  gap-2">
-                <CirclePlus className="h-4 w-4" />
-                <span className="hidden sm:block">Add Table</span>
-              </Button>
-            }
-            title={"Add Table"}
-            description={"New Table is added"}
-          ></DrawerDialogComponent>
-        </div>
+        <Button
+          variant="outline"
+          onClick={handleAddClick}
+          className=" h-8  gap-2"
+        >
+          <CirclePlus className="h-4 w-4" />
+          <span className="hidden sm:block">Add Table</span>
+        </Button>
       </div>
       <Tabs
         defaultValue={tabValue}
@@ -294,9 +338,6 @@ export default function TableComponent() {
                             Seats {table.capacity}
                           </CardDescription>
                         </div>
-                        {/* <div className="flex-1">
-                          <Badge> {table.status}</Badge>
-                        </div> */}
                         <div className="ml-auto">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -308,23 +349,7 @@ export default function TableComponent() {
                                 <Ellipsis className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                              <DropdownMenuLabel>Mark as</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-
-                              {AllDesgination.map((data, i) => {
-                                return (
-                                  <DropdownMenuCheckboxItem
-                                    checked={data.isChecked}
-                                    onCheckedChange={(e) =>
-                                      handleOnCheck(e, data, i)
-                                    }
-                                  >
-                                    {data.value}
-                                  </DropdownMenuCheckboxItem>
-                                );
-                              })}
-                            </DropdownMenuContent>
+                            {DropdownMenuList(table)}
                           </DropdownMenu>
                         </div>
                       </div>
@@ -335,7 +360,6 @@ export default function TableComponent() {
                         size="sm"
                         className="w-full gap-2"
                       >
-                        {/* <CirclePlus className="h-4 w-4" /> */}
                         <span>Create Order </span>
                       </Button>
                     </CardFooter>
@@ -387,16 +411,24 @@ export default function TableComponent() {
                         <UserIcon className="h-3 w-3 mr-1.5" />
                         <div className="text-sm">
                           <span className="text-muted-foreground text-xs">
-                            Assigned to:
+                            {table.status != "Occupied"
+                              ? "Reserved for:"
+                              : "Assigned to:"}
                           </span>{" "}
-                          <span> John Smith</span>
+                          <span>
+                            {table.status != "Occupied"
+                              ? table.reservationName
+                              : "Dummy Name"}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center">
                         <ClockIcon className="h-3 w-3 mr-1.5" />
                         <div className="text-sm">
                           <span className="text-muted-foreground text-xs">
-                            Timer:
+                            {table.status != "Occupied"
+                              ? "Reservation at:"
+                              : "Timer:"}
                           </span>
                           {"  "}
                           <span>20 mins 52 sec</span>
@@ -405,7 +437,9 @@ export default function TableComponent() {
                     </CardContent>
                     <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
                       <Button variant="outline" size="sm" className="w-full">
-                        Close tab
+                        {table.status != "Occupied"
+                          ? "Cancel Reservation"
+                          : "Close tab"}
                       </Button>
 
                       <Button
@@ -414,7 +448,7 @@ export default function TableComponent() {
                         className="w-full gap-2"
                       >
                         {/* <CirclePlus className="h-4 w-4" /> */}
-                        <span className="">New Order </span>
+                        <span className="">Create Order</span>
                       </Button>
                     </CardFooter>
                   </Card>
@@ -462,14 +496,18 @@ export default function TableComponent() {
                             )}
                         </div>
                         <div className="ml-auto">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="  h-8 w-8 "
-                          >
-                            <Ellipsis className="h-4 w-4" />
-                            <span className="sr-only">Back</span>
-                          </Button>
+                          <DropdownMenu open={false}>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="  h-8 w-8 "
+                              >
+                                <Ellipsis className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            {DropdownMenuList(table)}
+                          </DropdownMenu>
                         </div>
                       </div>
                     </CardHeader>
@@ -478,7 +516,7 @@ export default function TableComponent() {
                         <ClockIcon className="h-3 w-3 mr-1.5" />
                         <div className="text-sm">
                           <span className="text-muted-foreground text-xs">
-                            Timer:
+                            Unavailable Since:
                           </span>
                           {"  "}
                           <span>20 mins 52 sec</span>
@@ -495,6 +533,89 @@ export default function TableComponent() {
   );
 }
 
-const AddTable = ({}) => {
-  return <></>;
+// Define the form validation schema using Zod
+const tableSchema = z.object({
+  tableName: z
+    .string()
+    .min(1, "Table name is required.")
+    .max(50, "Character lkmit exceeded"),
+  capacity: z
+    .number()
+    .min(1, "Seat capacity must be at least 1.")
+    .max(30, "Please Enter number less than 30"),
+});
+
+export const ManageTable = ({ name = "", seat = "" }: any) => {
+  const { open, setOpen }: any = useContext(DrawerContext);
+
+  const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(tableSchema),
+    defaultValues: {
+      tableName: name,
+      capacity: seat,
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    console.log("Form Data:", data);
+    setIsLoading(true);
+    try {
+      // Dispatch the addTable action and wait for it to complete
+      await dispatch(addTable(data)).unwrap();
+      console.log("Table added successfully!");
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add table:", error);
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <FormField
+          control={form.control}
+          name="tableName"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="tableName">Table Name</FormLabel>
+              <FormControl>
+                <Input id="tableName" placeholder="Table 1" {...field} />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="capacity"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="capacity">Seat Capacity</FormLabel>
+              <FormControl>
+                <Input
+                  id="capacity"
+                  type="number"
+                  placeholder="4"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+
+        <Button loading={isLoading} type="submit">
+          Save
+        </Button>
+      </form>
+    </Form>
+  );
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,18 +20,26 @@ import {
 import { Pencil, Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useMediaQuery } from "../hooks/mediaQuery";
+import { ManageTable } from "../pages/tables";
+import DrawerContext from "../context/drawerContext";
 
 export function DrawerDialogComponent({
-  title,
-  description,
   triggerButton,
   isFooter = true,
   children,
 }: any) {
-  const [open, setOpen] = useState(false);
-  //TODO:
+  const componentMap: any = {
+    manageTable: ManageTable,
+  };
+  const { open, setOpen, component, compProps, title, description }: any =
+    useContext(DrawerContext);
+  console.log(open);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  // const isDesktop = false;
+  console.log(useContext(DrawerContext));
+  const DynamicComponent = () => {
+    const Component = componentMap[component];
+    return <Component {...compProps} />;
+  };
 
   if (isDesktop) {
     return (
@@ -42,7 +50,8 @@ export function DrawerDialogComponent({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          {children}
+          <ManageTable {...compProps} />
+          {/* {DynamicComponent()} */}
         </DialogContent>
       </Dialog>
     );
@@ -56,7 +65,7 @@ export function DrawerDialogComponent({
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <div className="px-4">{children}</div>
+        <div className="px-4"> {DynamicComponent()}</div>
         {isFooter && (
           <DrawerFooter className="pt-2">
             <DrawerClose asChild>

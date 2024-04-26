@@ -3,6 +3,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
 import RootState from "./store";
 import axios from "./axios";
+import { toast } from "sonner";
 
 export const BASE_URL = "http://localhost:4200/api";
 
@@ -29,10 +30,22 @@ export const updateTable = createAsyncThunk(
     }
   }
 );
+export const addTable = createAsyncThunk(
+  "tables/add",
+  async (table: TableType, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/tables`, table);
+      return response.data;
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to Add table");
+    }
+  }
+);
 
-export const deleteTable = createAsyncThunk<any>(
+export const deleteTable = createAsyncThunk(
   "tables/delete",
-  async (id, { rejectWithValue }) => {
+  async (id: any, { rejectWithValue }) => {
     try {
       await axios.delete(`${BASE_URL}/tables/${id}`);
       return id; // return the id to identify which table was deleted

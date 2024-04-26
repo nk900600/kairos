@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
-import { deleteTable, fetchTables, updateTable } from "./actions";
+import { addTable, deleteTable, fetchTables, updateTable } from "./actions";
+import { toast } from "sonner";
 
 export interface TableState {
   alltables: TableType[];
@@ -36,6 +37,12 @@ const counterSlice = createSlice({
           if (index !== -1) {
             state.alltables[index] = action.payload;
           }
+        }
+      )
+      .addCase(
+        addTable.fulfilled,
+        (state: TableState, action: PayloadAction<TableType>) => {
+          state.alltables.push(action.payload);
         }
       )
       .addCase(
