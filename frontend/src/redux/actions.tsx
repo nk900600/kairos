@@ -24,7 +24,7 @@ export const updateTable = createAsyncThunk(
   async (table: TableType, { rejectWithValue }) => {
     try {
       const response = await axios.put(`${BASE_URL}/tables/${table.id}`, table);
-      return response.data;
+      return table;
     } catch (error) {
       return rejectWithValue("Failed to update table");
     }
@@ -49,6 +49,20 @@ export const deleteTable = createAsyncThunk(
     try {
       await axios.delete(`${BASE_URL}/tables/${id}`);
       return id; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+export const updateTableStatus = createAsyncThunk(
+  "tables/updateStatus",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      await axios.post(`${BASE_URL}/tables/${payload.id}/update-status`, {
+        status: payload.status,
+      });
+      return payload; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
     }

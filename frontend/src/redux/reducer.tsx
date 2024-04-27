@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
-import { addTable, deleteTable, fetchTables, updateTable } from "./actions";
+import { addTable, deleteTable, fetchTables, updateTable, updateTableStatus } from "./actions";
 import { toast } from "sonner";
 
 export interface TableState {
@@ -52,10 +52,19 @@ const counterSlice = createSlice({
             (table) => table.id !== action.payload
           );
         }
+      )
+      .addCase(
+        updateTableStatus.fulfilled,
+        (state: TableState, action: PayloadAction<any>) => {
+          const index = state.alltables.findIndex(
+            (table) => table.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.alltables[index].status = action.payload.status;
+          }
+        }
       );
   },
 });
-
-// export const { addTables, allTables, deleteTable } = counterSlice.actions;
 
 export const counterReducers = counterSlice.reducer;

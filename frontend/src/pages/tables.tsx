@@ -59,7 +59,13 @@ import { useLocation } from "react-router-dom";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { useDispatch, useSelector } from "react-redux";
-import { addTable, deleteTable, fetchTables } from "../redux/actions";
+import {
+  addTable,
+  deleteTable,
+  fetchTables,
+  updateTable,
+  updateTableStatus,
+} from "../redux/actions";
 import { AppDispatch } from "../redux/store";
 import { TableState } from "../redux/reducer";
 import { Label } from "../components/ui/label";
@@ -80,114 +86,6 @@ import {
 } from "../components/ui/form";
 import DrawerContext from "../context/drawerContext";
 
-const Alltables = [
-  {
-    id: 4,
-    tableName: "Table 1",
-    capacity: 4,
-    status: "Reserved",
-    reservationName: "Nikhil Kumar",
-    reservationTime: "2024-03-30T11:38:30.000Z",
-    reservationPartySize: 4,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-03-31T11:04:06.000Z",
-    updatedAt: "2024-04-04T04:06:17.000Z",
-  },
-  {
-    id: 5,
-    tableName: "Table 2",
-    capacity: 2,
-    status: "Available",
-    reservationName: "",
-    reservationTime: "",
-    reservationPartySize: 0,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T11:00:00.000Z",
-    updatedAt: "2024-04-04T04:08:17.000Z",
-  },
-  {
-    id: 6,
-    tableName: "Table 3",
-    capacity: 6,
-    status: "Occupied",
-    reservationName: "Arjun Patel",
-    reservationTime: "2024-03-31T19:45:30.000Z",
-    reservationPartySize: 6,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 2,
-    updatedBy: null,
-    createdAt: "2024-03-31T12:04:06.000Z",
-    updatedAt: "2024-04-04T04:10:17.000Z",
-  },
-  {
-    id: 7,
-    tableName: "Table 4",
-    capacity: 8,
-    status: "Cleaning",
-    reservationName: "",
-    reservationTime: "",
-    reservationPartySize: 0,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T13:04:06.000Z",
-    updatedAt: "2024-04-04T04:12:17.000Z",
-  },
-  {
-    id: 8,
-    tableName: "Table 5",
-    capacity: 4,
-    status: "Maintenance",
-    reservationName: "",
-    reservationTime: "",
-    reservationPartySize: 0,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 3,
-    updatedBy: null,
-    createdAt: "2024-04-02T11:04:06.000Z",
-    updatedAt: "2024-04-04T04:14:17.000Z",
-  },
-  {
-    id: 9,
-    tableName: "Table 6",
-    capacity: 2,
-    status: "Reserved",
-    reservationName: "Anjali Rao",
-    reservationTime: "2024-04-01T20:00:30.000Z",
-    reservationPartySize: 2,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-03T11:04:06.000Z",
-    updatedAt: "2024-04-04T04:16:17.000Z",
-  },
-  {
-    id: 10,
-    tableName: "Table 7",
-    capacity: 4,
-    status: "Available",
-    reservationName: "",
-    reservationTime: "",
-    reservationPartySize: 0,
-    imageUrl: null,
-    firmId: 1,
-    createdBy: 4,
-    updatedBy: null,
-    createdAt: "2024-04-04T11:04:06.000Z",
-    updatedAt: "2024-04-04T04:18:17.000Z",
-  },
-];
-
 const AllDesgination = [
   {
     id: 0,
@@ -201,7 +99,7 @@ const AllDesgination = [
   },
   {
     id: 3,
-    value: "Maintaince",
+    value: "Maintenance",
     isChecked: false,
   },
 ];
@@ -235,7 +133,7 @@ export default function TableComponent() {
     setOpen(true);
     setTitle("Edit Table");
     setDescription(" ");
-    setCompProps({ name: table.tableName, seat: table.capacity });
+    setCompProps({ tableData: table });
   };
 
   const handleAddClick = (event: any) => {
@@ -252,19 +150,23 @@ export default function TableComponent() {
       {AllDesgination.map((data, i) => {
         return (
           <DropdownMenuCheckboxItem
-            checked={data.isChecked}
-            onCheckedChange={(e) => handleOnCheck(e, data, i)}
+            checked={data.value == table.status}
+            onCheckedChange={(e) => handleOnCheck(data.value, table)}
           >
             {data.value}
           </DropdownMenuCheckboxItem>
         );
       })}
 
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <Plus className="mr-2 h-4 w-4 " />
-        <span>Create reservation</span>
-      </DropdownMenuItem>
+      {["Available"].includes(table.status) && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
+            <Plus className="mr-2 h-4 w-4 " />
+            <span>Create reservation</span>
+          </DropdownMenuItem>
+        </>
+      )}
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => handleEditClick(table)}>
         <>
@@ -281,7 +183,9 @@ export default function TableComponent() {
     </DropdownMenuContent>
   );
 
-  const handleOnCheck = (e: any, data: any, i: number) => {};
+  const handleOnCheck = (status: any, table: any) => {
+    dispatch(updateTableStatus({ id: table.id, status: status }));
+  };
   return (
     <>
       <BreadcrumbComponent
@@ -394,7 +298,7 @@ export default function TableComponent() {
                         <div className="flex-1">
                           <Badge variant={"secondary"}> {table.status}</Badge>
                         </div>
-                        <div className="ml-auto">
+                        {/* <div className="ml-auto">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -403,7 +307,7 @@ export default function TableComponent() {
                             <Ellipsis className="h-4 w-4" />
                             <span className="sr-only">Back</span>
                           </Button>
-                        </div>
+                        </div> */}
                       </div>
                     </CardHeader>
                     <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
@@ -496,7 +400,7 @@ export default function TableComponent() {
                             )}
                         </div>
                         <div className="ml-auto">
-                          <DropdownMenu open={false}>
+                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
@@ -545,7 +449,7 @@ const tableSchema = z.object({
     .max(30, "Please Enter number less than 30"),
 });
 
-export const ManageTable = ({ name = "", seat = "" }: any) => {
+export const ManageTable = ({ tableData = {} }: any) => {
   const { open, setOpen }: any = useContext(DrawerContext);
 
   const dispatch: AppDispatch = useDispatch();
@@ -553,18 +457,23 @@ export const ManageTable = ({ name = "", seat = "" }: any) => {
   const form = useForm({
     resolver: zodResolver(tableSchema),
     defaultValues: {
-      tableName: name,
-      capacity: seat,
+      tableName: tableData?.tableName || "",
+      capacity: tableData?.capacity || "",
     },
   });
 
   const onSubmit = async (data: any) => {
-    console.log("Form Data:", data);
     setIsLoading(true);
     try {
       // Dispatch the addTable action and wait for it to complete
-      await dispatch(addTable(data)).unwrap();
-      console.log("Table added successfully!");
+      if (tableData?.tableName) {
+        tableData = JSON.parse(JSON.stringify(tableData));
+        tableData.tableName = data.tableName;
+        tableData.capacity = data.capacity;
+        await dispatch(updateTable(tableData)).unwrap();
+      } else {
+        await dispatch(addTable(data)).unwrap();
+      }
       setOpen(false);
     } catch (error) {
       console.error("Failed to add table:", error);

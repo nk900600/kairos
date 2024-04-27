@@ -3,5 +3,14 @@ export interface TableType {
   name?: string;
   tableName?: string;
   capacity?: Number;
-  // add other necessary table properties
+  status?: string;
+  reservationName?: any;
+  reservationTime?: any;
+  reservationPartySize?: any;
+  imageUrl?: any;
+  firmId?: number;
+  createdBy?: number;
+  updatedBy?: any;
+  createdAt?: string;
+  updatedAt?: string;
 }
