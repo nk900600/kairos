@@ -33,7 +33,11 @@ class EmployeeController {
   async createEmployee(req, res) {
     const transaction = await sequelize.transaction();
     try {
-      if (!req.body?.email || !req.body?.firstName || !req.body?.lastName) {
+      if (
+        !req.body?.mobileNumber ||
+        !req.body?.firstName ||
+        !req.body?.lastName
+      ) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
@@ -57,13 +61,13 @@ class EmployeeController {
       }
 
       // Validate the email
-      if (!emailRegex.test(req.body?.email)) {
+      if (req.body?.email && !emailRegex.test(req.body?.email)) {
         return res.status(400).json({ message: "Invalid email format" });
       }
 
       const user = await Employee.findOne(
         {
-          where: { email: req.body.email },
+          where: { mobileNumber: req.body.mobileNumber },
           paranoid: false, // Include soft-deleted records
         },
         { transaction }

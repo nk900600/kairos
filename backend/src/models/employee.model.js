@@ -22,8 +22,6 @@ const Employee = sequelize.define(
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
     },
     street: {
       type: DataTypes.STRING,
