@@ -20,8 +20,9 @@ import {
 import { Pencil, Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useMediaQuery } from "../hooks/mediaQuery";
-import { ManageTable } from "../pages/tables";
+import { ManageReservation, ManageTable } from "../pages/tables";
 import DrawerContext from "../context/drawerContext";
+import { ManageEmployees } from "../pages/contacts";
 
 export function DrawerDialogComponent({
   triggerButton,
@@ -30,6 +31,8 @@ export function DrawerDialogComponent({
 }: any) {
   const componentMap: any = {
     manageTable: ManageTable,
+    manageEmployee: ManageEmployees,
+    manageReservation: ManageReservation,
   };
   const { open, setOpen, component, compProps, title, description }: any =
     useContext(DrawerContext);
@@ -48,8 +51,8 @@ export function DrawerDialogComponent({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          <ManageTable {...compProps} />
-          {/* {DynamicComponent()} */}
+          {/* <ManageTable {...compProps} /> */}
+          {DynamicComponent()}
         </DialogContent>
       </Dialog>
     );

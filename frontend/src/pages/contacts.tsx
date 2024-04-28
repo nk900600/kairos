@@ -13,7 +13,14 @@ import {
 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
-
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "..//components/ui/avatar";
 import {
   Card,
@@ -31,7 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import * as React from "react";
 
@@ -53,6 +60,27 @@ import {
 import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import {
+  addEmployee,
+  deleteEmployees,
+  fetchAllEmployees,
+  fetchDesgination,
+  updateEmployees,
+} from "../redux/actions";
+import { RootState } from "../redux/reducer";
+import DrawerContext from "../context/drawerContext";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 const AllDesgination = [
   {
@@ -121,22 +149,82 @@ const AllEmployees = [
 ];
 
 export default function ContactsComponent() {
-  const [allDesignation, setAllDesignation] = useState(AllDesgination);
-  const [allEmployees, setAllEmployees] = useState(AllEmployees);
-  const [allEmployeesCopy, setAllEmployeesCopy] = useState(AllEmployees);
+  const { allEmployees, allDesgination } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = React.useContext(DrawerContext);
+  const [allEmployeesCopy, setAllEmployeesCopy] = useState(allEmployees);
+  const [allDesginationCopy, setAllDesginationCopy] = useState(allDesgination);
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchAllEmployees());
+    dispatch(fetchDesgination());
+  }, [dispatch]);
+  useEffect(() => {
+    setAllEmployeesCopy(allEmployees);
+  }, [allEmployees]);
+  useEffect(() => {
+    let data = JSON.parse(JSON.stringify(allDesgination)).map((data: any) => ({
+      ...data,
+      checked: false,
+    }));
+    setAllDesginationCopy([{ title: "Show all", checked: true }, ...data]);
+  }, [allDesgination]);
 
   const handleOnCheck = (isChecked: any, data: any, index: number): any => {
-    data.isChecked = isChecked;
-    allDesignation[index] = data;
-    console.log(allDesignation);
-    setAllDesignation(JSON.parse(JSON.stringify(allDesignation)));
+    if (index != 0) {
+      allDesginationCopy[0].checked = false;
+    }
+    if (index == 0) {
+      allDesginationCopy.forEach((data) => {
+        data.checked = false;
+      });
+      allDesginationCopy[0].checked = true;
+      setAllDesginationCopy(JSON.parse(JSON.stringify(allDesginationCopy)));
+      return;
+    }
+
+    allDesginationCopy[index].checked = isChecked;
+    setAllDesginationCopy(JSON.parse(JSON.stringify(allDesginationCopy)));
+  };
+
+  const filterEmployeeData = () => {
+    // let newData = allEmployees.filter((val) =>
+    //   val.employee.toLowerCase().includes(e.target.value.toLowerCase())
+    // );
+    // setAllEmployeesCopy(newData);
   };
 
   const handleSearchChange = (e: any) => {
-    let newData = allEmployees.filter((val) =>
-      val.employee.toLowerCase().includes(e.target.value.toLowerCase())
+    let newData = allEmployees.filter(
+      (val) =>
+        val.firstName.toLowerCase().includes(e.target.value.toLowerCase()) ||
+        val.lastName.toLowerCase().includes(e.target.value.toLowerCase())
     );
     setAllEmployeesCopy(newData);
+  };
+
+  const handleEditClick = (employee: any) => {
+    setOpen(true);
+    setTitle("Edit Employee");
+    setDescription("Edit your profile here. Click save when you're done");
+    setComponent("manageEmployee");
+    setCompProps({ employeeData: employee });
+  };
+  const handleAddClick = () => {
+    setOpen(true);
+    setTitle("Add Employee");
+    setDescription("Create new profile here. Click save when you're done");
+    setComponent("manageEmployee");
   };
   return (
     <>
@@ -153,6 +241,7 @@ export default function ContactsComponent() {
           All Employees
         </h1>
         <div className="flex items-center gap-3">
+          {/* Commenting for now */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 h-8 ">
@@ -163,29 +252,27 @@ export default function ContactsComponent() {
             <DropdownMenuContent className="w-56">
               <DropdownMenuLabel>Desigination</DropdownMenuLabel>
               <DropdownMenuSeparator />
-
-              {allDesignation.map((data, i) => {
+              {allDesginationCopy.map((data, i) => {
                 return (
                   <DropdownMenuCheckboxItem
-                    checked={data.isChecked}
+                    checked={data?.checked}
                     onCheckedChange={(e) => handleOnCheck(e, data, i)}
                   >
-                    {data.value}
+                    {data.title}
                   </DropdownMenuCheckboxItem>
                 );
               })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <DrawerDialogComponent
-            title="Add Employee"
-            description="Create new profile here. Click save when you're done"
-            triggerButton={
-              <Button variant="default" className="gap-2 h-8 ">
-                <CirclePlus className="h-4 w-4" />
-                <span className="hidden sm:block">Add new</span>
-              </Button>
-            }
-          ></DrawerDialogComponent>
+
+          <Button
+            onClick={handleAddClick}
+            variant="default"
+            className="gap-2 h-8 "
+          >
+            <CirclePlus className="h-4 w-4" />
+            <span className="hidden sm:block">Add new</span>
+          </Button>
         </div>
       </div>
       <Card>
@@ -215,32 +302,32 @@ export default function ContactsComponent() {
                     src="https://avatar.iran.liara.run/public"
                     alt="Avatar"
                   />
-                  <AvatarFallback>{employee.employee}</AvatarFallback>
+                  <AvatarFallback>
+                    {employee.firstName} {employee.lastName}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
                   <p className="text-sm font-medium leading-none">
-                    {employee.employee}
+                    {employee.firstName} {employee.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {employee.designation}
+                    {employee?.Designation
+                      ? employee?.Designation?.title
+                      : allDesgination?.find(
+                          (val) => val.id == employee?.designationId
+                        )?.title}
                   </p>
                 </div>
                 <div className="ml-auto font-medium gap-4">
                   <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
-                    <DrawerDialogComponent
-                      triggerButton={
-                        <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
-                          <Pencil className="h-3 w-3" />
-                        </div>
-                      }
-                      title="Edit Employee"
-                      description="Edit your profile here. Click save when you're done"
+                    <div
+                      onClick={() => handleEditClick(employee)}
+                      className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
                     >
-                      <ProfileForm></ProfileForm>
-                    </DrawerDialogComponent>
+                      <Pencil className="h-3 w-3" />
+                    </div>
                   </div>
-
-                  <AlertDialogDemo></AlertDialogDemo>
+                  <AlertDialogDemo employeeId={employee.id}></AlertDialogDemo>
                 </div>
               </div>
             );
@@ -251,23 +338,11 @@ export default function ContactsComponent() {
   );
 }
 
-function ProfileForm({ className }: React.ComponentProps<"form">) {
-  return (
-    <form className={cn("grid items-start gap-4", className)}>
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input type="email" id="email" defaultValue="shadcn@example.com" />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="username">Username</Label>
-        <Input id="username" defaultValue="@shadcn" />
-      </div>
-      <Button type="submit">Save changes</Button>
-    </form>
-  );
-}
-
-export function AlertDialogDemo() {
+export function AlertDialogDemo({ employeeId }: any) {
+  const dispatch: AppDispatch = useDispatch();
+  const handleEmployeeDelete = () => {
+    dispatch(deleteEmployees(employeeId));
+  };
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -286,9 +361,157 @@ export function AlertDialogDemo() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleEmployeeDelete}>
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
 }
+
+// Define the form validation schema using Zod
+const addEmployeeSchema = z.object({
+  firstName: z
+    .string()
+    .regex(/^[A-Za-z]*$/, "Please enter a valid Name")
+    .min(1, "First Name is required.")
+    .max(50, "Character lkmit exceeded"),
+  lastName: z
+    .string()
+    .regex(/^[A-Za-z]*$/, "Please enter a valid Name")
+    .min(1, "Last Name is required.")
+    .max(50, "Character lkmit exceeded"),
+  mobileNumber: z
+    .number()
+    .min(1111111111, "Seat capacity must be at least 1.")
+    .max(9999999999, "Please Enter number less than 30"),
+});
+
+export const ManageEmployees = ({ employeeData = {} }: any) => {
+  const { setOpen }: any = React.useContext(DrawerContext);
+  const { allDesgination } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+  const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [desgination, setDesgination] = useState("Waiter/Waitress");
+  const form = useForm({
+    resolver: zodResolver(addEmployeeSchema),
+    defaultValues: {
+      firstName: employeeData?.firstName || "",
+      lastName: employeeData?.lastName || "",
+      mobileNumber: Number(employeeData?.mobileNumber) || "",
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    setIsLoading(true);
+    try {
+      //TODO: remove static firmId value
+      let idData = {
+        firmId: 1,
+        role: 3,
+        designation: allDesgination.find((val) => val.title == desgination)?.id,
+      };
+      data = { ...data, ...idData };
+
+      // Dispatch the addTable action and wait for it to complete
+      if (employeeData?.id) {
+        data.id = employeeData.id;
+        await dispatch(updateEmployees(data)).unwrap();
+      } else {
+        await dispatch(addEmployee(data)).unwrap();
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add table:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDesginationChange = (data: any) => {
+    setDesgination(data);
+  };
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel htmlFor="firstName">First Name</FormLabel>
+                <FormControl>
+                  <Input id="firstName" placeholder="Joe" {...field} />
+                </FormControl>
+                {fieldState.error && (
+                  <FormMessage>{fieldState.error.message}</FormMessage>
+                )}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel htmlFor="lastName">Last Name</FormLabel>
+                <FormControl>
+                  <Input id="lastName" placeholder="Rogan" {...field} />
+                </FormControl>
+                {fieldState.error && (
+                  <FormMessage>{fieldState.error.message}</FormMessage>
+                )}
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="mobileNumber"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="mobileNumber">Mobile Number</FormLabel>
+              <FormControl>
+                <Input
+                  id="mobileNumber"
+                  type="number"
+                  placeholder="1234567890"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormItem>
+          <FormLabel htmlFor="desgination">Designation</FormLabel>
+          <Select
+            onValueChange={handleDesginationChange}
+            defaultValue={desgination}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a verified email to display" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {allDesgination.map((item) => {
+                return <SelectItem value={item.title}>{item.title}</SelectItem>;
+              })}
+            </SelectContent>
+          </Select>
+        </FormItem>
+        <Button loading={isLoading} type="submit">
+          {employeeData?.id ? "Update Employee" : "Add Employee"}
+        </Button>
+      </form>
+    </Form>
+  );
+};

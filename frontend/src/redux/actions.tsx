@@ -68,3 +68,67 @@ export const updateTableStatus = createAsyncThunk(
     }
   }
 );
+
+export const fetchDesgination = createAsyncThunk(
+  "tables/fetchDesgination",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/designations`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+//EMPLOYEES
+
+export const fetchAllEmployees = createAsyncThunk(
+  "tables/fetchAllEmployees",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/employees`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+export const updateEmployees = createAsyncThunk(
+  "tables/updateEmployees",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.put(
+        `${BASE_URL}/employees/${payload.id}`,
+        payload
+      );
+      return payload; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const deleteEmployees = createAsyncThunk(
+  "tables/deleteEmployees",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${BASE_URL}/employees/${id}`);
+      return id; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+export const addEmployee = createAsyncThunk(
+  "tables/addEmployee",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.post(`${BASE_URL}/employees`, payload);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);

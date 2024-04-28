@@ -67,7 +67,7 @@ import {
   updateTableStatus,
 } from "../redux/actions";
 import { AppDispatch } from "../redux/store";
-import { TableState } from "../redux/reducer";
+import { RootState } from "../redux/reducer";
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 
@@ -109,12 +109,19 @@ function useQuery() {
 }
 
 export default function TableComponent() {
-  const { open, setOpen, title, setTitle, setDescription, setCompProps } =
-    useContext(DrawerContext);
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
   let query = useQuery();
 
   const tables = useSelector(
-    (state: { table: TableState }) => state.table.alltables
+    (state: { table: RootState }) => state.table.alltables
   );
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
@@ -142,6 +149,13 @@ export default function TableComponent() {
     setDescription("Please add New Table ");
   };
 
+  const handleReservationClick = (event: any) => {
+    setOpen(true);
+    setTitle("Create Reservation");
+    setDescription("Please Create a new resertvation ");
+    setComponent("manageReservation");
+  };
+
   const DropdownMenuList = (table: any) => (
     <DropdownMenuContent className="w-56" align="end">
       <DropdownMenuLabel>Mark as</DropdownMenuLabel>
@@ -158,15 +172,15 @@ export default function TableComponent() {
         );
       })}
 
-      {["Available"].includes(table.status) && (
+      {/* {["Available"].includes(table.status) && (
         <>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleReservationClick(table)}>
             <Plus className="mr-2 h-4 w-4 " />
             <span>Create reservation</span>
           </DropdownMenuItem>
         </>
-      )}
+      )} */}
       <DropdownMenuSeparator />
       <DropdownMenuItem onClick={() => handleEditClick(table)}>
         <>
@@ -218,8 +232,10 @@ export default function TableComponent() {
         <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-3">
           <TabsTrigger value="available">Available</TabsTrigger>
           <TabsTrigger value="occupied">
-            <span className="hidden sm:block">Occupied / Reserved</span>
-            <span className="block sm:hidden">Occ / Res</span>
+            <span className="hidden sm:block">Occupied</span>
+            <span className="block sm:hidden">Occupied</span>
+
+            {/*  Future: <span className="block sm:hidden">Occ / Res</span> */}
           </TabsTrigger>
           <TabsTrigger value="others">Others</TabsTrigger>
         </TabsList>
@@ -508,6 +524,102 @@ export const ManageTable = ({ tableData = {} }: any) => {
               <FormControl>
                 <Input
                   id="capacity"
+                  type="number"
+                  placeholder="4"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+
+        <Button loading={isLoading} type="submit">
+          Save
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+// Define the form validation schema using Zod
+const resetvationSchema = z.object({
+  tableName: z
+    .string()
+    .min(1, "Table name is required.")
+    .max(50, "Character lkmit exceeded"),
+  capacity: z
+    .number()
+    .min(1, "Seat capacity must be at least 1.")
+    .max(30, "Please Enter number less than 30"),
+});
+
+export const ManageReservation = ({ tableData = {} }: any) => {
+  const { open, setOpen }: any = useContext(DrawerContext);
+
+  const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(resetvationSchema),
+    defaultValues: {
+      reservationName: tableData?.reservationName || "",
+      reservationTime: tableData?.reservationTime || "",
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    setIsLoading(true);
+    try {
+      // Dispatch the addTable action and wait for it to complete
+      if (tableData?.reservationName) {
+        tableData = JSON.parse(JSON.stringify(tableData));
+        tableData.reservationName = data.reservationName;
+        tableData.reservationTime = data.reservationTime;
+        await dispatch(updateTable(tableData)).unwrap();
+      } else {
+        await dispatch(addTable(data)).unwrap();
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add table:", error);
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <FormField
+          control={form.control}
+          name="reservationName"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="reservationName">Customer Name</FormLabel>
+              <FormControl>
+                <Input
+                  id="reservationName"
+                  placeholder="Joe rogan"
+                  {...field}
+                />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="reservationTime"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="reservationTime">Reservation Time</FormLabel>
+              <FormControl>
+                <Input
+                  id="reservationTime"
                   type="number"
                   placeholder="4"
                   {...field}
