@@ -132,3 +132,17 @@ export const addEmployee = createAsyncThunk(
     }
   }
 );
+
+// Orders
+
+export const fetchAllOrders = createAsyncThunk(
+  "tables/fetchAllOrders",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/orders`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);

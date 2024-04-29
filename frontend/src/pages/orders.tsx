@@ -61,9 +61,13 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { useSwipeable } from "react-swipeable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { RootState } from "../redux/reducer";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllOrders, fetchTables } from "../redux/actions";
+import { AppDispatch } from "../redux/store";
 
 const AllTables = [
   {
@@ -93,7 +97,7 @@ const AllTables = [
   },
 ];
 
-const allOrders = [
+const allOrderstatic = [
   {
     id: 8,
     totalAmount: 26,
@@ -656,7 +660,13 @@ const allOrders = [
   },
 ];
 export default function OrdersComponent() {
+  const { alltables, allOrders } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
+  const [alltablesCopy, setAlltablesCopy] = useState<any>(alltables);
+
+  const dispatch: AppDispatch = useDispatch();
   let sheetProps: any = {
     open: isOpen,
     onOpenChange: (data: any) => {
@@ -669,6 +679,37 @@ export default function OrdersComponent() {
       setOpen(false);
     },
   });
+
+  useEffect(() => {
+    dispatch(fetchAllOrders());
+    dispatch(fetchTables());
+  }, [dispatch]);
+
+  useEffect(() => {
+    let data = JSON.parse(JSON.stringify(alltables)).map((data: any) => ({
+      ...data,
+      checked: false,
+    }));
+    setAlltablesCopy([{ tableName: "Show all", checked: true }, ...data]);
+  }, [alltables]);
+
+  const handleOnCheck = (isChecked: any, data: any, index: number): any => {
+    if (index != 0) {
+      alltablesCopy[0].checked = false;
+    }
+    if (index == 0) {
+      alltablesCopy.forEach((data: any) => {
+        data.checked = false;
+      });
+      alltablesCopy[0].checked = true;
+      setAlltablesCopy(JSON.parse(JSON.stringify(alltablesCopy)));
+      return;
+    }
+
+    alltablesCopy[index].checked = isChecked;
+    setAlltablesCopy(JSON.parse(JSON.stringify(alltablesCopy)));
+  };
+
   return (
     <>
       <BreadcrumbComponent
@@ -693,10 +734,13 @@ export default function OrdersComponent() {
             <DropdownMenuLabel>All Tables</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            {AllTables.map((data, i) => {
+            {alltablesCopy.map((data: any, i: number) => {
               return (
-                <DropdownMenuCheckboxItem checked={data.isChecked}>
-                  {data.value}
+                <DropdownMenuCheckboxItem
+                  checked={data.checked}
+                  onCheckedChange={(e) => handleOnCheck(e, data, i)}
+                >
+                  {data.tableName}
                 </DropdownMenuCheckboxItem>
               );
             })}
@@ -733,7 +777,7 @@ export default function OrdersComponent() {
                               </CardDescription>
                             </div>
 
-                            <div className="ml-auto">
+                            {/* <div className="ml-auto">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
@@ -752,7 +796,7 @@ export default function OrdersComponent() {
                                   <DropdownMenuSeparator />
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            </div>
+                            </div> */}
                           </div>
                         </CardHeader>
                         <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">

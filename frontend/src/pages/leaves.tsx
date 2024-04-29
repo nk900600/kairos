@@ -12,6 +12,7 @@ import {
   Plus,
   Search,
   Trash2,
+  UserIcon,
   Users,
   icons,
 } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
@@ -74,6 +76,7 @@ import {
 import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { Textarea } from "../components/ui/textarea";
 
 const AllPolicy = [
   {
@@ -345,133 +348,143 @@ export default function LeavesComponent() {
           <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="policy">Policy</TabsTrigger>
         </TabsList>
-        <TabsContent value="pending" className="grid gap-2">
-          {AllLeaves.filter((leave) => leave.status === "Pending").map(
-            (leave) => {
+        <TabsContent value="pending">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+            {AllLeaves.filter((leave) => leave.status === "Pending").map(
+              (leave) => {
+                return (
+                  <>
+                    <Card className="flex w-full flex-col items">
+                      <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
+                        <div className=" flex w-full items-center gap-3 rounded-md ">
+                          <CalendarClock className="h-6 w-6" />
+
+                          <div className="flex-col">
+                            <CardTitle className="text-base ">
+                              From {leave.startDate} To {leave.endDate}
+                            </CardTitle>
+
+                            <CardDescription className="text-xs">
+                              {leave.LeaveType.name}{" "}
+                              {"(" + leave.duration + " Days)"}
+                            </CardDescription>
+                          </div>
+                          <div className="flex-1">
+                            {/* {leave.status === "Pending" && (
+                              <Badge variant="outline">Pending</Badge>
+                            )} */}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                        <div className="flex items-center">
+                          <UserIcon className="h-3 w-3 mr-1.5" />
+                          <div className="text-sm">
+                            <span className="text-muted-foreground text-xs">
+                              Reason:
+                            </span>{" "}
+                            <span>{leave.reason}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-start   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <span className="">Cancel</span>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </>
+                );
+              }
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="history">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+            {AllLeaves.filter((leave) => leave.status != "Pending").map(
+              (leave) => {
+                return (
+                  <>
+                    <Card className="flex w-full flex-col items">
+                      <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
+                        <div className=" flex w-full items-center gap-3 rounded-md ">
+                          {leave.status === "Approved" && (
+                            <CalendarCheck2 className="h-6 w-6" />
+                          )}
+                          {leave.status === "Rejected" && (
+                            <CalendarX2 className="h-6 w-6" />
+                          )}
+
+                          <div className="flex-col">
+                            <CardTitle className="text-base ">
+                              From {leave.startDate} To {leave.endDate}
+                            </CardTitle>
+
+                            <CardDescription className="text-xs">
+                              {leave.LeaveType.name}{" "}
+                              {"(" + leave.duration + " Days)"}
+                            </CardDescription>
+                          </div>
+                          <div className="flex-1">
+                            {leave.status === "Approved" && (
+                              <Badge variant="default">Approved</Badge>
+                            )}
+                            {leave.status === "Rejected" && (
+                              <Badge variant="destructive">Rejected</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                        <div className="flex items-center">
+                          <UserIcon className="h-3 w-3 mr-1.5" />
+                          <div className="text-sm">
+                            <span className="text-muted-foreground text-xs">
+                              Reason:
+                            </span>{" "}
+                            <span>{leave.reason}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                );
+              }
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="policy">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6   ">
+            {allPolicy.map((leave) => {
               return (
-                <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                  <CalendarClock className="h-6 w-6" />
+                <div className="  flex w-full items-center gap-3 rounded-md space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
+                  <CalendarPlus className="h-6 w-6" />
 
-                  <div className="flex-col flex-1">
-                    <CardTitle className="text-base">
-                      {" "}
-                      From {leave.startDate} To {leave.endDate}
-                    </CardTitle>
+                  <div className="flex w-full justify-between items-center">
+                    {" "}
+                    <div className="flex-col">
+                      <CardTitle className="text-base">{leave.name}</CardTitle>
 
-                    <CardDescription className="text-xs">
-                      <p className="text-sm text-muted-foreground">
-                        {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Reason: {leave.reason}
-                      </p>
-                    </CardDescription>
+                      <CardDescription className="text-xs">
+                        <p className="text-sm text-muted-foreground">
+                          {leave.description}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {leave.numLeavesAvailable + " Days"}
+                        </p>
+                      </CardDescription>
+                    </div>
+                    <div>
+                      <Button variant="ghost" size="icon" className="gap-2">
+                        <Pencil className="h-4 w-4 " />
+                      </Button>
+                    </div>
                   </div>
-
-                  <Badge variant="outline">Pending</Badge>
                 </div>
               );
-            }
-          )}
-        </TabsContent>
-        <TabsContent value="history" className="grid gap-2">
-          {AllLeaves.map((leave) => {
-            return (
-              <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                {leave.status === "Pending" && (
-                  <CalendarClock className="h-6 w-6" />
-                )}
-                {leave.status === "Approved" && (
-                  <CalendarCheck2 className="h-6 w-6" />
-                )}
-                {leave.status === "Rejected" && (
-                  <CalendarX2 className="h-6 w-6" />
-                )}
+            })}
+          </div>
 
-                <div className="flex-col flex-1">
-                  <CardTitle className="text-base">
-                    {" "}
-                    From {leave.startDate} To {leave.endDate}
-                  </CardTitle>
-
-                  <CardDescription className="text-xs">
-                    <p className="text-sm text-muted-foreground">
-                      {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Reason : {leave.reason}
-                    </p>
-                    {leave.status !== "Pending" && (
-                      <p className="text-sm text-muted-foreground">
-                        Comments : {leave.comments}
-                      </p>
-                    )}
-                  </CardDescription>
-                </div>
-
-                {/* 
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    From {leave.startDate} To {leave.endDate}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {leave.LeaveType.name} {"(" + leave.duration + " Days)"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Reason : {leave.reason}
-                  </p>
-                  {leave.status !== "Pending" && (
-                    <p className="text-sm text-muted-foreground">
-                      Comments : {leave.comments}
-                    </p>
-                  )}
-                </div> */}
-                {leave.status === "Pending" && (
-                  <Badge variant="outline">Pending</Badge>
-                )}
-                {leave.status === "Approved" && (
-                  <Badge variant="default">Approved</Badge>
-                )}
-                {leave.status === "Rejected" && (
-                  <Badge variant="destructive">Rejected</Badge>
-                )}
-              </div>
-            );
-          })}
-        </TabsContent>
-        <TabsContent value="policy" className="grid gap-2">
-          {allPolicy.map((leave) => {
-            return (
-              <div className=" flex w-full items-center space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
-                <CalendarPlus className="h-6 w-6" />
-
-                <div className="flex-col">
-                  <CardTitle className="text-base">{leave.name}</CardTitle>
-
-                  <CardDescription className="text-xs">
-                    <p className="text-sm text-muted-foreground">
-                      {leave.description}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {leave.numLeavesAvailable + " Days"}
-                    </p>
-                  </CardDescription>
-                </div>
-
-                {/* <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {leave.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {leave.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {leave.numLeavesAvailable + " Days"}
-                  </p>
-                </div> */}
-              </div>
-            );
-          })}
           {/* <DrawerDialogComponent
             title="Add Employee"
             description="Create new profile here. Click save when you're done"
@@ -523,5 +536,39 @@ export function AlertDialogDemo() {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+export function ManageLeave() {
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Leave Request</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <Label htmlFor="from">From</Label>
+            <Input id="from" readOnly value="2024-02-20" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="to">To</Label>
+            <Input id="to" readOnly value="2024-02-22" />
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="type">Leave Type</Label>
+          <Input id="type" readOnly value="Sick Leave - Local Team (2 Days)" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="reason">Reason</Label>
+          <Textarea id="reason" readOnly value="Medical checkup" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button variant="outline">Cancel</Button>
+        <Button className="ml-4">Submit</Button>
+      </CardFooter>
+    </Card>
   );
 }

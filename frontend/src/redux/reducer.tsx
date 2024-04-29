@@ -6,6 +6,7 @@ import {
   deleteEmployees,
   deleteTable,
   fetchAllEmployees,
+  fetchAllOrders,
   fetchDesgination,
   fetchTables,
   updateEmployees,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 export interface RootState {
   alltables: TableType[];
   allEmployees: any[];
+  allOrders: any[];
   allDesgination: any[];
   isLoading: boolean;
   error: string | null;
@@ -26,6 +28,7 @@ const initialState: RootState = {
   alltables: [],
   allEmployees: [],
   allDesgination: [],
+  allOrders: [],
   isLoading: false,
   error: null,
 };
@@ -120,6 +123,15 @@ const counterSlice = createSlice({
         fetchDesgination.fulfilled,
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allDesgination = action.payload;
+          state.isLoading = false;
+        }
+      )
+
+      // Orders
+      .addCase(
+        fetchAllOrders.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allOrders = action.payload;
           state.isLoading = false;
         }
       );
