@@ -76,6 +76,28 @@ class LeaveController {
       return res.status(500).json({ message: error.message });
     }
   }
+  // Update a leave request
+  async updateLeaveStatus(req, res) {
+    try {
+      if (!req.body?.status) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const leaveType = await Leave.findByPk(req.params.id);
+      if (!leaveType) {
+        return res.status(404).json({ message: "LeaveType not found" });
+      }
+
+      if (leaveType.status != LeaveStatus.PENDING) {
+        return res.status(404).json({ message: "Leave is marked as solved" });
+      }
+
+      await leaveType.update({ ...req.body }, { userId: req.user.id });
+      return res.status(200).json(leaveType);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 
   // Delete a leave request
   async deleteLeave(req, res) {
