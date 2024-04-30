@@ -146,3 +146,52 @@ export const fetchAllOrders = createAsyncThunk(
     }
   }
 );
+
+// Leaves types
+export const fetchAllLeaveTypes = createAsyncThunk(
+  "tables/fetchAllLeaveTypes",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/leave-types`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const createAllLeaveTypes = createAsyncThunk(
+  "tables/createAllLeaveTypes",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.post(`${BASE_URL}/leave-types`, payload);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const UpdateLeaveTypes = createAsyncThunk(
+  "tables/UpdateLeaveTypes",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.put(
+        `${BASE_URL}/leave-types/${payload.id}`,
+        payload
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const DeleteLeaveTypes = createAsyncThunk(
+  "tables/DeleteLeaveTypes",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${BASE_URL}/leave-types/${id}`);
+      return id; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);

@@ -46,7 +46,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Badge } from "../components/ui/badge";
 import * as React from "react";
 
@@ -77,42 +77,28 @@ import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { Textarea } from "../components/ui/textarea";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  DeleteLeaveTypes,
+  UpdateLeaveTypes,
+  createAllLeaveTypes,
+  fetchAllLeaveTypes,
+} from "../redux/actions";
+import { AppDispatch } from "../redux/store";
+import { RootState } from "../redux/reducer";
+import DrawerContext from "../context/drawerContext";
 
-const AllPolicy = [
-  {
-    id: 4,
-    name: "Sick Leave  - Local Team ",
-    description: null,
-    numLeavesAvailable: 365,
-    firmId: 1,
-    createdBy: null,
-    updatedBy: null,
-    createdAt: "2024-04-02T02:38:13.000Z",
-    updatedAt: "2024-04-04T04:49:59.000Z",
-  },
-  {
-    id: 4,
-    name: "PTO  - Local Team ",
-    description: null,
-    numLeavesAvailable: 365,
-    firmId: 1,
-    createdBy: null,
-    updatedBy: null,
-    createdAt: "2024-04-02T02:38:13.000Z",
-    updatedAt: "2024-04-04T04:49:59.000Z",
-  },
-  {
-    id: 4,
-    name: "Casual Leaves  - Local Team ",
-    description: null,
-    numLeavesAvailable: 365,
-    firmId: 1,
-    createdBy: null,
-    updatedBy: null,
-    createdAt: "2024-04-02T02:38:13.000Z",
-    updatedAt: "2024-04-04T04:49:59.000Z",
-  },
-];
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const AllLeaves = [
   {
@@ -287,8 +273,16 @@ const AllLeaves = [
 
 export default function LeavesComponent() {
   const [allLeaves, setAllLeaves] = useState(AllLeaves);
-  const [allPolicy, setAllPolicy] = useState(AllPolicy);
   const [addButtonLabel, setAddButtonLabel] = useState("Apply");
+  const { allLeavesTypes } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+  const dispatch: AppDispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(fetchAllLeaveTypes());
+  }, [dispatch]);
+
   const handleClick = (e: any) => {
     console.log(e);
     switch (e) {
@@ -302,6 +296,39 @@ export default function LeavesComponent() {
         setAddButtonLabel("");
     }
   };
+
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = React.useContext(DrawerContext);
+  const handleAddPolicyClick = () => {
+    if (addButtonLabel == "Apply") {
+    } else {
+      setOpen(true);
+
+      setTitle("Add Leave Policy");
+      setDescription("Define Leave Guidelines ");
+      setComponent("manageLeaveType");
+    }
+  };
+
+  const handleLeaveTypeClick = (leaveType: any) => {
+    setOpen(true);
+
+    setTitle("Edit Leave Policy");
+    setComponent("manageLeaveType");
+    setCompProps({ leaveType });
+  };
+  const handleLeaveTypeDeleteClick = (leaveType: any) => {
+    setTitle("Edit Leave Policy");
+    setComponent("manageLeaveType");
+    setCompProps({ leaveType });
+  };
   return (
     <>
       <BreadcrumbComponent
@@ -312,30 +339,18 @@ export default function LeavesComponent() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
           All Leaves
         </h1>
         {addButtonLabel && (
-          <DrawerDialogComponent
-            triggerButton={
-              <Button variant="default" className=" h-8  gap-2">
-                <CirclePlus className="h-4 w-4" />
-                <span className="hidden sm:block">{addButtonLabel} </span>
-              </Button>
-            }
-            title={
-              addButtonLabel === "Apply"
-                ? "Apply for leave"
-                : "Add Leave Policy"
-            }
-            description={
-              addButtonLabel === "Apply"
-                ? "Request Time Off"
-                : "Define Leave Guidelines"
-            }
+          <Button
+            variant="outline"
+            className=" h-8  gap-2"
+            onClick={handleAddPolicyClick}
           >
-            <ProfileForm></ProfileForm>
-          </DrawerDialogComponent>
+            <CirclePlus className="h-4 w-4" />
+            <span className="hidden sm:block">{addButtonLabel} </span>
+          </Button>
         )}
       </div>
       <Tabs
@@ -387,9 +402,12 @@ export default function LeavesComponent() {
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-start   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
+                      <CardFooter className="flex justify-end   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
                         <Button variant="outline" size="sm" className="gap-2">
                           <span className="">Cancel</span>
+                        </Button>
+                        <Button size="sm" className="gap-2">
+                          <span className="">Edit</span>
                         </Button>
                       </CardFooter>
                     </Card>
@@ -455,7 +473,7 @@ export default function LeavesComponent() {
         </TabsContent>
         <TabsContent value="policy">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6   ">
-            {allPolicy.map((leave) => {
+            {allLeavesTypes.map((leave) => {
               return (
                 <div className="  flex w-full items-center gap-3 rounded-md space-x-4 rounded-md border p-2 md:p-4 lg:p-4">
                   <CalendarPlus className="h-6 w-6" />
@@ -474,65 +492,54 @@ export default function LeavesComponent() {
                         </p>
                       </CardDescription>
                     </div>
-                    <div>
-                      <Button variant="ghost" size="icon" className="gap-2">
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleLeaveTypeClick(leave)}
+                        variant="ghost"
+                        size="icon"
+                        className="gap-2"
+                      >
                         <Pencil className="h-4 w-4 " />
                       </Button>
+
+                      <AlertDialogDemo leaveType={leave}></AlertDialogDemo>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-
-          {/* <DrawerDialogComponent
-            title="Add Employee"
-            description="Create new profile here. Click save when you're done"
-          >
-            <ProfileForm></ProfileForm>
-          </DrawerDialogComponent> */}
         </TabsContent>
       </Tabs>
     </>
   );
 }
 
-function ProfileForm({ className }: React.ComponentProps<"form">) {
-  return (
-    <form className={cn("grid items-start gap-4", className)}>
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input type="email" id="email" defaultValue="shadcn@example.com" />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="username">Username</Label>
-        <Input id="username" defaultValue="@shadcn" />
-      </div>
-      <Button type="submit">Save changes</Button>
-    </form>
-  );
-}
-
-export function AlertDialogDemo() {
+export function AlertDialogDemo({ leaveType }: any) {
+  const dispatch: AppDispatch = useDispatch();
+  const handleLeaveTypeDelete = () => {
+    dispatch(DeleteLeaveTypes(leaveType.id));
+  };
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         {/* <Button variant="outline">Show Dialog</Button> */}
         <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-4 w-4 " />
         </div>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This action cannot be undone. This will delete your Leave Policy.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleLeaveTypeDelete}>
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -572,3 +579,87 @@ export function ManageLeave() {
     </Card>
   );
 }
+
+const leaveTypeSchema = z.object({
+  name: z.string().max(50, "Character lkmit exceeded"),
+  numLeavesAvailable: z.number().max(365, "Please Enter number less than 30"),
+});
+export const ManageLeaveType = ({ leaveType = {} }: any) => {
+  const { open, setOpen }: any = useContext(DrawerContext);
+
+  const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(leaveTypeSchema),
+    defaultValues: {
+      name: leaveType?.name || "",
+      numLeavesAvailable: leaveType?.numLeavesAvailable || "",
+    },
+  });
+
+  const onSubmit = async (data: any) => {
+    setIsLoading(true);
+    try {
+      // Dispatch the addTable action and wait for it to complete
+      if (leaveType?.name) {
+        leaveType = JSON.parse(JSON.stringify(leaveType));
+        leaveType.name = data.name;
+        leaveType.numLeavesAvailable = data.numLeavesAvailable;
+        await dispatch(UpdateLeaveTypes(leaveType)).unwrap();
+      } else {
+        await dispatch(createAllLeaveTypes(data)).unwrap();
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add table:", error);
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="name">Name</FormLabel>
+              <FormControl>
+                <Input id="name" placeholder="Sick Leaves" {...field} />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="numLeavesAvailable"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="numLeavesAvailable">Total Leaves</FormLabel>
+              <FormControl>
+                <Input
+                  id="numLeavesAvailable"
+                  type="number"
+                  placeholder="365"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+
+        <Button loading={isLoading} type="submit">
+          Save
+        </Button>
+      </form>
+    </Form>
+  );
+};

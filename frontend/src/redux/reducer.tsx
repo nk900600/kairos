@@ -1,11 +1,15 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
 import {
+  DeleteLeaveTypes,
+  UpdateLeaveTypes,
   addEmployee,
   addTable,
+  createAllLeaveTypes,
   deleteEmployees,
   deleteTable,
   fetchAllEmployees,
+  fetchAllLeaveTypes,
   fetchAllOrders,
   fetchDesgination,
   fetchTables,
@@ -18,6 +22,7 @@ import { toast } from "sonner";
 export interface RootState {
   alltables: TableType[];
   allEmployees: any[];
+  allLeavesTypes: any[];
   allOrders: any[];
   allDesgination: any[];
   isLoading: boolean;
@@ -27,6 +32,7 @@ export interface RootState {
 const initialState: RootState = {
   alltables: [],
   allEmployees: [],
+  allLeavesTypes: [],
   allDesgination: [],
   allOrders: [],
   isLoading: false,
@@ -103,7 +109,7 @@ const counterSlice = createSlice({
               ...action.payload,
             };
           }
-        }
+        } 
       )
       .addCase(
         deleteEmployees.fulfilled,
@@ -133,6 +139,42 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allOrders = action.payload;
           state.isLoading = false;
+        }
+      )
+
+      // Leaves types
+      .addCase(
+        fetchAllLeaveTypes.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allLeavesTypes = action.payload;
+        }
+      )
+      .addCase(
+        createAllLeaveTypes.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allLeavesTypes.push(action.payload);
+        }
+      )
+      .addCase(
+        UpdateLeaveTypes.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allLeavesTypes.findIndex(
+            (table) => table.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.allLeavesTypes[index] = {
+              ...state.allLeavesTypes[index],
+              ...action.payload,
+            };
+          }
+        }
+      )
+      .addCase(
+        DeleteLeaveTypes.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allLeavesTypes = state.allLeavesTypes.filter(
+            (employee) => employee.id !== action.payload
+          );
         }
       );
   },
