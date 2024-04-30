@@ -4,6 +4,7 @@ import { TableType } from "./types/tables";
 import RootState from "./store";
 import axios from "./axios";
 import { toast } from "sonner";
+import { dateConvertor } from "../util/date";
 
 export const BASE_URL = "http://localhost:4200/api";
 
@@ -190,6 +191,24 @@ export const DeleteLeaveTypes = createAsyncThunk(
     try {
       await axios.delete(`${BASE_URL}/leave-types/${id}`);
       return id; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+// Leaves
+
+export const fetchAllLeaves = createAsyncThunk(
+  "tables/fetchAllLeave",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/leaves`);
+      response.data.forEach((data: any) => {
+        data.startDate = dateConvertor(data.startDate);
+        data.endDate = dateConvertor(data.endDate);
+      });
+      return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
     }

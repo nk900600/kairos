@@ -83,6 +83,7 @@ import {
   UpdateLeaveTypes,
   createAllLeaveTypes,
   fetchAllLeaveTypes,
+  fetchAllLeaves,
 } from "../redux/actions";
 import { AppDispatch } from "../redux/store";
 import { RootState } from "../redux/reducer";
@@ -99,195 +100,32 @@ import {
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const AllLeaves = [
-  {
-    id: 1,
-    startDate: "2024-01-10",
-    endDate: "2024-01-15",
-    duration: 5,
-    reason: "Family vacation",
-    status: "Approved",
-    appliedOn: "2024-01-01",
-    comments: "Approved by HR",
-    leaveDurationType: "Full Day",
-    firmId: 1,
-    createdBy: 2,
-    updatedBy: 2,
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-05",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 3,
-  },
-  {
-    id: 2,
-    startDate: "2024-02-20",
-    endDate: "2024-02-22",
-    duration: 2,
-    reason: "Medical checkup",
-    status: "Pending",
-    appliedOn: "2024-02-15",
-    comments: null,
-    leaveDurationType: "Full Day",
-    firmId: 1,
-    createdBy: 4,
-    updatedBy: 4,
-    createdAt: "2024-02-15",
-    updatedAt: "2024-02-15",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 3,
-  },
-  {
-    id: 3,
-    startDate: "2024-03-05",
-    endDate: "2024-03-05",
-    duration: 1,
-    reason: "Dentist appointment",
-    status: "Rejected",
-    appliedOn: "2024-03-01",
-    comments: "Not enough leave balance",
-    leaveDurationType: "Half Day",
-    firmId: 1,
-    createdBy: 5,
-    updatedBy: 3,
-    createdAt: "2024-03-01",
-    updatedAt: "2024-03-02",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 2,
-  },
-  {
-    id: 4,
-    startDate: "2024-04-10",
-    endDate: "2024-04-12",
-    duration: 3,
-    reason: "Wedding",
-    status: "Approved",
-    appliedOn: "2024-04-01",
-    comments: "Congrats! Approved.",
-    leaveDurationType: "Full Day",
-    firmId: 1,
-    createdBy: 6,
-    updatedBy: 2,
-    createdAt: "2024-04-01",
-    updatedAt: "2024-04-05",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 3,
-  },
-  {
-    id: 5,
-    startDate: "2024-05-15",
-    endDate: "2024-05-15",
-    duration: 1,
-    reason: "Personal work",
-    status: "Pending",
-    appliedOn: "2024-05-10",
-    comments: null,
-    leaveDurationType: "Half Day",
-    firmId: 1,
-    createdBy: 7,
-    updatedBy: 7,
-    createdAt: "2024-05-10",
-    updatedAt: "2024-05-10",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 2,
-  },
-  {
-    id: 6,
-    startDate: "2024-06-20",
-    endDate: "2024-06-25",
-    duration: 5,
-    reason: "Vacation",
-    status: "Approved",
-    appliedOn: "2024-06-10",
-    comments: "Enjoy your trip!",
-    leaveDurationType: "Full Day",
-    firmId: 1,
-    createdBy: 8,
-    updatedBy: 3,
-    createdAt: "2024-06-10",
-    updatedAt: "2024-06-15",
-    LeaveType: {
-      id: 4,
-      name: "Sick Leave  - Local Team ",
-      description: null,
-      numLeavesAvailable: 365,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-04-02T02:38:13.000Z",
-      updatedAt: "2024-04-04T04:49:59.000Z",
-    },
-    managerId: 3,
-  },
-];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { DatePickerWithRange } from "./common/datePicker";
 
 export default function LeavesComponent() {
-  const [allLeaves, setAllLeaves] = useState(AllLeaves);
-  const [addButtonLabel, setAddButtonLabel] = useState("Apply");
-  const { allLeavesTypes } = useSelector(
+  const [addButtonLabel, setAddButtonLabel] = useState("Apply Leave");
+  const { allLeavesTypes, allLeaves } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
 
   React.useEffect(() => {
     dispatch(fetchAllLeaveTypes());
+    dispatch(fetchAllLeaves());
   }, [dispatch]);
 
   const handleClick = (e: any) => {
     console.log(e);
     switch (e) {
       case "pending":
-        setAddButtonLabel("Apply");
+        setAddButtonLabel("Apply Leave");
         return;
       case "policy":
         setAddButtonLabel("Add Policy");
@@ -307,10 +145,13 @@ export default function LeavesComponent() {
     setCompProps,
   } = React.useContext(DrawerContext);
   const handleAddPolicyClick = () => {
-    if (addButtonLabel == "Apply") {
-    } else {
-      setOpen(true);
+    setOpen(true);
 
+    if (addButtonLabel == "Apply Leave") {
+      setTitle("Apply Leave");
+      setDescription("Please choose start date and end date");
+      setComponent("manageLeave");
+    } else {
       setTitle("Add Leave Policy");
       setDescription("Define Leave Guidelines ");
       setComponent("manageLeaveType");
@@ -319,16 +160,11 @@ export default function LeavesComponent() {
 
   const handleLeaveTypeClick = (leaveType: any) => {
     setOpen(true);
+    setTitle("Edit Leave Policy");
+    setComponent("manageLeaveType");
+    setCompProps({ leaveType });
+  };
 
-    setTitle("Edit Leave Policy");
-    setComponent("manageLeaveType");
-    setCompProps({ leaveType });
-  };
-  const handleLeaveTypeDeleteClick = (leaveType: any) => {
-    setTitle("Edit Leave Policy");
-    setComponent("manageLeaveType");
-    setCompProps({ leaveType });
-  };
   return (
     <>
       <BreadcrumbComponent
@@ -365,8 +201,9 @@ export default function LeavesComponent() {
         </TabsList>
         <TabsContent value="pending">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {AllLeaves.filter((leave) => leave.status === "Pending").map(
-              (leave) => {
+            {allLeaves
+              .filter((leave: any) => leave.status === "Pending")
+              .map((leave) => {
                 return (
                   <>
                     <Card className="flex w-full flex-col items">
@@ -391,17 +228,20 @@ export default function LeavesComponent() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
-                        <div className="flex items-center">
-                          <UserIcon className="h-3 w-3 mr-1.5" />
-                          <div className="text-sm">
-                            <span className="text-muted-foreground text-xs">
-                              Reason:
-                            </span>{" "}
-                            <span>{leave.reason}</span>
+
+                      {leave?.reason && (
+                        <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                          <div className="flex items-center">
+                            <UserIcon className="h-3 w-3 mr-1.5" />
+                            <div className="text-sm">
+                              <span className="text-muted-foreground text-xs">
+                                Reason:
+                              </span>{" "}
+                              <span>{leave.reason}</span>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
+                        </CardContent>
+                      )}
                       <CardFooter className="flex justify-end   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
                         <Button variant="outline" size="sm" className="gap-2">
                           <span className="">Cancel</span>
@@ -413,14 +253,14 @@ export default function LeavesComponent() {
                     </Card>
                   </>
                 );
-              }
-            )}
+              })}
           </div>
         </TabsContent>
         <TabsContent value="history">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {AllLeaves.filter((leave) => leave.status != "Pending").map(
-              (leave) => {
+            {allLeaves
+              .filter((leave) => leave.status != "Pending")
+              .map((leave) => {
                 return (
                   <>
                     <Card className="flex w-full flex-col items">
@@ -453,22 +293,24 @@ export default function LeavesComponent() {
                           </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
-                        <div className="flex items-center">
-                          <UserIcon className="h-3 w-3 mr-1.5" />
-                          <div className="text-sm">
-                            <span className="text-muted-foreground text-xs">
-                              Reason:
-                            </span>{" "}
-                            <span>{leave.reason}</span>
+
+                      {leave?.reason && (
+                        <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                          <div className="flex items-center">
+                            <UserIcon className="h-3 w-3 mr-1.5" />
+                            <div className="text-sm">
+                              <span className="text-muted-foreground text-xs">
+                                Reason:
+                              </span>{" "}
+                              <span>{leave.reason}</span>
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
+                        </CardContent>
+                      )}
                     </Card>
                   </>
                 );
-              }
-            )}
+              })}
           </div>
         </TabsContent>
         <TabsContent value="policy">
@@ -546,39 +388,146 @@ export function AlertDialogDemo({ leaveType }: any) {
   );
 }
 
-export function ManageLeave() {
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Leave Request</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <Label htmlFor="from">From</Label>
-            <Input id="from" readOnly value="2024-02-20" />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="to">To</Label>
-            <Input id="to" readOnly value="2024-02-22" />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="type">Leave Type</Label>
-          <Input id="type" readOnly value="Sick Leave - Local Team (2 Days)" />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="reason">Reason</Label>
-          <Textarea id="reason" readOnly value="Medical checkup" />
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button variant="outline">Cancel</Button>
-        <Button className="ml-4">Submit</Button>
-      </CardFooter>
-    </Card>
+const startDateSchema = z.date().refine(
+  (date) => {
+    // Check if the date is today or in the future
+    return date >= new Date();
+  },
+  {
+    message: "Start date must be today or later.",
+  }
+);
+
+const leaveSchema = z
+  .object({
+    start: startDateSchema,
+    end: z.date(),
+  })
+  .refine((data) => data.end >= data.start, {
+    message: "End date must be on or after the start date.",
+    path: ["dates", "end"],
+  });
+
+export const ManageLeave = ({ leave }: any) => {
+  const { setOpen }: any = React.useContext(DrawerContext);
+  const { allDesgination } = useSelector(
+    (state: { table: RootState }) => state.table
   );
-}
+  const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [desgination, setDesgination] = useState("Waiter/Waitress");
+  const form = useForm({
+    resolver: zodResolver(leaveSchema),
+    defaultValues: {
+      startDate: leave?.startDate || new Date(), // default to current date
+      endDate: leave?.endDate || new Date(), // default to current date, adjust as necessary
+    },
+  });
+
+  const { setValue } = form;
+
+  const onSubmit = async (data: any) => {
+    console.log(data);
+    return;
+    setIsLoading(true);
+
+    try {
+      //TODO: remove static firmId value
+      let idData = {
+        firmId: 1,
+        role: 3,
+        designation: allDesgination.find((val) => val.title == desgination)?.id,
+      };
+      data = { ...data, ...idData };
+
+      // Dispatch the addTable action and wait for it to complete
+      if (leave?.id) {
+        data.id = leave.id;
+        // await dispatch(updateEmployees(data)).unwrap();
+      } else {
+        // await dispatch(addEmployee(data)).unwrap();
+      }
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add table:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleDesginationChange = (data: any) => {
+    setDesgination(data);
+  };
+
+  const handleDatePicker = (date: any) => {
+    console.log(date);
+
+    setValue("startDate", date?.from); // Set startDate to April 1, 2024
+    setValue("endDate", date?.to);
+  };
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        {/* <div className="grid grid-cols-2 gap-4"> */}
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="startDate">Start Date</FormLabel>
+              <FormControl>
+                <DatePickerWithRange
+                  onDateChange={(d: any) => handleDatePicker(d)}
+                  className="w-full"
+                ></DatePickerWithRange>
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        />
+        {/* <FormField
+          control={form.control}
+          name="endDate"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="endDate">End Date</FormLabel>
+              <FormControl>
+                <Input id="endDate" placeholder="Rogan" {...field} />
+              </FormControl>
+              {fieldState.error && (
+                <FormMessage>{fieldState.error.message}</FormMessage>
+              )}
+            </FormItem>
+          )}
+        /> */}
+        {/* </div> */}
+
+        <FormItem>
+          <FormLabel htmlFor="desgination">Leave Policy</FormLabel>
+          <Select
+            onValueChange={handleDesginationChange}
+            defaultValue={desgination}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a verified email to display" />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {allDesgination.map((item) => {
+                return <SelectItem value={item.title}>{item.title}</SelectItem>;
+              })}
+            </SelectContent>
+          </Select>
+        </FormItem>
+        <Button loading={isLoading} type="submit">
+          {leave?.id ? "Update Leave" : "Add Leave"}
+        </Button>
+      </form>
+    </Form>
+  );
+};
 
 const leaveTypeSchema = z.object({
   name: z.string().max(50, "Character lkmit exceeded"),

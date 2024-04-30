@@ -10,6 +10,7 @@ import {
   deleteTable,
   fetchAllEmployees,
   fetchAllLeaveTypes,
+  fetchAllLeaves,
   fetchAllOrders,
   fetchDesgination,
   fetchTables,
@@ -23,6 +24,7 @@ export interface RootState {
   alltables: TableType[];
   allEmployees: any[];
   allLeavesTypes: any[];
+  allLeaves: any[];
   allOrders: any[];
   allDesgination: any[];
   isLoading: boolean;
@@ -33,6 +35,7 @@ const initialState: RootState = {
   alltables: [],
   allEmployees: [],
   allLeavesTypes: [],
+  allLeaves: [],
   allDesgination: [],
   allOrders: [],
   isLoading: false,
@@ -109,7 +112,7 @@ const counterSlice = createSlice({
               ...action.payload,
             };
           }
-        } 
+        }
       )
       .addCase(
         deleteEmployees.fulfilled,
@@ -175,6 +178,14 @@ const counterSlice = createSlice({
           state.allLeavesTypes = state.allLeavesTypes.filter(
             (employee) => employee.id !== action.payload
           );
+        }
+      )
+
+      // Leaves
+      .addCase(
+        fetchAllLeaves.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allLeaves = action.payload;
         }
       );
   },

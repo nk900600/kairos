@@ -23,7 +23,7 @@ import { useMediaQuery } from "../hooks/mediaQuery";
 import { ManageReservation, ManageTable } from "../pages/tables";
 import DrawerContext from "../context/drawerContext";
 import { ManageEmployees } from "../pages/contacts";
-import { ManageLeaveType } from "../pages/leaves";
+import { ManageLeave, ManageLeaveType } from "../pages/leaves";
 
 export function DrawerDialogComponent({
   triggerButton,
@@ -35,6 +35,7 @@ export function DrawerDialogComponent({
     manageEmployee: ManageEmployees,
     manageReservation: ManageReservation,
     manageLeaveType: ManageLeaveType,
+    manageLeave: ManageLeave,
   };
   const { open, setOpen, component, compProps, title, description }: any =
     useContext(DrawerContext);
