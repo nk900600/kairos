@@ -2,7 +2,7 @@ function calculateDuration(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-  return duration;
+  return duration == 0 ? 1 : duration;
 }
 
 function calculateNextBillingDate(billingCycle) {
@@ -13,7 +13,5 @@ function calculateNextBillingDate(billingCycle) {
     return new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
   }
 }
-
-
 
 module.exports = { calculateDuration, calculateNextBillingDate };
