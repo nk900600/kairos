@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import { addDays, format, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { useEffect } from "react";
@@ -14,10 +14,15 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 
-export function DatePickerWithRange({ className, onDateChange }: any) {
+export function DatePickerWithRange({
+  className,
+  dateObj,
+  disableDate = [],
+  onDateChange,
+}: any) {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
+    from: dateObj?.from || new Date(2022, 0, 20),
+    to: dateObj?.to || addDays(new Date(2022, 0, 20), 20),
   });
 
   useEffect(() => {
@@ -58,7 +63,9 @@ export function DatePickerWithRange({ className, onDateChange }: any) {
             defaultMonth={date?.from}
             selected={date}
             onSelect={setDate}
-            numberOfMonths={2}
+            numberOfMonths={1}
+            min={2}
+            disabled={disableDate}
           />
         </PopoverContent>
       </Popover>

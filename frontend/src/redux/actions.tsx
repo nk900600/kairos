@@ -214,3 +214,63 @@ export const fetchAllLeaves = createAsyncThunk(
     }
   }
 );
+export const createLeave = createAsyncThunk(
+  "tables/createLeave",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.post(`${BASE_URL}/leaves`, payload);
+      response.data.startDate = dateConvertor(response.data.startDate);
+      response.data.endDate = dateConvertor(response.data.endDate);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+
+      return rejectWithValue("Failed to create leave");
+    }
+  }
+);
+export const updateLeave = createAsyncThunk(
+  "tables/updateLeave",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.put(
+        `${BASE_URL}/leaves/${payload.id}`,
+        payload
+      );
+      response.data.startDate = dateConvertor(response.data.startDate);
+      response.data.endDate = dateConvertor(response.data.endDate);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const deleteLeave = createAsyncThunk(
+  "tables/deleteLeave",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${BASE_URL}/leaves/${id}`);
+      return id; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const updateLeaveStatus = createAsyncThunk(
+  "tables/updateLeaveStatus",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.put(
+        `${BASE_URL}/leaves/${payload.id}/status`,
+        {
+          status: payload.status,
+        }
+      );
+      response.data.startDate = dateConvertor(response.data.startDate);
+      response.data.endDate = dateConvertor(response.data.endDate);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);

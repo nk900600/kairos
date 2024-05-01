@@ -82,8 +82,12 @@ import {
   DeleteLeaveTypes,
   UpdateLeaveTypes,
   createAllLeaveTypes,
+  createLeave,
+  deleteLeave,
   fetchAllLeaveTypes,
   fetchAllLeaves,
+  updateLeave,
+  updateLeaveStatus,
 } from "../redux/actions";
 import { AppDispatch } from "../redux/store";
 import { RootState } from "../redux/reducer";
@@ -108,6 +112,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { DatePickerWithRange } from "./common/datePicker";
+import { addDays, format, subDays } from "date-fns";
 
 export default function LeavesComponent() {
   const [addButtonLabel, setAddButtonLabel] = useState("Apply Leave");
@@ -165,6 +170,23 @@ export default function LeavesComponent() {
     setCompProps({ leaveType });
   };
 
+  const handleEditClick = (leave: any) => {
+    setOpen(true);
+    setTitle("Edit Leave");
+    setDescription("Please choose start date and end date");
+    setComponent("manageLeave");
+    setCompProps({ leave: leave });
+  };
+  const handleApproveClick = (leave: any) => {
+    dispatch(updateLeaveStatus({ id: leave.id, status: "Approved" }));
+  };
+  const handleRejectClick = (leave: any) => {
+    dispatch(updateLeaveStatus({ id: leave.id, status: "Rejected" }));
+  };
+  const handleLeaveDelete = (leave: any) => {
+    dispatch(deleteLeave(leave.id));
+  };
+
   return (
     <>
       <BreadcrumbComponent
@@ -217,8 +239,7 @@ export default function LeavesComponent() {
                             </CardTitle>
 
                             <CardDescription className="text-xs">
-                              {leave.LeaveType.name}{" "}
-                              {"(" + leave.duration + " Days)"}
+                              {leave.name} {"(" + leave.duration + " Days)"}
                             </CardDescription>
                           </div>
                           <div className="flex-1">
@@ -243,11 +264,34 @@ export default function LeavesComponent() {
                         </CardContent>
                       )}
                       <CardFooter className="flex justify-end   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
-                        <Button variant="outline" size="sm" className="gap-2">
+                        <Button
+                          onClick={() => handleLeaveDelete(leave)}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                        >
                           <span className="">Cancel</span>
                         </Button>
-                        <Button size="sm" className="gap-2">
+                        <Button
+                          onClick={() => handleEditClick(leave)}
+                          size="sm"
+                          className="gap-2"
+                        >
                           <span className="">Edit</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleApproveClick(leave)}
+                          size="sm"
+                          className="gap-2"
+                        >
+                          <span className="">Approve</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleRejectClick(leave)}
+                          size="sm"
+                          className="gap-2"
+                        >
+                          <span className="">Reject</span>
                         </Button>
                       </CardFooter>
                     </Card>
@@ -410,42 +454,52 @@ const leaveSchema = z
 
 export const ManageLeave = ({ leave }: any) => {
   const { setOpen }: any = React.useContext(DrawerContext);
-  const { allDesgination } = useSelector(
+  const { allLeavesTypes } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [desgination, setDesgination] = useState("Waiter/Waitress");
+  const [leaveType, setLeaveType] = useState(allLeavesTypes[0]?.name);
   const form = useForm({
     resolver: zodResolver(leaveSchema),
     defaultValues: {
-      startDate: leave?.startDate || new Date(), // default to current date
-      endDate: leave?.endDate || new Date(), // default to current date, adjust as necessary
+      startDate: new Date(leave?.startDate) || new Date(), // default to current date
+      endDate: new Date(leave?.endDate) || new Date(), // default to current date, adjust as necessary
     },
   });
 
-  const { setValue } = form;
+  React.useEffect(() => {
+    dispatch(fetchAllLeaveTypes());
+  }, [dispatch]);
 
-  const onSubmit = async (data: any) => {
-    console.log(data);
-    return;
+  const { setValue, getValues } = form;
+
+  const onSubmit = async () => {
+    let dates: any = getValues();
+
+    if (!dates.startDate || !dates.endDate) {
+      return;
+    }
     setIsLoading(true);
 
     try {
-      //TODO: remove static firmId value
-      let idData = {
-        firmId: 1,
-        role: 3,
-        designation: allDesgination.find((val) => val.title == desgination)?.id,
-      };
-      data = { ...data, ...idData };
-
       // Dispatch the addTable action and wait for it to complete
       if (leave?.id) {
-        data.id = leave.id;
         // await dispatch(updateEmployees(data)).unwrap();
+        let payload = {
+          startDate: format(dates.startDate, "yyyy-MM-dd"),
+          endDate: format(dates.endDate, "yyyy-MM-dd"),
+          id: leave?.id,
+        };
+        await dispatch(updateLeave(payload)).unwrap();
       } else {
-        // await dispatch(addEmployee(data)).unwrap();
+        let payload = {
+          startDate: format(dates.startDate, "yyyy-MM-dd"),
+          endDate: format(dates.endDate, "yyyy-MM-dd"),
+          LeaveTypeId: allLeavesTypes.find((val) => val.name == leaveType)?.id,
+        };
+
+        await dispatch(createLeave(payload)).unwrap();
       }
       setOpen(false);
     } catch (error) {
@@ -455,12 +509,10 @@ export const ManageLeave = ({ leave }: any) => {
   };
 
   const handleDesginationChange = (data: any) => {
-    setDesgination(data);
+    setLeaveType(data);
   };
 
   const handleDatePicker = (date: any) => {
-    console.log(date);
-
     setValue("startDate", date?.from); // Set startDate to April 1, 2024
     setValue("endDate", date?.to);
   };
@@ -473,11 +525,21 @@ export const ManageLeave = ({ leave }: any) => {
           name="startDate"
           render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel htmlFor="startDate">Start Date</FormLabel>
+              <FormLabel htmlFor="startDate">Select Dates</FormLabel>
               <FormControl>
                 <DatePickerWithRange
                   onDateChange={(d: any) => handleDatePicker(d)}
                   className="w-full"
+                  dateObj={{
+                    from: new Date(leave?.startDate) || new Date(),
+                    to: new Date(leave?.endDate) || addDays(new Date(), 3),
+                  }}
+                  disableDate={[
+                    {
+                      from: new Date(1990, 1, 1),
+                      to: subDays(new Date(), 1),
+                    },
+                  ]}
                 ></DatePickerWithRange>
               </FormControl>
               {fieldState.error && (
@@ -486,42 +548,28 @@ export const ManageLeave = ({ leave }: any) => {
             </FormItem>
           )}
         />
-        {/* <FormField
-          control={form.control}
-          name="endDate"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="endDate">End Date</FormLabel>
-              <FormControl>
-                <Input id="endDate" placeholder="Rogan" {...field} />
-              </FormControl>
-              {fieldState.error && (
-                <FormMessage>{fieldState.error.message}</FormMessage>
-              )}
-            </FormItem>
-          )}
-        /> */}
-        {/* </div> */}
 
-        <FormItem>
-          <FormLabel htmlFor="desgination">Leave Policy</FormLabel>
-          <Select
-            onValueChange={handleDesginationChange}
-            defaultValue={desgination}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a verified email to display" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {allDesgination.map((item) => {
-                return <SelectItem value={item.title}>{item.title}</SelectItem>;
-              })}
-            </SelectContent>
-          </Select>
-        </FormItem>
-        <Button loading={isLoading} type="submit">
+        {!leave?.id && (
+          <FormItem>
+            <FormLabel htmlFor="desgination">Leave Policy</FormLabel>
+            <Select
+              onValueChange={handleDesginationChange}
+              defaultValue={leaveType}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a verified email to display" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {allLeavesTypes.map((item) => {
+                  return <SelectItem value={item.name}>{item.name}</SelectItem>;
+                })}
+              </SelectContent>
+            </Select>
+          </FormItem>
+        )}
+        <Button loading={isLoading} onClick={onSubmit}>
           {leave?.id ? "Update Leave" : "Add Leave"}
         </Button>
       </form>

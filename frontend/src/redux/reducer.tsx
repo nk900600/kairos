@@ -6,7 +6,9 @@ import {
   addEmployee,
   addTable,
   createAllLeaveTypes,
+  createLeave,
   deleteEmployees,
+  deleteLeave,
   deleteTable,
   fetchAllEmployees,
   fetchAllLeaveTypes,
@@ -15,6 +17,8 @@ import {
   fetchDesgination,
   fetchTables,
   updateEmployees,
+  updateLeave,
+  updateLeaveStatus,
   updateTable,
   updateTableStatus,
 } from "./actions";
@@ -186,6 +190,48 @@ const counterSlice = createSlice({
         fetchAllLeaves.fulfilled,
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allLeaves = action.payload;
+        }
+      )
+      .addCase(
+        createLeave.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allLeaves.push(action.payload);
+        }
+      )
+      .addCase(
+        updateLeave.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allLeaves.findIndex(
+            (table) => table.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.allLeaves[index] = {
+              ...state.allLeaves[index],
+              ...action.payload,
+            };
+          }
+        }
+      )
+      .addCase(
+        updateLeaveStatus.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allLeaves.findIndex(
+            (table) => table.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.allLeaves[index] = {
+              ...state.allLeaves[index],
+              ...action.payload,
+            };
+          }
+        }
+      )
+      .addCase(
+        deleteLeave.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allLeaves = state.allLeaves.filter(
+            (employee) => employee.id !== action.payload
+          );
         }
       );
   },
