@@ -460,11 +460,12 @@ export const ManageLeave = ({ leave }: any) => {
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [leaveType, setLeaveType] = useState(allLeavesTypes[0]?.name);
+  const [reason, setReason] = useState("");
   const form = useForm({
     resolver: zodResolver(leaveSchema),
     defaultValues: {
-      startDate: new Date(leave?.startDate) || new Date(), // default to current date
-      endDate: new Date(leave?.endDate) || new Date(), // default to current date, adjust as necessary
+      startDate: leave?.startDate ? new Date(leave?.startDate) : new Date(), // default to current date
+      endDate: leave?.endDate ? new Date(leave?.endDate) : new Date(), // default to current date, adjust as necessary
     },
   });
 
@@ -496,6 +497,7 @@ export const ManageLeave = ({ leave }: any) => {
         let payload = {
           startDate: format(dates.startDate, "yyyy-MM-dd"),
           endDate: format(dates.endDate, "yyyy-MM-dd"),
+          reason: reason,
           LeaveTypeId: allLeavesTypes.find((val) => val.name == leaveType)?.id,
         };
 
@@ -531,8 +533,12 @@ export const ManageLeave = ({ leave }: any) => {
                   onDateChange={(d: any) => handleDatePicker(d)}
                   className="w-full"
                   dateObj={{
-                    from: new Date(leave?.startDate) || new Date(),
-                    to: new Date(leave?.endDate) || addDays(new Date(), 3),
+                    from: leave?.startDate
+                      ? new Date(leave?.startDate)
+                      : new Date(),
+                    to: leave?.endDate
+                      ? new Date(leave?.endDate)
+                      : addDays(new Date(), 3),
                   }}
                   disableDate={[
                     {
@@ -548,6 +554,7 @@ export const ManageLeave = ({ leave }: any) => {
             </FormItem>
           )}
         />
+        {leave?.id}
 
         {!leave?.id && (
           <FormItem>
@@ -569,6 +576,10 @@ export const ManageLeave = ({ leave }: any) => {
             </Select>
           </FormItem>
         )}
+        <FormItem>
+          <FormLabel htmlFor="desgination">Reason</FormLabel>
+          <Textarea onChange={(e) => setReason(e.target.value)}></Textarea>
+        </FormItem>
         <Button loading={isLoading} onClick={onSubmit}>
           {leave?.id ? "Update Leave" : "Add Leave"}
         </Button>
