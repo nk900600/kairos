@@ -2,14 +2,22 @@ import {
   ArrowLeft,
   BookOpenText,
   ChevronUpIcon,
+  CirclePercent,
   CirclePlus,
+  CircleSlash,
   Cross,
+  Ellipsis,
   MinusIcon,
   PackageIcon,
+  Pencil,
+  PencilIcon,
+  Percent,
   PlusIcon,
+  Salad,
   ScrollText,
   Search,
   ShoppingBag,
+  Trash2,
   Users,
   X,
   XIcon,
@@ -54,7 +62,7 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 import { Separator } from "../components/ui/separator";
-import { Children, useEffect, useState } from "react";
+import { Children, useContext, useEffect, useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { useSwipeable } from "react-swipeable";
 import {
@@ -66,312 +74,44 @@ import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { Checkbox } from "../components/ui/checkbox";
 import { DrawerClose } from "../components/ui/drawer";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import {
+  deleteMenu,
+  fetchAllMenuCategories,
+  fetchAllMenus,
+  updateMenu,
+} from "../redux/actions";
+import { RootState } from "../redux/reducer";
+import DrawerContext from "../context/drawerContext";
+import { ScrollArea } from "../components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 
 const currencyMap = new Map([["INR", "₹"]]);
-const allCategory = [
-  {
-    id: 1,
-    title: "Appetizer",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-  {
-    id: 2,
-    title: "Main Course",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-  {
-    id: 3,
-    title: "Burgers",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-  {
-    id: 4,
-    title: "Pizzas",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-  {
-    id: 5,
-    title: "Dessert",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-  {
-    id: 6,
-    title: "Beverages",
-    firmTypeId: 1,
-    firmId: null,
-    createdAt: "2024-03-30T11:34:27.000Z",
-    updatedAt: "2024-03-30T11:34:27.000Z",
-  },
-];
-const AllMenu = [
-  {
-    id: 20,
-    name: "Delhi Tikki Sandwich + Side + Coke",
-    description:
-      "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-    calorieCount: null,
-    price: 279,
-    currency: "INR",
-    categoryId: 3,
-    available: false,
-    spiceLevel: "Spicy",
-    dietType: "Vegetarian",
-    imageUrl: "http://example.com/chicken_wings.jpg",
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-03-30T17:08:30.000Z",
-    updatedAt: "2024-03-30T17:08:30.000Z",
-    Customizations: [
-      {
-        id: 33,
-        name: "Add Ons",
-        description: "Add Ons",
-        isRequired: false,
-        isMultiselect: true,
-        maxMultiSelect: 3,
-        createdAt: "2024-03-30T17:08:30.000Z",
-        updatedAt: "2024-03-30T17:08:30.000Z",
-        menuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 56,
-            name: "Cheese Pull (Mozzarella)",
-            description: "Cheese Pull (Mozzarella)",
-            additionalPrice: 59,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 33,
-          },
-          {
-            id: 55,
-            name: "Potato Roastie Patty",
-            description: "Potato Roastie Patty",
-            additionalPrice: 29,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 33,
-          },
-        ],
-      },
-      {
-        id: 32,
-        name: "Bread",
-        description: "Bread",
-        isRequired: true,
-        isMultiselect: false,
-        maxMultiSelect: 100,
-        createdAt: "2024-03-30T17:08:30.000Z",
-        updatedAt: "2024-03-30T17:08:30.000Z",
-        menuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-          },
-          {
-            id: 53,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-          },
-          {
-            id: 52,
-            name: "Multigrain",
-            description: "Multigrain",
-            additionalPrice: 0,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-          },
-          {
-            id: 51,
-            name: "White Italian",
-            description: "White Italian",
-            additionalPrice: 0,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 22,
-    name: "Mumbai Tikki Sandwich + Side + Coke",
-    description:
-      "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-    calorieCount: null,
-    price: 279,
-    currency: "INR",
-    categoryId: 3,
-    available: true,
-    spiceLevel: "Spicy",
-    dietType: "Vegetarian",
-    imageUrl: "http://example.com/chicken_wings.jpg",
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T17:02:31.000Z",
-    updatedAt: "2024-04-01T17:02:31.000Z",
-    Customizations: [
-      {
-        id: 36,
-        name: "Add Ons",
-        description: "Add Ons",
-        isRequired: false,
-        isMultiselect: true,
-        maxMultiSelect: 3,
-        createdAt: "2024-04-01T17:02:31.000Z",
-        updatedAt: "2024-04-01T17:02:31.000Z",
-        menuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 63,
-            name: "Cheese Pull (Mozzarella)",
-            description: "Cheese Pull (Mozzarella)",
-            additionalPrice: 59,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 36,
-          },
-          {
-            id: 62,
-            name: "Potato Roastie Patty",
-            description: "Potato Roastie Patty",
-            additionalPrice: 29,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 36,
-          },
-        ],
-      },
-      {
-        id: 35,
-        name: "Bread",
-        description: "Bread",
-        isRequired: true,
-        isMultiselect: false,
-        maxMultiSelect: 100,
-        createdAt: "2024-04-01T17:02:31.000Z",
-        updatedAt: "2024-04-01T17:02:31.000Z",
-        menuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 61,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 35,
-          },
-          {
-            id: 60,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 35,
-          },
-          {
-            id: 59,
-            name: "Multigrain",
-            description: "Multigrain",
-            additionalPrice: 0,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 35,
-          },
-          {
-            id: 58,
-            name: "White Italian",
-            description: "White Italian",
-            additionalPrice: 0,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 35,
-          },
-        ],
-      },
-      {
-        id: 34,
-        name: "Sub",
-        description: "Sub Data",
-        isRequired: true,
-        isMultiselect: false,
-        maxMultiSelect: 100,
-        createdAt: "2024-04-01T17:02:31.000Z",
-        updatedAt: "2024-04-01T17:02:31.000Z",
-        menuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 57,
-            name: "Delhi Tikki 15cm",
-            description: "Some Data",
-            additionalPrice: 0,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-04-01T17:02:31.000Z",
-            updatedAt: "2024-04-01T17:02:31.000Z",
-            CustomizationId: 34,
-          },
-        ],
-      },
-    ],
-  },
-];
 
 export function MenuHeaderComponent() {
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
+
+  const handleAddClick = () => {
+    setOpen(true);
+    setTitle("Add New Item");
+    setDescription(" ");
+    setComponent("manageMenu");
+  };
   return (
     <>
       <BreadcrumbComponent
@@ -382,10 +122,19 @@ export function MenuHeaderComponent() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
           All Menus
         </h1>
-        <DrawerDialogComponent
+
+        <Button
+          onClick={handleAddClick}
+          variant="outline"
+          className=" h-8  gap-2"
+        >
+          <CirclePlus className="h-4 w-4" />
+          <span className="hidden sm:block">Add Item</span>
+        </Button>
+        {/* <DrawerDialogComponent
           triggerButton={
             <Button variant="outline" className=" h-8  gap-2">
               <CirclePlus className="h-4 w-4" />
@@ -394,26 +143,42 @@ export function MenuHeaderComponent() {
           }
           title={"Add Item"}
           description={"A new menu itmes"}
-        ></DrawerDialogComponent>
+        ></DrawerDialogComponent> */}
       </div>
     </>
   );
 }
 
 export default function MenusComponent({ canPlaceOrder = false }) {
+  const dispatch: AppDispatch = useDispatch();
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
+  const { allMenu, allMenuCategories } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+
+  useEffect(() => {
+    dispatch(fetchAllMenus());
+    dispatch(fetchAllMenuCategories());
+  }, [dispatch]);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isOrderOpen, setOrderOpen] = useState(false);
-  const [allMenus, setAllMenus] = useState(AllMenu);
   const [countMap, setcountMap] = useState<any>({});
-  const [allCategories, setAllCategories] = useState(allCategory);
 
   useEffect(() => {
     let countmap: any = {};
-    allMenus.forEach((menu) => {
+    allMenu.forEach((menu: any) => {
       countmap[menu.id] = 0;
     });
     setcountMap(countmap);
-  }, []);
+  }, [allMenu]);
 
   const handleOpenMenu = (w: any) => {
     setMenuOpen(w);
@@ -431,6 +196,74 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     isOrderOpen,
   };
 
+  const handleMenuClick = (menu: any) => {
+    setOpen(true);
+    setTitle("Edit Item");
+    setDescription(" ");
+    setComponent("customizationComponent");
+    setCompProps({ menu: menu });
+  };
+
+  const handleEditMenuClick = (table: any) => {
+    setOpen(true);
+    setTitle("Edit Item");
+    setDescription(" ");
+    setComponent("manageMenu");
+    setCompProps({ menu: table });
+  };
+  const handleDiscountClick = (menu: any) => {
+    setOpen(true);
+    setTitle("Add Discount");
+    setDescription("Enter a discount percentage to apply to this menu item.");
+    setComponent("manageMenuDiscount");
+    setCompProps({ menu: menu });
+  };
+
+  const DropdownMenuList = (menu: any) => (
+    <DropdownMenuContent className="w-56" align="end">
+      <DropdownMenuItem onClick={() => handleEditMenuClick(menu)}>
+        <>
+          <Pencil className="mr-2 h-4 w-4 " />
+          <span>Edit</span>
+        </>
+      </DropdownMenuItem>
+
+      {/* <DropdownMenuItem onClick={() => handleDiscountClick(menu)}>
+        <>
+          <Percent className="mr-2 h-4 w-4 " />
+          <span>Discount</span>
+        </>
+      </DropdownMenuItem> */}
+
+      <DropdownMenuItem
+        onClick={() =>
+          dispatch(updateMenu({ id: menu.id, available: !menu.available }))
+        }
+      >
+        <>
+          <CircleSlash className="mr-2 h-4 w-4 " />
+          <span>
+            {menu.available ? "Mark as not Available" : "Mark as Available"}
+          </span>
+        </>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+
+      <DropdownMenuItem onClick={() => {}}>
+        <>
+          <Salad className="mr-2 h-4 w-4 " />
+          <span>Customization</span>
+        </>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+
+      <DropdownMenuItem onClick={() => dispatch(deleteMenu(menu.id))}>
+        <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+        <span>Delete</span>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
+
   return (
     <>
       {!canPlaceOrder && <MenuHeaderComponent />}
@@ -443,7 +276,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search Contacts..."
+                  placeholder="Search Menu item..."
                   className="w-full appearance-none bg-background pl-8 shadow-none "
                 />
               </div>
@@ -451,8 +284,8 @@ export default function MenusComponent({ canPlaceOrder = false }) {
           </div>
         </div>
 
-        {allCategories.map((category) => {
-          let validMenu = allMenus.filter(
+        {allMenuCategories.map((category) => {
+          let validMenu = allMenu.filter(
             (menu: any) => menu.categoryId === category.id
           );
           if (!validMenu.length) return <></>;
@@ -467,10 +300,11 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                         <Card
                           aria-disabled={menu.available}
                           className={
-                            "w-full " +
+                            "w-full  " +
                             (!menu.available &&
                               "bg-gray-200 opacity-50 cursor-not-allowed")
                           }
+                          // onClick={() => handleMenuClick(menu)}
                         >
                           <CardHeader className="p-3 lg:p-4 md:p-4  ">
                             <div className="flex items-start gap-4 items-center">
@@ -491,15 +325,17 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                                   )}
                                 </CardTitle>
 
-                                {menu.Customizations?.length && (
+                                {menu.Customizations?.length ? (
                                   <CardDescription className="text-xs">
                                     Customization
                                   </CardDescription>
+                                ) : (
+                                  ""
                                 )}
                               </div>
 
                               <div className="ml-auto">
-                                <MenuAddButton
+                                {/* <MenuAddButton
                                   title={
                                     <SheetTitle className="flex items-center gap-3">
                                       <VegIcon className="h-5 w-5" />
@@ -509,19 +345,63 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                                   description={menu.description}
                                 >
                                   <CustomizationComponent menu={menu} />
-                                </MenuAddButton>
+                                </MenuAddButton> */}
+
+                                {/* <CustomizationComponent menu={menu} /> */}
 
                                 {/* {canPlaceOrder && <CurrentOrder></CurrentOrder>} */}
+
+                                <div className="ml-auto">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="  h-8 w-8 "
+                                      >
+                                        <Ellipsis className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    {DropdownMenuList(menu)}
+                                  </DropdownMenu>
+                                </div>
+                                {/* 
+                                <div className="flex gap-3">
+                                  <Button
+                                    className="flex items-center"
+                                    variant="ghost"
+                                    size={"icon"}
+                                  >
+                                    <PencilIcon className="h-4 w-4" />
+                                  </Button>
+
+                                  <Button
+                                    className="flex items-center"
+                                    variant="ghost"
+                                    size={"icon"}
+                                  >
+                                    {menu.Customizations?.length ? (
+                                      <Salad className=" h-4 w-4" />
+                                    ) : (
+                                      <Salad className=" h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div> */}
                               </div>
                             </div>
                           </CardHeader>
                           <CardContent className="p-3 pt-0 lg:p-4 md:p-4 lg:pt-0 md:pt-0 ">
-                            <p className="text-xs font-bold">
-                              {currencyMap.get(menu.currency)} {menu.price}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              223.2 kcal - 7g Protein - 19.1.g Carbs - 11.8g Fat
-                            </p>
+                            <div className="flex justify-between align-start">
+                              <div>
+                                <p className="text-xs font-bold">
+                                  {currencyMap.get(menu.currency)} {menu.price}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  223.2 kcal - 7g Protein - 19.1.g Carbs - 11.8g
+                                  Fat
+                                </p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       );
@@ -632,87 +512,89 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
 
 export const CustomizationComponent = ({ menu }: any) => {
   return (
-    <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
-      <div>
-        {menu.Customizations.map((item: any, index: number) => {
-          return (
-            <>
-              <div className="grid gap-3">
-                <div>
-                  {" "}
-                  <div className="font-semibold text-muted-foreground">
-                    {item.name}
+    <ScrollArea className=" max-h-screen">
+      <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
+        <div>
+          {menu.Customizations?.map((item: any, index: number) => {
+            return (
+              <>
+                <div className="grid gap-3">
+                  <div>
+                    {" "}
+                    <div className="font-semibold text-muted-foreground">
+                      {item.name}
+                    </div>
+                    <div className="font-sm text-muted-foreground">
+                      {item.maxMultiSelect}
+                    </div>
                   </div>
-                  <div className="font-sm text-muted-foreground">
-                    {item.maxMultiSelect}
-                  </div>
-                </div>
 
-                <ul className="grid gap-3">
-                  {item.CustomizationChoices.map((options: any) => {
-                    return (
-                      <li className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 w-full justify-between">
-                          <label
-                            htmlFor={options.id}
-                            className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            <div className="flex justify-between ">
-                              <div className="flex gap-5">
-                                {options.dietType == "Vegetarian" && (
-                                  <VegIcon></VegIcon>
+                  <ul className="grid gap-3">
+                    {item.CustomizationChoices.map((options: any) => {
+                      return (
+                        <li className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2 w-full justify-between">
+                            <label
+                              htmlFor={options.id}
+                              className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              <div className="flex justify-between ">
+                                <div className="flex gap-5">
+                                  {options.dietType == "Vegetarian" && (
+                                    <VegIcon></VegIcon>
+                                  )}
+                                  <span className=" font-semibold">
+                                    {options.name}
+                                  </span>
+                                </div>
+
+                                {options.additionalPrice != 0 && (
+                                  <span>${options.additionalPrice}</span>
                                 )}
-                                <span className=" font-semibold">
-                                  {options.name}
-                                </span>
                               </div>
+                            </label>
+                            <Checkbox id={options.id} />
+                          </div>
+                        </li>
+                      );
+                    })}
 
-                              {options.additionalPrice != 0 && (
-                                <span>${options.additionalPrice}</span>
-                              )}
-                            </div>
-                          </label>
-                          <Checkbox id={options.id} />
-                        </div>
-                      </li>
-                    );
-                  })}
-
-                  {/* <li className="flex items-center justify-between">
+                    {/* <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">
                       Aqua Filters x <span>1</span>
                     </span>
                     <span>$49.00</span>
                   </li> */}
-                </ul>
-              </div>
-              {index + 1 !== menu.Customizations.length && (
-                <Separator className="my-4" />
-              )}
-            </>
-          );
-        })}
-      </div>
-      <div className="flex justify-between gap-4">
-        <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
-          <Button variant="ghost" size={"icon"} className="h-10">
-            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
-          </Button>
-
-          <span className="text-sm font-semibold">{1}</span>
-
-          <Button variant="ghost" size={"icon"} className={" h-10 "}>
-            <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-          </Button>
+                  </ul>
+                </div>
+                {index + 1 !== menu.Customizations?.length && (
+                  <Separator className="my-4" />
+                )}{" "}
+              </>
+            );
+          })}
         </div>
+        <div className="flex justify-between gap-4">
+          <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
+            <Button variant="ghost" size={"icon"} className="h-10">
+              <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+            </Button>
 
-        <DrawerClose asChild>
-          <Button size={"lg"} className="h-10 w-full">
-            Add Item - $1230
-          </Button>
-        </DrawerClose>
-      </div>
-    </CardContent>
+            <span className="text-sm font-semibold">{1}</span>
+
+            <Button variant="ghost" size={"icon"} className={" h-10 "}>
+              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+            </Button>
+          </div>
+
+          <DrawerClose asChild>
+            <Button size={"lg"} className="h-10 w-full">
+              Add Item - $1230
+            </Button>
+          </DrawerClose>
+        </div>
+      </CardContent>
+    </ScrollArea>
   );
 };
 
@@ -744,8 +626,15 @@ export function MenuAddButton({
         )}
 
         {count != 0 && <span className="text-sm font-semibold">{count}</span>}
-
-        <DrawerDialogComponent
+        <Button
+          variant="ghost"
+          size={count == 0 ? "lg" : "icon"}
+          className={" h-8 " + (count == 0 ? "gap-4" : "")}
+        >
+          {count == 0 && <span className="text-sm font-semibold ">Add</span>}
+          <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+        </Button>
+        {/* <DrawerDialogComponent
           isFooter={false}
           triggerButton={
             <Button
@@ -763,25 +652,7 @@ export function MenuAddButton({
           description={description}
         >
           {children}
-        </DrawerDialogComponent>
-
-        {/* <Sheet {...sheetProps}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size={count == 0 ? "lg" : "icon"}
-              className={" h-8 " + (count == 0 ? "gap-4" : "")}
-            >
-              {count == 0 && (
-                <span className="text-sm font-semibold ">Add</span>
-              )}
-              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-full" {...handlers}>
-            {children}
-          </SheetContent>
-        </Sheet> */}
+        </DrawerDialogComponent> */}
       </div>
     </div>
   );

@@ -7,18 +7,23 @@ import {
   addTable,
   createAllLeaveTypes,
   createLeave,
+  createMenu,
   deleteEmployees,
   deleteLeave,
+  deleteMenu,
   deleteTable,
   fetchAllEmployees,
   fetchAllLeaveTypes,
   fetchAllLeaves,
+  fetchAllMenuCategories,
+  fetchAllMenus,
   fetchAllOrders,
   fetchDesgination,
   fetchTables,
   updateEmployees,
   updateLeave,
   updateLeaveStatus,
+  updateMenu,
   updateTable,
   updateTableStatus,
 } from "./actions";
@@ -28,9 +33,11 @@ export interface RootState {
   alltables: TableType[];
   allEmployees: any[];
   allLeavesTypes: any[];
+  allMenu: any[];
   allLeaves: any[];
   allOrders: any[];
   allDesgination: any[];
+  allMenuCategories: any[];
   isLoading: boolean;
   error: string | null;
 }
@@ -41,6 +48,8 @@ const initialState: RootState = {
   allLeavesTypes: [],
   allLeaves: [],
   allDesgination: [],
+  allMenu: [],
+  allMenuCategories: [],
   allOrders: [],
   isLoading: false,
   error: null,
@@ -230,6 +239,48 @@ const counterSlice = createSlice({
         deleteLeave.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.allLeaves = state.allLeaves.filter(
+            (employee) => employee.id !== action.payload
+          );
+        }
+      )
+
+      // menu Categories
+      .addCase(
+        fetchAllMenuCategories.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenuCategories = action.payload;
+        }
+      )
+      .addCase(
+        fetchAllMenus.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenu = action.payload;
+        }
+      )
+      .addCase(
+        createMenu.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenu.push(action.payload);
+        }
+      )
+      .addCase(
+        updateMenu.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allMenu.findIndex(
+            (table) => table.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.allMenu[index] = {
+              ...state.allMenu[index],
+              ...action.payload,
+            };
+          }
+        }
+      )
+      .addCase(
+        deleteMenu.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenu = state.allMenu.filter(
             (employee) => employee.id !== action.payload
           );
         }

@@ -24,6 +24,10 @@ import { ManageReservation, ManageTable } from "../pages/tables";
 import DrawerContext from "../context/drawerContext";
 import { ManageEmployees } from "../pages/contacts";
 import { ManageLeave, ManageLeaveType } from "../pages/leaves";
+import { CustomizationComponent } from "../pages/menus";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { ManageMenu } from "../pages/modals/manageMenu";
+import { ManageMenuDiscount } from "../pages/modals/manageMenuDiscount";
 
 export function DrawerDialogComponent({
   triggerButton,
@@ -36,6 +40,9 @@ export function DrawerDialogComponent({
     manageReservation: ManageReservation,
     manageLeaveType: ManageLeaveType,
     manageLeave: ManageLeave,
+    customizationComponent: CustomizationComponent,
+    manageMenu: ManageMenu,
+    manageMenuDiscount: ManageMenuDiscount,
   };
   const { open, setOpen, component, compProps, title, description }: any =
     useContext(DrawerContext);
@@ -49,7 +56,7 @@ export function DrawerDialogComponent({
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{triggerButton}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] ">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>

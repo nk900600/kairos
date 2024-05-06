@@ -5,6 +5,7 @@ import RootState from "./store";
 import axios from "./axios";
 import { toast } from "sonner";
 import { dateConvertor } from "../util/date";
+import { ResponsiveContainer } from "recharts";
 
 export const BASE_URL = "http://localhost:4200/api";
 
@@ -270,6 +271,70 @@ export const updateLeaveStatus = createAsyncThunk(
       response.data.endDate = dateConvertor(response.data.endDate);
       return response.data;
     } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+// menu Categories
+
+export const fetchAllMenuCategories = createAsyncThunk(
+  "tables/fetchAllMenuCategories",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/menus/categories`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const fetchAllMenus = createAsyncThunk(
+  "tables/fetchAllMenus",
+  async (_, { rejectWithValue }) => {
+    try {
+      let response = await axios.get(`${BASE_URL}/menus`);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const createMenu = createAsyncThunk(
+  "tables/createMenu",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.post(`${BASE_URL}/menus`, payload);
+      return response.data.menuItem; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const updateMenu = createAsyncThunk(
+  "tables/updateMenu",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.patch(
+        `${BASE_URL}/menus/${payload.id}`,
+        payload
+      );
+      return payload; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const deleteMenu = createAsyncThunk(
+  "tables/deleteMenu",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${BASE_URL}/menus/${id}`);
+      return id; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
       return rejectWithValue("Failed to delete table");
     }
   }

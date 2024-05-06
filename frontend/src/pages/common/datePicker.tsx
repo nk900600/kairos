@@ -13,20 +13,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
+import { nullable } from "zod";
 
 export function DatePickerWithRange({
   className,
-  dateObj,
+  dateObj = null,
   disableDate = [],
   onDateChange,
 }: any) {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: dateObj?.from || new Date(2022, 0, 20),
-    to: dateObj?.to || addDays(new Date(2022, 0, 20), 20),
+    from: dateObj?.from ? dateObj?.from : new Date(2022, 0, 20),
+    to: dateObj?.to ? dateObj?.to : addDays(new Date(2022, 0, 20), 20),
   });
 
   useEffect(() => {
-    onDateChange(date);
+    onDateChange && onDateChange(date);
   }, [date]);
 
   return (

@@ -146,6 +146,7 @@ export default function TableComponent() {
   const handleAddClick = (event: any) => {
     setOpen(true);
     setTitle("Add Table");
+    setComponent("manageTable");
     setDescription("Please add New Table ");
   };
 
