@@ -125,24 +125,13 @@ class MenuItemsController {
         !req.body?.categoryId ||
         !req.body?.price ||
         !req.body?.spiceLevel ||
-        !req.body?.dietType ||
-        !req.body?.firmId
+        !req.body?.dietType
       ) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      const {
-        name,
-        description,
-        price,
-        categoryId,
-        available,
-        spiceLevel,
-        dietType,
-        imageUrl,
-        customizations,
-        firmId,
-      } = req.body;
+      const { name, description, price, categoryId, spiceLevel, dietType } =
+        req.body;
 
       // Create the menu item
       const menuItem = await MenuItem.create(
@@ -151,17 +140,16 @@ class MenuItemsController {
           description,
           price,
           categoryId,
-          available,
+          available: true,
           spiceLevel,
           dietType,
-          imageUrl,
-          firmId,
+          firmId: req.user.firmId,
         },
         { transaction, userId: req.user.id }
       );
-
       let data = [];
-      if (customizations && customizations.length > 0) {
+      if (req.body?.customizations && req.body?.customizations.length > 0) {
+        const customizations = req.body?.customizations;
         const customizationPromises = customizations.map(
           async (customizationData) => {
             if (!customizationData.name) {
@@ -265,7 +253,7 @@ class MenuItemsController {
 
       await menuItem.destroy();
 
-      res.send("Menu item deleted successfully");
+      res.status(204).send("Menu item deleted successfully");
     } catch (error) {
       console.error("Error deleting menu item:", error);
       res.status(500).send("Error deleting menu item");

@@ -59,8 +59,7 @@ const MenuItem = sequelize.define(
       type: DataTypes.ENUM(
         SpiceLevel.MEDIUM,
         SpiceLevel.MILD,
-        SpiceLevel.SPICY,
-        SpiceLevel.VERYSPICY
+        SpiceLevel.SPICY
       ),
       defaultValue: null,
     },
@@ -68,6 +67,7 @@ const MenuItem = sequelize.define(
       type: DataTypes.ENUM(...Object.values(DietType)),
       defaultValue: null,
     },
+    discount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     imageUrl: DataTypes.STRING,
     firmId: {
       type: DataTypes.INTEGER,

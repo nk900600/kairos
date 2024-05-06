@@ -10,7 +10,7 @@ const SpiceLevel = Object.freeze({
   MILD: "Mild",
   MEDIUM: "Medium",
   SPICY: "Spicy",
-  VERYSPICY: "Very Spicy",
+  // VERYSPICY: "Very Spicy",
 });
 
 const DietType = Object.freeze({
