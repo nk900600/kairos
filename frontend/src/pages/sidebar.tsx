@@ -53,6 +53,7 @@ import SelectTableComponent from "../pages/placeOrder/selectTable";
 import SignUp from "../pages/signUp";
 import Login from "../pages/login";
 import { MainSettings } from "./settings/main";
+import { CustomizationPage } from "./customizations";
 
 const allMenuItems = [
   {
@@ -200,7 +201,11 @@ function Sidebar() {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Routes>
             <Route path="/tables" Component={TableComponent} />
-            <Route path="/menus" Component={MenusComponent} />
+            <Route path="/menus" Component={MenusComponent}></Route>
+            <Route
+              path="/menus/:id/customization"
+              Component={CustomizationPage}
+            />
             <Route path="/orders" Component={OrdersComponent} />
             <Route path="/employees" Component={ContactsComponent} />
             <Route path="/leaves" Component={LeavesComponent} />
@@ -211,7 +216,7 @@ function Sidebar() {
               Component={SelectItemsComponent}
             />
             <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
-            <Route path="/settings" Component={MainSettings} />{" "}
+            <Route path="/settings" Component={MainSettings} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </Routes>
         </main>

@@ -38,7 +38,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/breadcrumb";
-import { NavLink, Navigate } from "react-router-dom";
+import { NavLink, Navigate, useNavigate } from "react-router-dom";
 import { ReactComponent as VegIcon } from "../VegIcon.svg";
 import { Input } from "../components/ui/input";
 import {
@@ -92,6 +92,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import ManageCustomization from "./modals/manageCustomization";
 
 const currencyMap = new Map([["INR", "₹"]]);
 
@@ -160,6 +161,8 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     setDescription,
     setCompProps,
   } = useContext(DrawerContext);
+
+  const navigate = useNavigate();
   const { allMenu, allMenuCategories } = useSelector(
     (state: { table: RootState }) => state.table
   );
@@ -249,7 +252,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
       </DropdownMenuItem>
       <DropdownMenuSeparator />
 
-      <DropdownMenuItem onClick={() => {}}>
+      <DropdownMenuItem onClick={() => navigate(menu.id + "/customization")}>
         <>
           <Salad className="mr-2 h-4 w-4 " />
           <span>Customization</span>
@@ -304,7 +307,6 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                             (!menu.available &&
                               "bg-gray-200 opacity-50 cursor-not-allowed")
                           }
-                          // onClick={() => handleMenuClick(menu)}
                         >
                           <CardHeader className="p-3 lg:p-4 md:p-4  ">
                             <div className="flex items-start gap-4 items-center">
