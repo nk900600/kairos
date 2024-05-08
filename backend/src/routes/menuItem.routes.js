@@ -15,6 +15,7 @@ router.patch(
   "/:id/customization/:customid",
   menuItemsController.updateMenuCustomization
 );
+router.post("/:id/customization/", menuItemsController.createCustomizationItem);
 router.delete("/:id", menuItemsController.deleteMenuItem);
 router.delete(
   "/:id/customization/:customid",

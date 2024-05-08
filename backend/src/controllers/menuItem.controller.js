@@ -206,6 +206,86 @@ class MenuItemsController {
       return res.status(500).send("Error creating menu item");
     }
   }
+  // Create a new menu item
+  async createCustomizationItem(req, res) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      if (!req.body?.customizations) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // const customizations = req.body?.customizations;
+      // let data = await processCustomizations(customizations, req, transaction);
+      // data = logCustomizations(data);
+      const customizations = req.body?.customizations;
+      const customizationPromises = customizations.map(
+        async (customizationData) => {
+          if (!customizationData.name) {
+            throw new Error("Missing required fields - customization - Name ");
+          }
+
+          let customization = await Customization.create(
+            {
+              ...customizationData,
+              menuItemId: req.params.id,
+            },
+            { transaction, userId: req.user.id }
+          );
+
+          if (
+            customizationData.choices &&
+            customizationData.choices.length > 0
+          ) {
+            customization["choices"] = [];
+
+            const choicePromises = customizationData.choices.map(
+              async (choiceData) => {
+                if (!choiceData.name) {
+                  throw new Error(
+                    "Missing required fields - choiceData - Name "
+                  );
+                }
+                let data = await CustomizationChoice.create(
+                  {
+                    ...choiceData,
+                    CustomizationId: customization.id,
+                  },
+                  { transaction, userId: req.user.id }
+                );
+                return data; // Return data to be included in the Promise.all
+              }
+            );
+
+            // Wait for all choices to be created and added to customization["choices"]
+            customization["choices"] = await Promise.all(choicePromises);
+          }
+
+          return customization;
+        }
+      );
+
+      await Promise.all(customizationPromises);
+
+      transaction.commit();
+
+      const menuItems = await Customization.findAll({
+        where: {
+          menuItemId: req.params.id, // Ensure that the 'menuId' is the correct field name in your 'Customization' model
+        },
+        include: [
+          {
+            model: CustomizationChoice,
+          },
+        ],
+      });
+      return res.status(201).json({ menuItems });
+    } catch (error) {
+      console.log("Error creating menu item:", error);
+      transaction.rollback();
+      return res.status(500).send("Error creating menu item");
+    }
+  }
 
   // Update a menu item
   async updateMenuItem(req, res) {
