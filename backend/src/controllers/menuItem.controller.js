@@ -108,7 +108,7 @@ class MenuItemsController {
       }
 
       transaction.commit();
-      return res.json(customization);
+      return res.status(201).json(customization);
     } catch (err) {
       transaction.rollback();
       return res.status(500).json({ message: err.message });
