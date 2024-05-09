@@ -30,7 +30,7 @@ const TableSession = sequelize.define(
     endTime: DataTypes.DATE,
     totalAmount: DataTypes.INTEGER,
 
-    // Will create new custier table once MVP is out
+    // Will create new customer table once MVP is out
     customerName: DataTypes.STRING,
     customerMobile: DataTypes.INTEGER,
 

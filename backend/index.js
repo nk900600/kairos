@@ -30,6 +30,7 @@ async function init() {
   const tableSessionRoutes = require("./src/routes/tableSession.routes");
   const firmSubscriptionRoutes = require("./src/routes/firmSubscription.routes");
   const desginationRoutes = require("./src/routes/designation.routes");
+  const cartRoutes = require("./src/routes/cart.routes");
 
   const app = express();
   const port = 4200;
@@ -55,6 +56,7 @@ async function init() {
   app.use("/api/designations", authMiddleware, desginationRoutes);
   app.use("/api/tables-session", authMiddleware, tableSessionRoutes);
   app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
+  app.use("/api/cart-items", authMiddleware, cartRoutes);
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
