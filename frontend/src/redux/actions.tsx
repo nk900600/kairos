@@ -1,7 +1,6 @@
 // tableThunks.js
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
-import RootState from "./store";
 import axios from "./axios";
 import { toast } from "sonner";
 import { dateConvertor } from "../util/date";
@@ -280,8 +279,12 @@ export const updateLeaveStatus = createAsyncThunk(
 
 export const fetchAllMenuCategories = createAsyncThunk(
   "tables/fetchAllMenuCategories",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
+      const state: any = getState();
+      if (state.table.allMenuCategories.length > 0) {
+        return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
+      }
       let response = await axios.get(`${BASE_URL}/menus/categories`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -291,8 +294,13 @@ export const fetchAllMenuCategories = createAsyncThunk(
 );
 export const fetchAllMenus = createAsyncThunk(
   "tables/fetchAllMenus",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
+      const state: any = getState();
+      if (state.table.allMenu.length > 0) {
+        return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
+      }
+
       let response = await axios.get(`${BASE_URL}/menus`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -357,6 +365,7 @@ export const updateMenuCustomization = createAsyncThunk(
   "tables/updateMenuCustomization",
   async (payload: any, { rejectWithValue }) => {
     try {
+      payload["maxMultiSelect"] = payload.maxChoices;
       await axios.patch(
         `${BASE_URL}/menus/${payload.menuId}/customization/${payload.customizationId}`,
         payload

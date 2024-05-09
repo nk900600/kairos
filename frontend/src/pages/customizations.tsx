@@ -126,13 +126,9 @@ export const CustomizationPage = () => {
                         {menu.name}
                       </CardTitle>
 
-                      {/* {menu?.description ? (
-                        <CardDescription className="text-xs">
-                          {menu.description}
-                        </CardDescription>
-                      ) : (
-                        ""
-                      )} */}
+                      <CardDescription className="text-xs">
+                        Max Selection : {menu.maxMultiSelect}
+                      </CardDescription>
                     </div>
 
                     <div className="ml-auto">

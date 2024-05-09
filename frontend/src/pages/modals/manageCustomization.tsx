@@ -82,7 +82,6 @@ export default function ManageCustomization({ menuId, choice }: any) {
             name: item.name,
             price: item.additionalPrice,
             diet: item.dietType,
-            ...item,
           }))
         : [{ name: "", price: 0, diet: "Vegetarian" }], //
     },
