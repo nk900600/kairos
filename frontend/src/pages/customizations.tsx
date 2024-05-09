@@ -5,7 +5,7 @@ import { GoBackButton } from "./common/goBackButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/reducer";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,24 +34,59 @@ import {
 } from "../components/ui/table";
 import { AppDispatch } from "../redux/store";
 import EmptyPlaceholder from "./common/emptyPlaceholder";
+import DrawerContext from "../context/drawerContext";
+import {
+  deleteMenuCustomization,
+  fetchAllMenuCategories,
+  fetchAllMenus,
+} from "../redux/actions";
 
 export const CustomizationPage = () => {
   const { allMenu, allMenuCategories } = useSelector(
     (state: { table: RootState }) => state.table
   );
   let { id } = useParams();
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
 
-  const [currentMenu, setCurrentMenu] = useState<any>({});
-
+  const [currentMenu, setCurrentMenu] = useState<any>(null);
+  const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     let mm = allMenu.find((menu) => menu.id == id);
+    console.log(mm, "from compppp");
     setCurrentMenu(mm);
   }, [allMenu]);
 
+  useEffect(() => {
+    dispatch(fetchAllMenus());
+    dispatch(fetchAllMenuCategories());
+  }, [dispatch]);
+
   const navigate = useNavigate();
-  const handleAddClick = () => {};
   const handleButtonClick = () => {
-    console.log("Dc");
+    setOpen(true);
+    setTitle("Customization Manager");
+    setDescription(
+      "Create and manage customization options for your products "
+    );
+    setComponent("manageCustomization");
+    setCompProps({ menuId: currentMenu.id });
+  };
+  const handleEditClick = (choice: any) => {
+    setOpen(true);
+    setTitle("Customization Manager");
+    setDescription(
+      "Create and manage customization options for your products "
+    );
+    setComponent("manageCustomization");
+    setCompProps({ menuId: currentMenu.id, choice });
   };
 
   return (
@@ -60,7 +95,7 @@ export const CustomizationPage = () => {
         list={[
           { link: "/", label: "Dashboard" },
           { link: "/menus", label: "Menu" },
-          { link: "/menu/" + 26 + "/customization", label: "Customizations" },
+          { link: "/menus/" + id + "/customization", label: "Customizations" },
         ]}
       />
       <div className="flex items-center gap-4">
@@ -69,7 +104,7 @@ export const CustomizationPage = () => {
           <p className="truncate w-[200px] sm:w-full">{currentMenu?.name}</p>
         </h1>
 
-        <Button onClick={handleAddClick} className=" h-8  gap-2">
+        <Button onClick={handleButtonClick} className=" h-8  gap-2">
           <CirclePlus className="h-4 w-4" />
           <span className="hidden sm:block">Add Customization</span>
         </Button>
@@ -80,7 +115,7 @@ export const CustomizationPage = () => {
           currentMenu?.Customizations &&
           currentMenu?.Customizations?.map((menu: any) => {
             return (
-              <Card aria-disabled={menu.available} className={"w-full  "}>
+              <Card className={"w-full  "}>
                 <CardHeader className="p-3 lg:p-4 md:p-4  ">
                   <div className="flex items-start gap-4 items-center">
                     <div className="flex flex-col items-center ">
@@ -91,19 +126,19 @@ export const CustomizationPage = () => {
                         {menu.name}
                       </CardTitle>
 
-                      {menu.Customizations?.length ? (
+                      {/* {menu?.description ? (
                         <CardDescription className="text-xs">
-                          Customization
+                          {menu.description}
                         </CardDescription>
                       ) : (
                         ""
-                      )}
+                      )} */}
                     </div>
 
                     <div className="ml-auto">
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => {}}
+                          onClick={() => handleEditClick(menu)}
                           variant="ghost"
                           size="icon"
                           className="gap-2"
@@ -111,7 +146,12 @@ export const CustomizationPage = () => {
                           <Pencil className="h-4 w-4 " />
                         </Button>
 
-                        <AlertDialogDelete />
+                        <AlertDialogDelete
+                          id={{
+                            menuId: currentMenu.id,
+                            customizationId: menu.id,
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -127,22 +167,15 @@ export const CustomizationPage = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell>Cheese Topping</TableCell>
-                          <TableCell>$1.99</TableCell>
-                          <TableCell>Vegetarian</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Gluten-Free Bun</TableCell>
-
-                          <TableCell>$2.49</TableCell>
-                          <TableCell>Gluten-Free</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Vegan Patty</TableCell>
-                          <TableCell>$3.99</TableCell>
-                          <TableCell>Vegan</TableCell>
-                        </TableRow>
+                        {menu.CustomizationChoices.map((choice: any) => {
+                          return (
+                            <TableRow>
+                              <TableCell>{choice.name}</TableCell>
+                              <TableCell>{choice.additionalPrice}</TableCell>
+                              <TableCell>{choice.dietType}</TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
@@ -151,17 +184,27 @@ export const CustomizationPage = () => {
             );
           })}
       </div>
-      {!currentMenu?.Customizations && (
-        <EmptyPlaceholder onButtonClick={handleButtonClick}></EmptyPlaceholder>
-      )}
+      {currentMenu != null &&
+        !(
+          "Customizations" in currentMenu && currentMenu.Customizations.length
+        ) && (
+          <EmptyPlaceholder
+            onButtonClick={handleButtonClick}
+          ></EmptyPlaceholder>
+        )}
     </>
   );
 };
 
-export function AlertDialogDelete({ leaveType }: any) {
+export function AlertDialogDelete({ id }: any) {
   const dispatch: AppDispatch = useDispatch();
   const handleLeaveTypeDelete = () => {
-    // dispatch(DeleteLeaveTypes(leaveType.id));
+    dispatch(
+      deleteMenuCustomization({
+        menuId: id.menuId,
+        customizationId: id.customizationId,
+      })
+    );
   };
   return (
     <AlertDialog>
@@ -174,7 +217,8 @@ export function AlertDialogDelete({ leaveType }: any) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will delete your Leave Policy.
+            This action cannot be undone. This will delete your customization
+            item.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

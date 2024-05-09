@@ -339,3 +339,49 @@ export const deleteMenu = createAsyncThunk(
     }
   }
 );
+export const deleteMenuCustomization = createAsyncThunk(
+  "tables/deleteMenuCustomization",
+  async (ids: any, { rejectWithValue }) => {
+    try {
+      await axios.delete(
+        `${BASE_URL}/menus/${ids.menuId}/customization/${ids.customizationId}`
+      );
+      return ids; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const updateMenuCustomization = createAsyncThunk(
+  "tables/updateMenuCustomization",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      await axios.patch(
+        `${BASE_URL}/menus/${payload.menuId}/customization/${payload.customizationId}`,
+        payload
+      );
+      return payload; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const createMenuCustomization = createAsyncThunk(
+  "tables/createMenuCustomization",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const data = await axios.post(
+        `${BASE_URL}/menus/${payload.menuId}/customization/`,
+        {
+          customizations: [payload],
+        }
+      );
+      return { menuId: payload.menuId, data: data.data }; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);

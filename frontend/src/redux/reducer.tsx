@@ -8,9 +8,11 @@ import {
   createAllLeaveTypes,
   createLeave,
   createMenu,
+  createMenuCustomization,
   deleteEmployees,
   deleteLeave,
   deleteMenu,
+  deleteMenuCustomization,
   deleteTable,
   fetchAllEmployees,
   fetchAllLeaveTypes,
@@ -24,6 +26,7 @@ import {
   updateLeave,
   updateLeaveStatus,
   updateMenu,
+  updateMenuCustomization,
   updateTable,
   updateTableStatus,
 } from "./actions";
@@ -274,6 +277,72 @@ const counterSlice = createSlice({
               ...state.allMenu[index],
               ...action.payload,
             };
+          }
+        }
+      )
+      .addCase(
+        deleteMenuCustomization.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allMenu.findIndex(
+            (table) => table.id === action.payload.menuId
+          );
+          if (index !== -1) {
+            state.allMenu[index].Customizations = state.allMenu[
+              index
+            ].Customizations.filter(
+              (data: any) => data.id != action.payload.customizationId
+            );
+          }
+        }
+      )
+      .addCase(
+        createMenuCustomization.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allMenu.findIndex(
+            (table) => table.id === action.payload.menuId
+          );
+          if (index !== -1) {
+            state.allMenu[index].Customizations = JSON.parse(
+              JSON.stringify(action.payload.data.menuItems)
+            );
+
+            state.allMenu[index] = JSON.parse(
+              JSON.stringify(state.allMenu[index])
+            );
+          }
+        }
+      )
+      .addCase(
+        updateMenuCustomization.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allMenu.findIndex(
+            (table) => table.id === action.payload.menuId
+          );
+          if (index !== -1) {
+            const InnerIndex = state.allMenu[index].Customizations.findIndex(
+              (data: any) => data.id === action.payload.customizationId
+            );
+
+            if (InnerIndex !== -1) {
+              let { choices, name, maxChoices } = action.payload;
+              state.allMenu[index].Customizations[InnerIndex] = {
+                ...state.allMenu[index].Customizations[InnerIndex],
+                name,
+                maxMultiSelect: maxChoices,
+              };
+
+              choices.forEach((val: any, index2: number) => {
+                state.allMenu[index].Customizations[
+                  InnerIndex
+                ].CustomizationChoices[index2] = {
+                  ...state.allMenu[index].Customizations[InnerIndex]
+                    .CustomizationChoices[index2],
+                  additionalPrice: val.price,
+                  dietType: val.diet,
+                  name: val.name,
+                };
+              });
+            }
           }
         }
       )

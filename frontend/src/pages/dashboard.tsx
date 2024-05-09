@@ -123,7 +123,6 @@ export function Dashboard() {
   };
   const handlers = useSwipeable({
     onSwipedLeft: (eventData: any) => {
-      console.log(eventData);
       setOpen(false);
     },
   });

@@ -127,7 +127,6 @@ export default function LeavesComponent() {
   }, [dispatch]);
 
   const handleClick = (e: any) => {
-    console.log(e);
     switch (e) {
       case "pending":
         setAddButtonLabel("Apply Leave");

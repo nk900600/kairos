@@ -293,7 +293,11 @@ export default function MenusComponent({ canPlaceOrder = false }) {
           );
           if (!validMenu.length) return <></>;
           return (
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion
+              defaultValue={allMenuCategories.map((val) => val.title)}
+              type="multiple"
+              className="w-full"
+            >
               <AccordionItem value="item-1">
                 <AccordionTrigger>{category.title}</AccordionTrigger>
                 <AccordionContent>
@@ -303,10 +307,11 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                         <Card
                           aria-disabled={menu.available}
                           className={
-                            "w-full  " +
+                            "w-full  cursor-pointer " +
                             (!menu.available &&
                               "bg-gray-200 opacity-50 cursor-not-allowed")
                           }
+                          onClick={() => navigate(menu.id + "/customization")}
                         >
                           <CardHeader className="p-3 lg:p-4 md:p-4  ">
                             <div className="flex items-start gap-4 items-center">
@@ -477,7 +482,6 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
   };
   const handlers = useSwipeable({
     onSwipedRight: (eventData: any) => {
-      console.log("fvfvf");
       setOpen(false);
     },
   });

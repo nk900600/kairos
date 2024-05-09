@@ -28,6 +28,7 @@ import { CustomizationComponent } from "../pages/menus";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { ManageMenu } from "../pages/modals/manageMenu";
 import { ManageMenuDiscount } from "../pages/modals/manageMenuDiscount";
+import ManageCustomization from "../pages/modals/manageCustomization";
 
 export function DrawerDialogComponent({
   triggerButton,
@@ -43,6 +44,7 @@ export function DrawerDialogComponent({
     customizationComponent: CustomizationComponent,
     manageMenu: ManageMenu,
     manageMenuDiscount: ManageMenuDiscount,
+    manageCustomization: ManageCustomization,
   };
   const { open, setOpen, component, compProps, title, description }: any =
     useContext(DrawerContext);
