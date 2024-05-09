@@ -10,8 +10,13 @@ export const BASE_URL = "http://localhost:4200/api";
 
 export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
+      const state: any = getState();
+      if (state.table.alltables.length > 0) {
+        return rejectWithValue("alltables already loaded"); // or simply return a resolved promise without fetching
+      }
+
       const response = await axios.get(`${BASE_URL}/tables`);
       return response.data;
     } catch (error) {

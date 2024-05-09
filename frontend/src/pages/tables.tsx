@@ -211,7 +211,7 @@ export default function TableComponent() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-lg sm:text-2xl  font-semibold tracking-tight ">
           All Tables
         </h1>
 

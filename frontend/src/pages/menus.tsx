@@ -123,7 +123,7 @@ export function MenuHeaderComponent() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-lg sm:text-2xl  font-semibold tracking-tight ">
           All Menus
         </h1>
 
@@ -307,11 +307,15 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                         <Card
                           aria-disabled={menu.available}
                           className={
-                            "w-full  cursor-pointer " +
+                            "w-full   " +
                             (!menu.available &&
-                              "bg-gray-200 opacity-50 cursor-not-allowed")
+                              "bg-gray-200 opacity-50 cursor-not-allowed ") +
+                            (!canPlaceOrder && " cursor-pointer ")
                           }
-                          onClick={() => navigate(menu.id + "/customization")}
+                          onClick={() =>
+                            !canPlaceOrder &&
+                            navigate(menu.id + "/customization")
+                          }
                         >
                           <CardHeader className="p-3 lg:p-4 md:p-4  ">
                             <div className="flex items-start gap-4 items-center">
@@ -342,58 +346,37 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                               </div>
 
                               <div className="ml-auto">
-                                {/* <MenuAddButton
-                                  title={
-                                    <SheetTitle className="flex items-center gap-3">
-                                      <VegIcon className="h-5 w-5" />
-                                      {menu.name}
-                                    </SheetTitle>
-                                  }
-                                  description={menu.description}
-                                >
-                                  <CustomizationComponent menu={menu} />
-                                </MenuAddButton> */}
-
-                                {/* <CustomizationComponent menu={menu} /> */}
-
-                                {/* {canPlaceOrder && <CurrentOrder></CurrentOrder>} */}
-
-                                <div className="ml-auto">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="  h-8 w-8 "
-                                      >
-                                        <Ellipsis className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    {DropdownMenuList(menu)}
-                                  </DropdownMenu>
-                                </div>
-                                {/* 
-                                <div className="flex gap-3">
-                                  <Button
-                                    className="flex items-center"
-                                    variant="ghost"
-                                    size={"icon"}
+                                {canPlaceOrder && (
+                                  <MenuAddButton
+                                    // title={
+                                    //   <SheetTitle className="flex items-center gap-3">
+                                    //     <VegIcon className="h-5 w-5" />
+                                    //     {menu.name}
+                                    //   </SheetTitle>
+                                    // }
+                                    // description={menu.description}
+                                    menu={menu}
                                   >
-                                    <PencilIcon className="h-4 w-4" />
-                                  </Button>
+                                    <CustomizationComponent menu={menu} />
+                                  </MenuAddButton>
+                                )}
 
-                                  <Button
-                                    className="flex items-center"
-                                    variant="ghost"
-                                    size={"icon"}
-                                  >
-                                    {menu.Customizations?.length ? (
-                                      <Salad className=" h-4 w-4" />
-                                    ) : (
-                                      <Salad className=" h-4 w-4" />
-                                    )}
-                                  </Button>
-                                </div> */}
+                                {!canPlaceOrder && (
+                                  <div className="ml-auto">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="  h-8 w-8 "
+                                        >
+                                          <Ellipsis className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      {DropdownMenuList(menu)}
+                                    </DropdownMenu>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </CardHeader>
@@ -517,6 +500,21 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
 }
 
 export const CustomizationComponent = ({ menu }: any) => {
+  const [currentMenu, setCurrentMenu] = useState(
+    JSON.parse(JSON.stringify(menu))
+  );
+
+  useEffect(() => {
+    currentMenu.orderTotal = currentMenu.price;
+    setCurrentMenu(JSON.parse(JSON.stringify(currentMenu)));
+  }, []);
+
+  const handleCheckBoxClick = (event: any, option: any) => {
+    console.log(event);
+    if (event) currentMenu.orderTotal += option.additionalPrice;
+    else currentMenu.orderTotal -= option.additionalPrice;
+    setCurrentMenu(JSON.parse(JSON.stringify(currentMenu)));
+  };
   return (
     <ScrollArea className=" max-h-screen">
       <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
@@ -531,7 +529,9 @@ export const CustomizationComponent = ({ menu }: any) => {
                       {item.name}
                     </div>
                     <div className="font-sm text-muted-foreground">
-                      {item.maxMultiSelect}
+                      {item.maxMultiSelect == 100
+                        ? " "
+                        : `Select any ${item.maxMultiSelect} options `}
                     </div>
                   </div>
 
@@ -555,22 +555,23 @@ export const CustomizationComponent = ({ menu }: any) => {
                                 </div>
 
                                 {options.additionalPrice != 0 && (
-                                  <span>${options.additionalPrice}</span>
+                                  <span>
+                                    {currencyMap.get(options.currency)}{" "}
+                                    {options.additionalPrice}
+                                  </span>
                                 )}
                               </div>
                             </label>
-                            <Checkbox id={options.id} />
+                            <Checkbox
+                              id={options.id}
+                              onCheckedChange={(event) =>
+                                handleCheckBoxClick(event, options)
+                              }
+                            />
                           </div>
                         </li>
                       );
                     })}
-
-                    {/* <li className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Aqua Filters x <span>1</span>
-                    </span>
-                    <span>$49.00</span>
-                  </li> */}
                   </ul>
                 </div>
                 {index + 1 !== menu.Customizations?.length && (
@@ -580,53 +581,75 @@ export const CustomizationComponent = ({ menu }: any) => {
             );
           })}
         </div>
-        <div className="flex justify-between gap-4">
-          <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
-            <Button variant="ghost" size={"icon"} className="h-10">
-              <MinusIcon className="h-4 w-4 -translate-x-0.5" />
-            </Button>
-
-            <span className="text-sm font-semibold">{1}</span>
-
-            <Button variant="ghost" size={"icon"} className={" h-10 "}>
-              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-            </Button>
-          </div>
-
-          <DrawerClose asChild>
-            <Button size={"lg"} className="h-10 w-full">
-              Add Item - $1230
-            </Button>
-          </DrawerClose>
-        </div>
       </CardContent>
+      <div className="flex justify-between gap-4">
+        <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
+          <Button variant="ghost" size={"icon"} className="h-10">
+            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+          </Button>
+
+          <span className="text-sm font-semibold">{1}</span>
+
+          <Button variant="ghost" size={"icon"} className={" h-10 "}>
+            <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+          </Button>
+        </div>
+
+        <Button size={"lg"} className="h-10 w-full">
+          Add Item - {currencyMap.get(menu.currency)} {currentMenu.orderTotal}
+        </Button>
+      </div>
     </ScrollArea>
   );
 };
 
-export function MenuAddButton({
-  count = 0,
-  title,
-  description,
-  children,
-}: any) {
-  const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
+export function MenuAddButton({ menu }: any) {
+  const [isOpen, setLocalOpen] = useState<boolean | undefined>(undefined);
+  const [count, setCount] = useState<number>(0);
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
   let sheetProps: any = {
     open: isOpen,
     onOpenChange: (data: any) => {
-      setOpen(data);
+      setLocalOpen(data);
     },
   };
   const handlers = useSwipeable({
     onSwipedRight: (eventData: any) => {
-      setOpen(false);
+      setLocalOpen(false);
     },
   });
+
+  const handleAddClick = () => {
+    if (menu?.Customizations?.length) {
+      setOpen(true);
+      setTitle("Edit Item");
+      setDescription(" ");
+      setComponent("customizationComponent");
+      setCompProps({ menu: menu });
+    } else setCount(count + 1);
+  };
+
+  const handleMinusClick = () => {
+    count == 1 ? setCount(0) : setCount(count - 1);
+  };
   return (
     <div className="flex items-center space-x-4">
       <div className="rounded-lg border bg-card h-8 flex items-center gap-1">
         {count !== 0 && (
-          <Button variant="ghost" size={"icon"} className="h-8">
+          <Button
+            onClick={handleMinusClick}
+            variant="ghost"
+            size={"sm"}
+            className="h-8"
+          >
             <MinusIcon className="h-4 w-4 -translate-x-0.5" />
           </Button>
         )}
@@ -634,8 +657,9 @@ export function MenuAddButton({
         {count != 0 && <span className="text-sm font-semibold">{count}</span>}
         <Button
           variant="ghost"
-          size={count == 0 ? "lg" : "icon"}
+          size={"sm"}
           className={" h-8 " + (count == 0 ? "gap-4" : "")}
+          onClick={handleAddClick}
         >
           {count == 0 && <span className="text-sm font-semibold ">Add</span>}
           <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
