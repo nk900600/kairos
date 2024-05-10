@@ -38,7 +38,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/breadcrumb";
-import { NavLink, Navigate, useNavigate } from "react-router-dom";
+import { NavLink, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ReactComponent as VegIcon } from "../VegIcon.svg";
 import { Input } from "../components/ui/input";
 import {
@@ -77,6 +77,7 @@ import { DrawerClose } from "../components/ui/drawer";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import {
+  addItemToCart,
   deleteMenu,
   fetchAllMenuCategories,
   fetchAllMenus,
@@ -93,6 +94,7 @@ import {
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import ManageCustomization from "./modals/manageCustomization";
+import { convertToObject } from "typescript";
 
 const currencyMap = new Map([["INR", "₹"]]);
 
@@ -357,7 +359,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                                     // description={menu.description}
                                     menu={menu}
                                   >
-                                    <CustomizationComponent menu={menu} />
+                                    {/* <CustomizationComponent menu={menu} /> */}
                                   </MenuAddButton>
                                 )}
 
@@ -499,10 +501,20 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
   );
 }
 
-export const CustomizationComponent = ({ menu }: any) => {
+export const CustomizationComponent = ({ menu, tableId }: any) => {
   const [currentMenu, setCurrentMenu] = useState(
     JSON.parse(JSON.stringify(menu))
   );
+
+  console.log(useParams());
+
+  const { allTableSessions } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+  const { setOpen } = useContext(DrawerContext);
+  const [selectedChoice, setSelectedChoice] = useState<any>([]);
+  const [quantity, setquantity] = useState(1);
+  const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     currentMenu.orderTotal = currentMenu.price;
@@ -510,95 +522,138 @@ export const CustomizationComponent = ({ menu }: any) => {
   }, []);
 
   const handleCheckBoxClick = (event: any, option: any) => {
-    console.log(event);
-    if (event) currentMenu.orderTotal += option.additionalPrice;
-    else currentMenu.orderTotal -= option.additionalPrice;
+    if (event) {
+      currentMenu.orderTotal += option.additionalPrice;
+      selectedChoice.push(option.id);
+      setSelectedChoice(selectedChoice);
+    } else {
+      currentMenu.orderTotal -= option.additionalPrice;
+      selectedChoice.filter((id: any) => id != option.id);
+      setSelectedChoice(selectedChoice);
+    }
     setCurrentMenu(JSON.parse(JSON.stringify(currentMenu)));
+  };
+
+  const handleMinusQuatity = () => {
+    if (quantity == 1) {
+      setquantity(0);
+      setOpen(false);
+      return;
+    }
+    setquantity(quantity - 1);
+  };
+
+  const handleAddItemClick = () => {
+    let payload = {
+      customizations: selectedChoice,
+      quantity: quantity,
+      menuItemId: menu.id,
+      tableSessionId: allTableSessions?.find(
+        (session) => session.tableId == tableId
+      ).id,
+    };
+    dispatch(addItemToCart(payload));
   };
   return (
     <ScrollArea className=" max-h-screen">
-      <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
-        <div>
-          {menu.Customizations?.map((item: any, index: number) => {
-            return (
-              <>
-                <div className="grid gap-3">
-                  <div>
-                    {" "}
-                    <div className="font-semibold text-muted-foreground">
-                      {item.name}
+      <>
+        <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
+          <div>
+            {menu.Customizations?.map((item: any, index: number) => {
+              return (
+                <>
+                  <div className="grid gap-3">
+                    <div>
+                      {" "}
+                      <div className="font-semibold text-muted-foreground">
+                        {item.name}
+                      </div>
+                      <div className="font-sm text-muted-foreground">
+                        {item.maxMultiSelect == 100
+                          ? " "
+                          : `Select any ${item.maxMultiSelect} options `}
+                      </div>
                     </div>
-                    <div className="font-sm text-muted-foreground">
-                      {item.maxMultiSelect == 100
-                        ? " "
-                        : `Select any ${item.maxMultiSelect} options `}
-                    </div>
-                  </div>
 
-                  <ul className="grid gap-3">
-                    {item.CustomizationChoices.map((options: any) => {
-                      return (
-                        <li className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2 w-full justify-between">
-                            <label
-                              htmlFor={options.id}
-                              className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              <div className="flex justify-between ">
-                                <div className="flex gap-5">
-                                  {options.dietType == "Vegetarian" && (
-                                    <VegIcon></VegIcon>
+                    <ul className="grid gap-3">
+                      {item.CustomizationChoices.map((options: any) => {
+                        return (
+                          <li className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2 w-full justify-between">
+                              <label
+                                htmlFor={options.id}
+                                className="text-sm w-full cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                <div className="flex justify-between ">
+                                  <div className="flex gap-5">
+                                    {options.dietType == "Vegetarian" && (
+                                      <VegIcon></VegIcon>
+                                    )}
+                                    <span className=" font-semibold">
+                                      {options.name}
+                                    </span>
+                                  </div>
+
+                                  {options.additionalPrice != 0 && (
+                                    <span>
+                                      {currencyMap.get(options.currency)}{" "}
+                                      {options.additionalPrice}
+                                    </span>
                                   )}
-                                  <span className=" font-semibold">
-                                    {options.name}
-                                  </span>
                                 </div>
+                              </label>
+                              <Checkbox
+                                id={options.id}
+                                onCheckedChange={(event) =>
+                                  handleCheckBoxClick(event, options)
+                                }
+                              />
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                  {index + 1 !== menu.Customizations?.length && (
+                    <Separator className="my-4" />
+                  )}{" "}
+                </>
+              );
+            })}
+          </div>
+        </CardContent>
+        <div className="flex justify-between gap-4">
+          <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
+            <Button
+              onClick={handleMinusQuatity}
+              variant="ghost"
+              size={"icon"}
+              className="h-10"
+            >
+              <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+            </Button>
 
-                                {options.additionalPrice != 0 && (
-                                  <span>
-                                    {currencyMap.get(options.currency)}{" "}
-                                    {options.additionalPrice}
-                                  </span>
-                                )}
-                              </div>
-                            </label>
-                            <Checkbox
-                              id={options.id}
-                              onCheckedChange={(event) =>
-                                handleCheckBoxClick(event, options)
-                              }
-                            />
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-                {index + 1 !== menu.Customizations?.length && (
-                  <Separator className="my-4" />
-                )}{" "}
-              </>
-            );
-          })}
-        </div>
-      </CardContent>
-      <div className="flex justify-between gap-4">
-        <div className="rounded-lg border bg-card h-10 flex items-center gap-2 w-fit">
-          <Button variant="ghost" size={"icon"} className="h-10">
-            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+            <span className="text-sm font-semibold">{quantity}</span>
+
+            <Button
+              onClick={() => setquantity(quantity + 1)}
+              variant="ghost"
+              size={"icon"}
+              className={" h-10 "}
+            >
+              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+            </Button>
+          </div>
+
+          <Button
+            size={"lg"}
+            className="h-10 w-full"
+            onClick={handleAddItemClick}
+          >
+            Add Item - {currencyMap.get(menu.currency)} {currentMenu.orderTotal}
           </Button>
-
-          <span className="text-sm font-semibold">{1}</span>
-
-          <Button variant="ghost" size={"icon"} className={" h-10 "}>
-            <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-          </Button>
         </div>
-
-        <Button size={"lg"} className="h-10 w-full">
-          Add Item - {currencyMap.get(menu.currency)} {currentMenu.orderTotal}
-        </Button>
-      </div>
+      </>
     </ScrollArea>
   );
 };
@@ -606,6 +661,7 @@ export const CustomizationComponent = ({ menu }: any) => {
 export function MenuAddButton({ menu }: any) {
   const [isOpen, setLocalOpen] = useState<boolean | undefined>(undefined);
   const [count, setCount] = useState<number>(0);
+  const { tableId } = useParams();
   const {
     open,
     setOpen,
@@ -633,7 +689,7 @@ export function MenuAddButton({ menu }: any) {
       setTitle("Edit Item");
       setDescription(" ");
       setComponent("customizationComponent");
-      setCompProps({ menu: menu });
+      setCompProps({ menu: menu, tableId });
     } else setCount(count + 1);
   };
 

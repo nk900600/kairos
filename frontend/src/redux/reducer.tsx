@@ -4,12 +4,15 @@ import {
   DeleteLeaveTypes,
   UpdateLeaveTypes,
   addEmployee,
+  addItemToCart,
   addTable,
   createAllLeaveTypes,
   createLeave,
   createMenu,
   createMenuCustomization,
+  createTableSession,
   deleteEmployees,
+  deleteItemToCart,
   deleteLeave,
   deleteMenu,
   deleteMenuCustomization,
@@ -20,6 +23,7 @@ import {
   fetchAllMenuCategories,
   fetchAllMenus,
   fetchAllOrders,
+  fetchAllTableSession,
   fetchDesgination,
   fetchTables,
   updateEmployees,
@@ -37,6 +41,8 @@ export interface RootState {
   allEmployees: any[];
   allLeavesTypes: any[];
   allMenu: any[];
+  allTableSessions: any[];
+  allCartData: any[];
   allLeaves: any[];
   allOrders: any[];
   allDesgination: any[];
@@ -49,7 +55,9 @@ const initialState: RootState = {
   alltables: [],
   allEmployees: [],
   allLeavesTypes: [],
+  allCartData: [],
   allLeaves: [],
+  allTableSessions: [],
   allDesgination: [],
   allMenu: [],
   allMenuCategories: [],
@@ -351,6 +359,44 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<any>) => {
           state.allMenu = state.allMenu.filter(
             (employee) => employee.id !== action.payload
+          );
+        }
+      )
+
+      // Table Session
+      .addCase(
+        createTableSession.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.alltables.findIndex(
+            (table) => table.id == action.payload.tableId
+          );
+
+          if (index !== -1) {
+            state.alltables[index].status = "Occupied";
+          }
+
+          state.allTableSessions.push(action.payload);
+        }
+      )
+      .addCase(
+        fetchAllTableSession.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allTableSessions = action.payload;
+        }
+      )
+
+      // Cart
+      .addCase(
+        addItemToCart.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allCartData.push(action.payload);
+        }
+      )
+      .addCase(
+        deleteItemToCart.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allCartData = state.allCartData.filter(
+            (data) => data.id != action.payload
           );
         }
       );

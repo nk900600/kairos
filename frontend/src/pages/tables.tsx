@@ -52,7 +52,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { useContext, useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { DrawerDialogComponent } from "../common/drawerDialog";
 
 import { useLocation } from "react-router-dom";
@@ -61,6 +61,7 @@ import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addTable,
+  createTableSession,
   deleteTable,
   fetchTables,
   updateTable,
@@ -126,6 +127,7 @@ export default function TableComponent() {
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   const handleClick = (e: any) => {
     setTableValue(e);
   };
@@ -200,6 +202,20 @@ export default function TableComponent() {
 
   const handleOnCheck = (status: any, table: any) => {
     dispatch(updateTableStatus({ id: table.id, status: status }));
+  };
+  const handleNewOrderClick = async (table: any) => {
+    await dispatch(
+      createTableSession({
+        startTime: Date.now(),
+        customerName: "",
+        customerMobile: 0,
+        tableId: table.id,
+      })
+    ).unwrap();
+    navigate("/place-order/table/" + table.id);
+  };
+  const handleOrderClick = async (table: any) => {
+    navigate("/place-order/table/" + table.id);
   };
   return (
     <>
@@ -280,6 +296,7 @@ export default function TableComponent() {
                         variant="outline"
                         size="sm"
                         className="w-full gap-2"
+                        onClick={() => handleNewOrderClick(table)}
                       >
                         <span>Create Order </span>
                       </Button>
@@ -367,8 +384,8 @@ export default function TableComponent() {
                         variant="outline"
                         size="sm"
                         className="w-full gap-2"
+                        onClick={() => handleOrderClick(table)}
                       >
-                        {/* <CirclePlus className="h-4 w-4" /> */}
                         <span className="">Create Order</span>
                       </Button>
                     </CardFooter>

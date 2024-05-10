@@ -194,14 +194,16 @@ function Sidebar() {
           </div>
         </div>
       </div>
+
+      {/* <Router basename="/"> */}
       <Routes>
         <Route path="/dashboard" Component={Dashboard} />
       </Routes>
       {!["/dashboard"].includes(location.pathname) && (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Routes>
-            <Route path="/tables" Component={TableComponent} />
-            <Route path="/menus" Component={MenusComponent}></Route>
+            <Route path="/tables" element={<TableComponent />} />
+            <Route path="/menus" element={<MenusComponent />} />
             <Route
               path="/menus/:id/customization"
               Component={CustomizationPage}
@@ -212,8 +214,8 @@ function Sidebar() {
             <Route path="/calender" Component={CalenderComponent} />
             <Route path="/place-order" Component={SelectTableComponent} />
             <Route
-              path="/place-order/table/:id"
-              Component={SelectItemsComponent}
+              path="/place-order/table/:tableId"
+              element={<SelectItemsComponent />}
             />
             <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
             <Route path="/settings" Component={MainSettings} />
@@ -221,6 +223,7 @@ function Sidebar() {
           </Routes>
         </main>
       )}
+      {/* </Router> */}
     </div>
   );
 }

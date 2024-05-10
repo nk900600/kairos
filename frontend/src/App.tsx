@@ -25,10 +25,10 @@ export function App() {
             <Route path="/login" Component={Login} />
           </Routes>
           <Sidebar></Sidebar>
-          <Toaster richColors />
         </Router>
-
         <DrawerDialogComponent />
+
+        <Toaster richColors />
       </DrawerProvider>
     </>
   );
