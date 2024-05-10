@@ -59,7 +59,15 @@ const TableSession = sequelize.define(
     foodRating: DataTypes.INTEGER,
     serviceRating: DataTypes.INTEGER,
     overallRating: DataTypes.INTEGER,
-
+    tableId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: true, // Ensure no two sessions can reference the same table
+      references: {
+        model: "Tables",
+        key: "id",
+      },
+    },
     firmId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -90,7 +98,7 @@ const TableSession = sequelize.define(
   }
 );
 // Define associations
-TableSession.belongsTo(Table, { as: "table" });
+// TableSession.belongsTo(Table, { as: "table" });
 // TableSession.hasMany(Order);
 
 // TableSession.sync({ alter: true });
@@ -102,5 +110,5 @@ TableSession.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;
 });
 
-// TableSession.sync({});
+// TableSession.sync({ alter: true });
 module.exports = { TableSession, SessionStatus, PaymentMethod, PaymentStatus };

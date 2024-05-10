@@ -28,7 +28,7 @@ class TableSessionController {
           firmId: req.user.firmId, // From Token
           ...req.body,
         },
-        { user: req.user.id } // for Tokern
+        { userId: req.user.id } // for Tokern
       );
       return res.status(201).json(newSession);
     } catch (error) {
@@ -47,7 +47,8 @@ class TableSessionController {
         {
           ...req.body,
         },
-        { where: { id: session.id } }
+        { where: { id: session.id } },
+        { userId: req.user.id } // for Tokern
       );
       const updatedSession = await TableSession.findByPk(session.id);
       return res.status(200).json(updatedSession);
@@ -103,10 +104,7 @@ class TableSessionController {
   async getallSession(req, res) {
     try {
       const sessions = await TableSession.findAll({
-        include: {
-          model: Table,
-          as: "table",
-        },
+        where: { firmId: req.user.firmId },
       });
       return res.status(200).json(sessions);
     } catch (error) {
