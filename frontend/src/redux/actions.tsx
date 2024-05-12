@@ -436,6 +436,20 @@ export const fetchAllTableSession = createAsyncThunk(
 );
 
 // Cart
+export const fetchAllCartData = createAsyncThunk(
+  "tables/fetchAllCartData",
+  async (tableSessionId: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/cart-items/${tableSessionId}`
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
 export const addItemToCart = createAsyncThunk(
   "tables/addItemToCart",
   async (payload: any, { rejectWithValue }) => {
@@ -452,14 +466,8 @@ export const updateItemToCart = createAsyncThunk(
   "tables/updateItemToCart",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let xx = {
-        customizations: [99],
-        quantity: 1,
-        menuItemId: 20,
-        tableSessionId: 3,
-      };
-      const response = await axios.post(`${BASE_URL}/cart-items/`, payload);
-      return response.data; // return the id to identify which table was deleted
+      await axios.put(`${BASE_URL}/cart-items/${payload.id}`, payload);
+      return payload; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
       return rejectWithValue("Failed to delete table");

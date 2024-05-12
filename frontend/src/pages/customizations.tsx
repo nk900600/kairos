@@ -64,11 +64,6 @@ export const CustomizationPage = () => {
     setCurrentMenu(mm);
   }, [allMenu]);
 
-  useEffect(() => {
-    dispatch(fetchAllMenus());
-    dispatch(fetchAllMenuCategories());
-  }, [dispatch]);
-
   const navigate = useNavigate();
   const handleButtonClick = () => {
     setOpen(true);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 import {
@@ -54,6 +54,16 @@ import SignUp from "../pages/signUp";
 import Login from "../pages/login";
 import { MainSettings } from "./settings/main";
 import { CustomizationPage } from "./customizations";
+import { AppDispatch } from "../redux/store";
+import {
+  fetchAllCartData,
+  fetchAllMenuCategories,
+  fetchAllMenus,
+  fetchAllOrders,
+  fetchAllTableSession,
+  fetchTables,
+} from "../redux/actions";
+import { useDispatch } from "react-redux";
 
 const allMenuItems = [
   {
@@ -110,6 +120,15 @@ const allMenuItemsCompany = [
 ];
 
 function Sidebar() {
+  const dispatch: AppDispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchTables());
+    dispatch(fetchAllTableSession());
+    // dispatch(fetchAllOrders());
+    dispatch(fetchAllMenus());
+    dispatch(fetchAllMenuCategories());
+  }, [dispatch]);
+
   const location = useLocation();
   const hideSidebarOnRoutes = ["/login", "/signup"];
   const showSidebar = !hideSidebarOnRoutes.includes(location.pathname);

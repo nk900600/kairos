@@ -17,6 +17,7 @@ import {
   deleteMenu,
   deleteMenuCustomization,
   deleteTable,
+  fetchAllCartData,
   fetchAllEmployees,
   fetchAllLeaveTypes,
   fetchAllLeaves,
@@ -27,6 +28,7 @@ import {
   fetchDesgination,
   fetchTables,
   updateEmployees,
+  updateItemToCart,
   updateLeave,
   updateLeaveStatus,
   updateMenu,
@@ -390,6 +392,23 @@ const counterSlice = createSlice({
         addItemToCart.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.allCartData.push(action.payload);
+        }
+      )
+      .addCase(
+        fetchAllCartData.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allCartData = action.payload
+        }
+      )
+      .addCase(
+        updateItemToCart.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allCartData.findIndex(
+            (table) => table.id == action.payload.id
+          );
+          if (index !== -1) {
+            state.allCartData[index].quantity = action.payload.quantity;
+          }
         }
       )
       .addCase(

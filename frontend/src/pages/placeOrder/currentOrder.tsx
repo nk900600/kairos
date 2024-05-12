@@ -20,7 +20,7 @@ import {
 } from "../../components/ui/sheet";
 import { Separator } from "../../components/ui/separator";
 import { ScrollArea } from "../../components/ui/scroll-area";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import {
   Select,
@@ -31,53 +31,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { currencyMap } from "../menus";
+import { AppDispatch } from "../../redux/store";
+import { useDispatch } from "react-redux";
+import { deleteItemToCart, updateItemToCart } from "../../redux/actions";
 
 const items = [1, 2, 3];
-export const CurrentOrder = ({ count = 0, menu }: any) => {
-  const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
-  let sheetProps: any = {
-    open: isOpen,
-    onOpenChange: (data: any) => {
-      setOpen(data);
-    },
+
+export function CurrentOrderContentComponent({ cart, tableSessionId }: any) {
+  const [cartData, setCartData] = useState<any>(cart);
+  const [totalAmount, setTotalAmount] = useState<any>(0);
+  const dispatch: AppDispatch = useDispatch();
+  useEffect(() => {
+    setTotalAmount(
+      cartData.reduce((total: any, item: any) => {
+        const itemTotal = item.quantity * item.MenuItem.price;
+        const customizationTotal = item.CartItemCustomizations.reduce(
+          (sum: any, customization: any) => {
+            return sum + customization.CustomizationChoice.additionalPrice;
+          },
+          0
+        );
+
+        return total + itemTotal + customizationTotal * item.quantity; // Multiply customization cost by item quantity
+      }, 0)
+    );
+  }, [cartData]);
+
+  const handleMinusClick = (cartItem: any, index: any) => {
+    let localCartData = JSON.parse(JSON.stringify(cartData));
+    if (cartItem.quantity == 1) {
+      localCartData[index].quantity = 0;
+      localCartData = localCartData.filter((val: any) => val.id != cartItem.id);
+      setCartData(localCartData);
+      dispatch(deleteItemToCart(cartItem.id));
+    } else {
+      let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
+      dispatch(updateItemToCart(payload)).unwrap();
+      localCartData[index].quantity = cartItem.quantity - 1;
+      setCartData(localCartData);
+    }
   };
-  const handlers = useSwipeable({
-    onSwipedRight: (eventData: any) => {
-      setOpen(false);
-    },
-  });
 
-  return (
-    <div className="flex items-center space-x-4">
-      <div className="rounded-lg border bg-card h-8 flex items-center gap-1">
-        {count !== 0 && (
-          <Button variant="ghost" size={"icon"} className="h-8">
-            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
-          </Button>
-        )}
+  const handleAddClick = (cartItem: any, index: any) => {
+    let localCartData = JSON.parse(JSON.stringify(cartData));
+    const payload = { quantity: cartItem.quantity + 1, id: cartItem.id };
+    dispatch(updateItemToCart(payload)).unwrap();
+    localCartData[index].quantity = cartItem.quantity + 1;
+    setCartData(localCartData);
+  };
 
-        {!count ? (
-          <span className={`text-sm font-semibold pl-4`}>Add</span>
-        ) : (
-          <span className="text-sm font-semibold">{count}</span>
-        )}
-
-        <Sheet {...sheetProps}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size={"icon"} className=" h-8 ">
-              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-full" {...handlers}>
-            <CurrentOrderContentComponent />
-          </SheetContent>
-        </Sheet>
-      </div>
-    </div>
-  );
-};
-
-export function CurrentOrderContentComponent() {
   return (
     <>
       <ScrollArea className="h-full ">
@@ -97,7 +100,7 @@ export function CurrentOrderContentComponent() {
         <div className="flex flex-col gap-4">
           <div className="">
             <Card>
-              {items.map((item) => {
+              {cartData.map((item: any, index: number) => {
                 return (
                   <CardContent className="grid gap-2.5 p-4">
                     <div className="flex items-start gap-4 items-center">
@@ -105,21 +108,31 @@ export function CurrentOrderContentComponent() {
                         <VegIcon className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <div className="font-medium">Paneer masala</div>
+                        <div className="font-medium">{item.MenuItem.name}</div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          #123456
+                          {item.CartItemCustomizations.map(
+                            (data: any) => data.CustomizationChoice.name
+                          ).join(", ")}
                         </div>
                       </div>
 
                       <div className="flex-col items-center space-x-4">
                         <div className="rounded-lg border bg-card h-6 flex items-center gap-1">
-                          <Button variant="ghost" size={"icon"} className="h-6">
+                          <Button
+                            onClick={() => handleMinusClick(item, index)}
+                            variant="ghost"
+                            size={"icon"}
+                            className="h-6"
+                          >
                             <MinusIcon className="h-4 w-4 -translate-x-0.5" />
                           </Button>
 
-                          <span className="text-sm font-semibold ">3</span>
+                          <span className="text-sm font-semibold ">
+                            {item.quantity}
+                          </span>
 
                           <Button
+                            onClick={() => handleAddClick(item, index)}
                             variant="ghost"
                             size={"icon"}
                             className=" h-6 "
@@ -128,53 +141,25 @@ export function CurrentOrderContentComponent() {
                           </Button>
                         </div>
                         <div className="ml-auto text-right">
-                          <div className="font-medium text-sm mt-1">$60.00</div>
+                          <div className="font-medium text-sm mt-1">
+                            {currencyMap.get(item.MenuItem.currency)}{" "}
+                            {(item.CartItemCustomizations.map(
+                              (choice: any) =>
+                                choice.CustomizationChoice.additionalPrice
+                            ).reduce((acc: any, val: any) => acc + val, 0) +
+                              item.MenuItem.price) *
+                              item.quantity}
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    {/* <div className="flex items-start gap-4">
-                <VegIcon className="h-5 w-5" />
-                <div className="flex-1">
-                  <div className="font-medium">Paneer masala</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    #123456
-                  </div>
-                  <div className="flex items-center gap-4 my-2">
-                    <div className="flex items-center space-x-4">
-                      <div className="rounded-lg border bg-card h-8 flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size={"icon"}
-                          className="h-8"
-                        >
-                          <MinusIcon className="h-4 w-4 -translate-x-0.5" />
-                        </Button>
-
-                        <span className="text-sm font-semibold ">3</span>
-
-                        <Button
-                          variant="ghost"
-                          size={"icon"}
-                          className=" h-8 "
-                        >
-                          <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="ml-auto text-right">
-                  <div className="font-medium">$60.00</div>
-                </div>
-              </div> */}
-                    {/* <Separator /> */}
                   </CardContent>
                 );
               })}
             </Card>
           </div>
-          <div className="space-y-4">
+          {/* TODO: Disocunt feature */}
+          {/* <div className="space-y-4">
             <Card>
               <CardContent className="grid gap-1 text-sm p-4">
                 <div className="flex items-center">
@@ -200,30 +185,39 @@ export function CurrentOrderContentComponent() {
                     </Select>
                   </div>
 
-                  {/* <div className="ml-auto">$60.00</div> */}
+                  <div className="ml-auto">$60.00</div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
           <div className="space-y-4">
             <Card>
               <CardContent className="grid gap-1 text-sm p-4">
                 <div className="flex items-center">
                   <div>Subtotal</div>
-                  <div className="ml-auto">$60.00</div>
+                  <div className="ml-auto">
+                    {" "}
+                    {currencyMap.get("INR")} {totalAmount}{" "}
+                  </div>
                 </div>
                 <div className="flex items-center">
-                  <div>Tax</div>
-                  <div className="ml-auto">$6.00</div>
+                  <div>GST 18%</div>
+                  <div className="ml-auto">
+                    {" "}
+                    {currencyMap.get("INR")} {(totalAmount * 0.18).toFixed(2)}
+                  </div>
                 </div>
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <div>Discount</div>
                   <div className="ml-auto">-$6.00</div>
-                </div>
+                </div> */}
                 <Separator className="border-color-gray-200" />
                 <div className="flex items-center font-medium">
                   <div>Total</div>
-                  <div className="ml-auto">$60.00</div>
+                  <div className="ml-auto">
+                    {currencyMap.get("INR")}{" "}
+                    {Math.round(totalAmount + totalAmount * 0.18)}{" "}
+                  </div>
                 </div>
               </CardContent>
             </Card>

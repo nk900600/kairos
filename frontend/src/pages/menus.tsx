@@ -65,10 +65,7 @@ import { Separator } from "../components/ui/separator";
 import { Children, useContext, useEffect, useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { useSwipeable } from "react-swipeable";
-import {
-  CurrentOrder,
-  CurrentOrderContentComponent,
-} from "./placeOrder/currentOrder";
+import { CurrentOrderContentComponent } from "./placeOrder/currentOrder";
 import { DrawerDialogComponent } from "../common/drawerDialog";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
@@ -78,9 +75,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import {
   addItemToCart,
+  deleteItemToCart,
   deleteMenu,
+  fetchAllCartData,
   fetchAllMenuCategories,
   fetchAllMenus,
+  updateItemToCart,
   updateMenu,
 } from "../redux/actions";
 import { RootState } from "../redux/reducer";
@@ -96,7 +96,7 @@ import {
 import ManageCustomization from "./modals/manageCustomization";
 import { convertToObject } from "typescript";
 
-const currencyMap = new Map([["INR", "₹"]]);
+export const currencyMap = new Map([["INR", "₹"]]);
 
 export function MenuHeaderComponent() {
   const {
@@ -165,17 +165,13 @@ export default function MenusComponent({ canPlaceOrder = false }) {
   } = useContext(DrawerContext);
 
   const navigate = useNavigate();
-  const { allMenu, allMenuCategories } = useSelector(
-    (state: { table: RootState }) => state.table
-  );
+  const { allMenu, allMenuCategories, allTableSessions, allCartData } =
+    useSelector((state: { table: RootState }) => state.table);
 
-  useEffect(() => {
-    dispatch(fetchAllMenus());
-    dispatch(fetchAllMenuCategories());
-  }, [dispatch]);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isOrderOpen, setOrderOpen] = useState(false);
   const [countMap, setcountMap] = useState<any>({});
+  const [tableSessionId, setTableSessionId] = useState<any>({});
 
   useEffect(() => {
     let countmap: any = {};
@@ -184,6 +180,19 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     });
     setcountMap(countmap);
   }, [allMenu]);
+
+  const { tableId } = useParams();
+
+  useEffect(() => {
+    // if (!allCartData.length) {
+    let id = allTableSessions?.find(
+      (session) => session.tableId == tableId
+    )?.id;
+    setTableSessionId(id);
+
+    dispatch(fetchAllCartData(id));
+    // }
+  }, [allTableSessions]);
 
   const handleOpenMenu = (w: any) => {
     setMenuOpen(w);
@@ -199,6 +208,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
   const currentOrdersProps = {
     handleOpenOrder,
     isOrderOpen,
+    tableSessionId,
   };
 
   const handleMenuClick = (menu: any) => {
@@ -350,17 +360,9 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                               <div className="ml-auto">
                                 {canPlaceOrder && (
                                   <MenuAddButton
-                                    // title={
-                                    //   <SheetTitle className="flex items-center gap-3">
-                                    //     <VegIcon className="h-5 w-5" />
-                                    //     {menu.name}
-                                    //   </SheetTitle>
-                                    // }
-                                    // description={menu.description}
                                     menu={menu}
-                                  >
-                                    {/* <CustomizationComponent menu={menu} /> */}
-                                  </MenuAddButton>
+                                    tableSessionId={tableSessionId}
+                                  />
                                 )}
 
                                 {!canPlaceOrder && (
@@ -457,8 +459,22 @@ export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
     </Popover>
   );
 }
-export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
+export function ShowCurrentOrder({
+  handleOpenMenu,
+  isMenuOpen,
+  tableSessionId,
+}: any) {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
+  const [currentCartData, setCurrentCartData] = useState<any>([]);
+  const { allCartData } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+
+  useEffect(() => {
+    setCurrentCartData(
+      allCartData.filter((val) => val.tableSessionId == tableSessionId)
+    );
+  }, [allCartData]);
   let sheetProps: any = {
     open: isOpen,
     onOpenChange: (data: any) => {
@@ -484,9 +500,14 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
                 <X className="h-4 w-4" />
               ) : (
                 <>
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-1 text-xs font-semibold leading-none bg-red-500 text-white rounded-full">
-                    2
-                  </span>
+                  {!!currentCartData.length ? (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-1 text-xs font-semibold leading-none bg-red-500 text-white rounded-full">
+                      {currentCartData.length}
+                    </span>
+                  ) : (
+                    ""
+                  )}
+
                   <ShoppingBag className="h-4 w-4" />
                 </>
               )}
@@ -494,26 +515,29 @@ export function ShowCurrentOrder({ handleOpenMenu, isMenuOpen }: any) {
           </div>
         </SheetTrigger>
         <SheetContent className="w-full" {...handlers}>
-          <CurrentOrderContentComponent />
+          <CurrentOrderContentComponent
+            tableSessionId={tableSessionId}
+            cart={currentCartData}
+          />
         </SheetContent>
       </Sheet>
     </>
   );
 }
 
-export const CustomizationComponent = ({ menu, tableId }: any) => {
+export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
   const [currentMenu, setCurrentMenu] = useState(
     JSON.parse(JSON.stringify(menu))
   );
 
-  console.log(useParams());
-
-  const { allTableSessions } = useSelector(
+  const { allTableSessions, allCartData } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const { setOpen } = useContext(DrawerContext);
   const [selectedChoice, setSelectedChoice] = useState<any>([]);
-  const [quantity, setquantity] = useState(1);
+  const [quantity, setquantity] = useState(
+    allCartData.find((val) => val.menuItemId == menu.id).quantity
+  );
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
@@ -548,11 +572,10 @@ export const CustomizationComponent = ({ menu, tableId }: any) => {
       customizations: selectedChoice,
       quantity: quantity,
       menuItemId: menu.id,
-      tableSessionId: allTableSessions?.find(
-        (session) => session.tableId == tableId
-      ).id,
+      tableSessionId: tableSessionId,
     };
     dispatch(addItemToCart(payload));
+    setOpen(false);
   };
   return (
     <ScrollArea className=" max-h-screen">
@@ -658,10 +681,15 @@ export const CustomizationComponent = ({ menu, tableId }: any) => {
   );
 };
 
-export function MenuAddButton({ menu }: any) {
+export function MenuAddButton({ menu, tableSessionId }: any) {
+  const { allTableSessions, allCartData } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+
   const [isOpen, setLocalOpen] = useState<boolean | undefined>(undefined);
-  const [count, setCount] = useState<number>(0);
-  const { tableId } = useParams();
+  const [count, setCount] = useState<number>(
+    allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 0
+  );
   const {
     open,
     setOpen,
@@ -671,12 +699,14 @@ export function MenuAddButton({ menu }: any) {
     setDescription,
     setCompProps,
   } = useContext(DrawerContext);
+  const dispatch: AppDispatch = useDispatch();
   let sheetProps: any = {
     open: isOpen,
     onOpenChange: (data: any) => {
       setLocalOpen(data);
     },
   };
+
   const handlers = useSwipeable({
     onSwipedRight: (eventData: any) => {
       setLocalOpen(false);
@@ -689,12 +719,34 @@ export function MenuAddButton({ menu }: any) {
       setTitle("Edit Item");
       setDescription(" ");
       setComponent("customizationComponent");
-      setCompProps({ menu: menu, tableId });
-    } else setCount(count + 1);
+      setCompProps({ menu: menu, tableSessionId });
+    } else {
+      setCount(count + 1);
+      let payload: any = {
+        customizations: [],
+        quantity: count + 1,
+        menuItemId: menu.id,
+        tableSessionId: tableSessionId,
+      };
+      let cartData = allCartData.find((val) => val.menuItemId == menu.id);
+      if (cartData) {
+        payload = { quantity: count + 1, id: cartData.id };
+        dispatch(updateItemToCart(payload));
+      } else dispatch(addItemToCart(payload));
+    }
   };
 
   const handleMinusClick = () => {
-    count == 1 ? setCount(0) : setCount(count - 1);
+    let cartData = allCartData.find((val) => val.menuItemId == menu.id);
+
+    if (count == 1) {
+      setCount(0);
+      dispatch(deleteItemToCart(cartData.id));
+    } else {
+      setCount(count - 1);
+      let payload = { quantity: count - 1, id: cartData.id };
+      dispatch(updateItemToCart(payload));
+    }
   };
   return (
     <div className="flex items-center space-x-4">

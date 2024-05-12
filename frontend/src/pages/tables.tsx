@@ -63,6 +63,7 @@ import {
   addTable,
   createTableSession,
   deleteTable,
+  fetchAllTableSession,
   fetchTables,
   updateTable,
   updateTableStatus,
@@ -86,6 +87,7 @@ import {
   FormMessage,
 } from "../components/ui/form";
 import DrawerContext from "../context/drawerContext";
+import EmptyPlaceholder from "./common/emptyPlaceholder";
 
 const AllDesgination = [
   {
@@ -121,8 +123,8 @@ export default function TableComponent() {
   } = useContext(DrawerContext);
   let query = useQuery();
 
-  const tables = useSelector(
-    (state: { table: RootState }) => state.table.alltables
+  const { alltables: tables, allTableSessions } = useSelector(
+    (state: { table: RootState }) => state.table
   );
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
@@ -135,7 +137,6 @@ export default function TableComponent() {
   useEffect(() => {
     let mytables = query.get("mytables");
     if (mytables) setTableValue("occupied");
-    dispatch(fetchTables());
   }, [dispatch]);
 
   const handleEditClick = (table: any) => {
@@ -217,6 +218,11 @@ export default function TableComponent() {
   const handleOrderClick = async (table: any) => {
     navigate("/place-order/table/" + table.id);
   };
+
+  const allAvailableTables = tables.filter(
+    (table: any) => table.status == "Available"
+  );
+
   return (
     <>
       <BreadcrumbComponent
@@ -258,53 +264,59 @@ export default function TableComponent() {
         </TabsList>
         <TabsContent value="available">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {tables
-              .filter((table: any) => table.status == "Available")
-              .map((table: any) => {
-                return (
-                  <Card className="flex w-full flex-col items">
-                    <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
-                      <div className=" flex w-full items-center gap-3 rounded-md ">
-                        <Ratio className=" h-6 w-6 " />
-                        <div className="flex-col">
-                          <CardTitle className="text-base">
-                            {table.tableName}
-                          </CardTitle>
+            {allAvailableTables.map((table: any) => {
+              return (
+                <Card className="flex w-full flex-col items">
+                  <CardHeader className="flex p-4 gap-2 lg:p-6 md:p-6">
+                    <div className=" flex w-full items-center gap-3 rounded-md ">
+                      <Ratio className=" h-6 w-6 " />
+                      <div className="flex-col">
+                        <CardTitle className="text-base">
+                          {table.tableName}
+                        </CardTitle>
 
-                          <CardDescription className="text-xs">
-                            Seats {table.capacity}
-                          </CardDescription>
-                        </div>
-                        <div className="ml-auto">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="  h-8 w-8 "
-                              >
-                                <Ellipsis className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            {DropdownMenuList(table)}
-                          </DropdownMenu>
-                        </div>
+                        <CardDescription className="text-xs">
+                          Seats {table.capacity}
+                        </CardDescription>
                       </div>
-                    </CardHeader>
-                    <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full gap-2"
-                        onClick={() => handleNewOrderClick(table)}
-                      >
-                        <span>Create Order </span>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
+                      <div className="ml-auto">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="  h-8 w-8 "
+                            >
+                              <Ellipsis className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          {DropdownMenuList(table)}
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2"
+                      onClick={() => handleNewOrderClick(table)}
+                    >
+                      <span>Create Order </span>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
+          {!allAvailableTables?.length && (
+            <EmptyPlaceholder
+              title="No Tables Available"
+              description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
+              buttonText=""
+              image="./closed_stores.gif"
+            ></EmptyPlaceholder>
+          )}
         </TabsContent>
         <TabsContent value="occupied">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
@@ -392,6 +404,15 @@ export default function TableComponent() {
                   </Card>
                 );
               })}
+
+            {/* {!availbleTables?.length && (
+              <EmptyPlaceholder
+                title="No Tables Available"
+                description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
+                buttonText=""
+                image="./closed_stores.gif"
+              ></EmptyPlaceholder>
+            )} */}
           </div>
         </TabsContent>
         <TabsContent value="others">

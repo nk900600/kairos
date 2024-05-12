@@ -681,11 +681,6 @@ export default function OrdersComponent() {
   });
 
   useEffect(() => {
-    dispatch(fetchAllOrders());
-    dispatch(fetchTables());
-  }, [dispatch]);
-
-  useEffect(() => {
     let data = JSON.parse(JSON.stringify(alltables)).map((data: any) => ({
       ...data,
       checked: false,

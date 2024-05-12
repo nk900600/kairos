@@ -80,11 +80,6 @@ export default function SelectTableComponent({ step = "table" }) {
 
 export function TableComponent({ handleTableClick }: any) {
   const [currentStep, setCurrentStep] = useState("table");
-  const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchTables());
-    dispatch(fetchAllTableSession());
-  }, [dispatch]);
 
   const { alltables: tables, allTableSessions } = useSelector(
     (state: { table: RootState }) => state.table
@@ -95,8 +90,6 @@ export function TableComponent({ handleTableClick }: any) {
     .filter(
       (val) => !allTableSessions.map((tab) => tab.tableId).includes(val.id)
     );
-
-  const handleButtonClick = () => {};
 
   return (
     <>
