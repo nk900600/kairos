@@ -39,32 +39,48 @@ class CartController {
         }
 
       await transaction.commit();
-      res.status(201).json(cartItem);
-    } catch (error) {
-      await transaction.rollback();
-      res.status(500).json({ message: error.message });
-    }
-  }
 
-  async getCartDetails(req, res) {
-    try {
-      if (!req.body?.tableSessionId) {
-        return res
-          .status(400)
-          .json({ message: "Missing tableSessionId field" });
-      }
-      const cartItems = await CartItem.findAll({
+      const returObj = await CartItem.findByPk(cartItem.id, {
         include: [
           {
             model: MenuItem,
-            attributes: ["id", "name", "price", "description"],
+            attributes: ["id", "name", "price", "description", "currency"],
           },
           {
             model: CartItemCustomization,
             include: [
               {
                 model: CustomizationChoice,
-                attributes: ["id", "name", "description"],
+                attributes: ["id", "name", "description", "additionalPrice"],
+              },
+            ],
+          },
+        ],
+        attributes: ["id", "quantity", "menuItemId", "tableSessionId"],
+      });
+
+      res.status(201).json(returObj);
+    } catch (error) {
+      await transaction.rollback();
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  async getCartDetailsByTableSessions(req, res) {
+    try {
+      const cartItems = await CartItem.findAll({
+        where: { tableSessionId: req.params.tableSessionId },
+        include: [
+          {
+            model: MenuItem,
+            attributes: ["id", "name", "price", "description", "currency"],
+          },
+          {
+            model: CartItemCustomization,
+            include: [
+              {
+                model: CustomizationChoice,
+                attributes: ["id", "name", "description", "additionalPrice"],
               },
             ],
           },
@@ -91,7 +107,27 @@ class CartController {
       if (cartItem) {
         cartItem.quantity = quantity;
         await cartItem.save();
-        res.json(cartItem);
+
+        const returObj = await CartItem.findByPk(cartItem.id, {
+          include: [
+            {
+              model: MenuItem,
+              attributes: ["id", "name", "price", "description", "currency"],
+            },
+            {
+              model: CartItemCustomization,
+              include: [
+                {
+                  model: CustomizationChoice,
+                  attributes: ["id", "name", "description", "additionalPrice"],
+                },
+              ],
+            },
+          ],
+          attributes: ["id", "quantity", "menuItemId", "tableSessionId"],
+        });
+
+        res.status(201).json(returObj);
       } else {
         res.status(404).json({ message: "Cart item not found" });
       }

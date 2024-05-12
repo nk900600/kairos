@@ -1,3 +1,4 @@
+const { TableStatus } = require("../enums/tables.enum.js");
 const { Table } = require("../models/table.model.js");
 const {
   TableSession,
@@ -30,6 +31,13 @@ class TableSessionController {
         },
         { userId: req.user.id } // for Tokern
       );
+      await Table.update(
+        {
+          status: TableStatus.OCCUPIED,
+        },
+        { where: { id: req.body?.tableId } }
+      );
+
       return res.status(201).json(newSession);
     } catch (error) {
       return res.status(500).json({ message: error.message });
