@@ -17,9 +17,12 @@ class OrderController {
     const transaction = await sequelize.transaction();
 
     try {
-      const order = await Order.create(orderDetails, {
-        userId: req.user.id,
-      });
+      const order = await Order.create(
+        { ...orderDetails, firmId: req.user.firmId },
+        {
+          userId: req.user.id,
+        }
+      );
 
       // Inside the createOrder method
 
@@ -91,12 +94,6 @@ class OrderController {
           },
           {
             model: TableSession,
-            include: [
-              {
-                model: Table,
-                as: "table",
-              },
-            ],
           },
         ],
       });
