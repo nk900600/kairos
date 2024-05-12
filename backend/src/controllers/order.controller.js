@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const sequelize = require("../db/db");
-const { CustomizationChoice } = require("../models/menuItem.model");
+const { CustomizationChoice, MenuItem } = require("../models/menuItem.model");
 const {
   Order,
   OrderItem,
@@ -8,10 +8,20 @@ const {
 } = require("../models/order.model");
 const { TableSession } = require("../models/tableSession.model");
 const { Table } = require("../models/table.model");
+const { CartItem } = require("../models/cart.model");
 
 class OrderController {
   // Create a new order
   async create(req, res) {
+    if (
+      !req.body?.tableSessionId ||
+      !req.body?.orderItems ||
+      !req.body?.totalAmount ||
+      !req.body?.status
+    ) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const { orderItems, ...orderDetails } = req.body;
 
     const transaction = await sequelize.transaction();
@@ -55,6 +65,13 @@ class OrderController {
 
       await Promise.all(orderItemPromises);
 
+      //delete all cart item
+      await CartItem.destroy(
+        {
+          where: { tableSessionId: orderDetails.tableSessionId },
+        },
+        { transaction }
+      );
       await transaction.commit();
 
       const createdOrder = await Order.findByPk(order.id, {
@@ -89,6 +106,9 @@ class OrderController {
             include: [
               {
                 model: CustomizationChoice,
+              },
+              {
+                model: MenuItem,
               },
             ],
           },
@@ -178,6 +198,9 @@ class OrderController {
             include: [
               {
                 model: CustomizationChoice,
+              },
+              {
+                model: MenuItem,
               },
             ],
           },

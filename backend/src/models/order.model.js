@@ -25,33 +25,22 @@ const OrderStatuses = Object.freeze({
 });
 
 // Define the OrderItem model
-const OrderItem = sequelize.define(
-  "OrderItem",
-  {
-    quantity: DataTypes.INTEGER,
-    amount: DataTypes.INTEGER,
-    currency: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "INR", // Set a default currency if applicable
-    },
-    specialInstructions: DataTypes.STRING,
-    isCompleted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Set a default currency if applicable
-    },
-
-    // Foreign keys for menuItem and customizations will be added below
+const OrderItem = sequelize.define("OrderItem", {
+  quantity: DataTypes.INTEGER,
+  amount: DataTypes.INTEGER,
+  currency: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "INR", // Set a default currency if applicable
   },
-  {
-    indexes: [
-      {
-        unique: true,
-        fields: ["OrderId", "MenuItemId"],
-      },
-    ],
-  }
-);
+  specialInstructions: DataTypes.STRING,
+  isCompleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Set a default currency if applicable
+  },
+
+  // Foreign keys for menuItem and customizations will be added below
+});
 
 // Define the Order model
 const Order = sequelize.define(
