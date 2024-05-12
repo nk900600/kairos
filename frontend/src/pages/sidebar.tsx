@@ -57,6 +57,7 @@ import { CustomizationPage } from "./customizations";
 import { AppDispatch } from "../redux/store";
 import {
   fetchAllCartData,
+  fetchAllEmployees,
   fetchAllMenuCategories,
   fetchAllMenus,
   fetchAllOrders,
@@ -126,6 +127,7 @@ function Sidebar() {
     dispatch(fetchAllTableSession());
     // dispatch(fetchAllOrders());
     dispatch(fetchAllMenus());
+    dispatch(fetchAllEmployees());
     dispatch(fetchAllMenuCategories());
   }, [dispatch]);
 

@@ -188,9 +188,10 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     let id = allTableSessions?.find(
       (session) => session.tableId == tableId
     )?.id;
-    setTableSessionId(id);
-
-    dispatch(fetchAllCartData(id));
+    if (id) {
+      setTableSessionId(id);
+      dispatch(fetchAllCartData(id));
+    }
     // }
   }, [allTableSessions]);
 
@@ -706,6 +707,12 @@ export function MenuAddButton({ menu, tableSessionId }: any) {
       setLocalOpen(data);
     },
   };
+
+  useEffect(() => {
+    setCount(
+      allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 0
+    );
+  }, [allCartData]);
 
   const handlers = useSwipeable({
     onSwipedRight: (eventData: any) => {

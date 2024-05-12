@@ -87,8 +87,10 @@ import {
   FormMessage,
 } from "../components/ui/form";
 import DrawerContext from "../context/drawerContext";
-import EmptyPlaceholder from "./common/emptyPlaceholder";
-
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
+import { dateConvertor } from "../util/date";
+import { format } from "date-fns";
+import { LiveTimer } from "../hooks/liveTImer";
 const AllDesgination = [
   {
     id: 0,
@@ -123,9 +125,11 @@ export default function TableComponent() {
   } = useContext(DrawerContext);
   let query = useQuery();
 
-  const { alltables: tables, allTableSessions } = useSelector(
-    (state: { table: RootState }) => state.table
-  );
+  const {
+    alltables: tables,
+    allTableSessions,
+    allEmployees,
+  } = useSelector((state: { table: RootState }) => state.table);
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
   const dispatch: AppDispatch = useDispatch();
@@ -314,7 +318,7 @@ export default function TableComponent() {
               title="No Tables Available"
               description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
               buttonText=""
-              image="./closed_stores.gif"
+              type="table"
             ></EmptyPlaceholder>
           )}
         </TabsContent>
@@ -354,6 +358,20 @@ export default function TableComponent() {
                             <span className="sr-only">Back</span>
                           </Button>
                         </div> */}
+                        <div className="ml-auto">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="  h-8 w-8 "
+                              >
+                                <Ellipsis className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            {DropdownMenuList(table)}
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
@@ -368,20 +386,54 @@ export default function TableComponent() {
                           <span>
                             {table.status != "Occupied"
                               ? table.reservationName
-                              : "Dummy Name"}
+                              : allEmployees?.find(
+                                  (val) => val.id == table.createdBy
+                                )?.firstName +
+                                " " +
+                                allEmployees?.find(
+                                  (val) => val.id == table.createdBy
+                                )?.lastName}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center">
                         <ClockIcon className="h-3 w-3 mr-1.5" />
                         <div className="text-sm">
-                          <span className="text-muted-foreground text-xs">
+                          <span className="text-muted-foreground text-xs ">
                             {table.status != "Occupied"
                               ? "Reservation at:"
                               : "Timer:"}
                           </span>
                           {"  "}
-                          <span>20 mins 52 sec</span>
+                          <span>
+                            {/* {allTableSessions?.find(
+                              (session) => session.tableId == table.id
+                            )?.startTime
+                              ? format(
+                                  allTableSessions?.find(
+                                    (session) => session.tableId == table.id
+                                  )?.startTime || Date.now(),
+                                  "HH:mm:ss"
+                                )
+
+
+                              : ""} */}
+
+                            {/* <LiveTimer/> */}
+
+                            {allTableSessions?.find(
+                              (session) => session.tableId == table.id
+                            )?.startTime && (
+                              <LiveTimer
+                                key={table.id}
+                                initialDate={
+                                  allTableSessions?.find(
+                                    (session) => session.tableId == table.id
+                                  )?.startTime
+                                }
+                              />
+                            )}
+                          </span>
                         </div>
                       </div>
                     </CardContent>

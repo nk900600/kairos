@@ -14,7 +14,7 @@ import {
   fetchTables,
 } from "../../redux/actions";
 import { RootState } from "../../redux/reducer";
-import EmptyPlaceholder from "../common/emptyPlaceholder";
+import { EmptyPlaceholder } from "../common/emptyPlaceholder";
 
 const header: any = {
   table: {
@@ -115,7 +115,6 @@ export function TableComponent({ handleTableClick }: any) {
             title="No Tables Available"
             description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
             buttonText=""
-            image="./closed_stores.gif"
           ></EmptyPlaceholder>
         )}
       </div>

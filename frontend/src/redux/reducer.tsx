@@ -10,6 +10,7 @@ import {
   createLeave,
   createMenu,
   createMenuCustomization,
+  createOrder,
   createTableSession,
   deleteEmployees,
   deleteItemToCart,
@@ -168,6 +169,12 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allOrders = action.payload;
           state.isLoading = false;
+        }
+      )
+      .addCase(
+        createOrder.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allOrders.push(action.payload);
         }
       )
 

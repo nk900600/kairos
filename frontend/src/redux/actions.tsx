@@ -153,6 +153,19 @@ export const fetchAllOrders = createAsyncThunk(
   }
 );
 
+export const createOrder = createAsyncThunk(
+  "tables/createOrder",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/orders/`, payload);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
 // Leaves types
 export const fetchAllLeaveTypes = createAsyncThunk(
   "tables/fetchAllLeaveTypes",

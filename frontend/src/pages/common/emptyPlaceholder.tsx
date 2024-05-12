@@ -5,20 +5,26 @@
  */
 import { Button } from "../../components/ui/button";
 // import Hamburger from "/Hamburger.gif";
-export default function EmptyPlaceholder({
+
+const imageMapper: any = {
+  customization: "../../Hamburger.gif",
+  table: "../../closed_stores.gif",
+  currentOrder: "../..//Empty.gif",
+};
+export const EmptyPlaceholder = ({
+  type,
   title = "No customization yet",
   description = "Get started by adding your first customization",
   buttonText = "Add customization",
-  image = "Hamburger.gif",
   onButtonClick = () => {},
-}) {
-  return (
+}: any) => {
+return (
     <div className="flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12">
       <img
         alt="Empty state illustration"
         className="w-full max-w-[300px]"
         height="00"
-        src={image}
+        src={imageMapper[type]}
         width="300"
       />
       <div className="space-y-2 text-center">
@@ -32,4 +38,4 @@ export default function EmptyPlaceholder({
       </div>
     </div>
   );
-}
+};

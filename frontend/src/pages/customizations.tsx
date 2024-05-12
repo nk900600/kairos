@@ -33,7 +33,7 @@ import {
   Table,
 } from "../components/ui/table";
 import { AppDispatch } from "../redux/store";
-import EmptyPlaceholder from "./common/emptyPlaceholder";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 import DrawerContext from "../context/drawerContext";
 import {
   deleteMenuCustomization,
@@ -180,6 +180,7 @@ export const CustomizationPage = () => {
           "Customizations" in currentMenu && currentMenu.Customizations.length
         ) && (
           <EmptyPlaceholder
+            type="customization"
             onButtonClick={handleButtonClick}
           ></EmptyPlaceholder>
         )}
