@@ -487,6 +487,10 @@ export function ShowCurrentOrder({
       setOpen(false);
     },
   });
+
+  const handleOnCloseClick = () => {
+    setOpen(false);
+  };
   return (
     <>
       <Sheet {...sheetProps}>
@@ -519,6 +523,7 @@ export function ShowCurrentOrder({
           <CurrentOrderContentComponent
             tableSessionId={tableSessionId}
             cart={currentCartData}
+            onCloseClick={handleOnCloseClick}
           />
         </SheetContent>
       </Sheet>
@@ -537,7 +542,7 @@ export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
   const { setOpen } = useContext(DrawerContext);
   const [selectedChoice, setSelectedChoice] = useState<any>([]);
   const [quantity, setquantity] = useState(
-    allCartData.find((val) => val.menuItemId == menu.id).quantity
+    allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 1
   );
   const dispatch: AppDispatch = useDispatch();
 

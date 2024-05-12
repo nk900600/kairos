@@ -38,6 +38,9 @@ import { CommandSeparator } from "../components/ui/command";
 import { Separator } from "../components/ui/separator";
 import { GoBackButton } from "./common/goBackButton";
 import { BreadcrumbComponent } from "./common/breadCrumbs";
+import { RootState } from "../redux/reducer";
+import { useSelector } from "react-redux";
+import { LiveTimerMinSec } from "../hooks/liveTImer";
 
 const AllDesgination = [
   {
@@ -62,29 +65,23 @@ const AllDesgination = [
   },
 ];
 
-const orders = [1, 2, 3, 4];
+const OrderStatuses = Object.freeze({
+  ADDED_TO_ORDER: "Added to Order",
+  MODIFIED: "Modified",
+  CONFIRMED: "Confirmed",
+  PREPARING: "Preparing",
+  READY_FOR_PICKUP: "Ready for Pickup",
+  CANCELLED: "Cancelled",
+  SERVED: "Served",
+  COMPLETED: "Completed",
+});
 
 export default function ChefsPanelComponent() {
-  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {}, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds((seconds) => seconds + 1);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatTime = (time: any) => {
-    const seconds = `0${time % 60}`.slice(-2);
-    const minutes = `0${Math.floor(time / 60)}`.slice(-2);
-    const getHours = `0${Math.floor(time / 3600)}`.slice(-2);
-
-    if (getHours != "00") {
-      return `${getHours}:${minutes}:${seconds}`;
-    }
-    return `${minutes}:${seconds}`;
-  };
+  const { allOrders, alltables, allEmployees } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
 
   return (
     <>
@@ -123,97 +120,120 @@ export default function ChefsPanelComponent() {
         )} */}
       </div>
       <Tabs defaultValue="incoming" className="w-full ">
-        <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-3">
-          <TabsTrigger value="incoming">Incoming</TabsTrigger>
+        <TabsList className="grid w-full mb-4 lg:w-1/2 grid-cols-2">
+          <TabsTrigger value="incoming">
+            Incoming
+            {!!allOrders.filter(
+              (val: any) => val.status == OrderStatuses.CONFIRMED
+            ).length
+              ? " ( " +
+                allOrders.filter(
+                  (val: any) => val.status == OrderStatuses.CONFIRMED
+                ).length +
+                " )"
+              : ""}
+          </TabsTrigger>
           <TabsTrigger value="preparing">Preparing</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="incoming">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {orders.map((val) => {
-              return (
-                <Card key="1" className="w-full max-w-sm">
-                  <CardHeader className="p-4 lg:p-6 md:p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex flex-col items-center w-[50px]">
-                        <ClockIcon className="h-5 w-5" />
-                        <CardTitle className="text-sm">
-                          {formatTime(seconds)}
-                        </CardTitle>
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-base">Table - 5</CardTitle>
+            {allOrders
+              .filter((val) => val.status == OrderStatuses.CONFIRMED)
+              .map((val: any) => {
+                return (
+                  <Card key="1" className="w-full">
+                    <CardHeader className="p-4 lg:p-6 md:p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex flex-col items-center w-[50px]">
+                          <ClockIcon className="h-5 w-5" />
+                          <CardTitle className="text-sm">
+                            <LiveTimerMinSec initialDate={val.orderDate} />
+                          </CardTitle>
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-base">
+                            {
+                              alltables?.find(
+                                (table: any) =>
+                                  table.id == val?.TableSession?.tableId
+                              )?.tableName
+                            }
+                          </CardTitle>
 
-                        <CardDescription className="text-xs">
-                          Order no - 123
-                        </CardDescription>
-                      </div>
+                          <CardDescription className="text-xs">
+                            {
+                              allEmployees?.find(
+                                (contact) => contact.id == val.createdBy
+                              )?.firstName
+                            }{" "}
+                            {
+                              allEmployees?.find(
+                                (contact) => contact.id == val.createdBy
+                              )?.lastName
+                            }
+                          </CardDescription>
+                        </div>
 
-                      <div className="ml-auto">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="  h-8 w-8 "
-                            >
-                              <Ellipsis className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-56" align="end">
-                            <DropdownMenuLabel>Mark as</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
+                        <div className="ml-auto">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="  h-8 w-8 "
+                              >
+                                <Ellipsis className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56" align="end">
+                              <DropdownMenuLabel>Mark as</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
 
-                            {AllDesgination.map((data, i) => {
-                              return (
-                                <DropdownMenuCheckboxItem>
-                                  {data.value}
-                                </DropdownMenuCheckboxItem>
-                              );
-                            })}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              {AllDesgination.map((data, i) => {
+                                return (
+                                  <DropdownMenuCheckboxItem>
+                                    {data.value}
+                                  </DropdownMenuCheckboxItem>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
-                    <div className="grid gap-2">
-                      <div className="flex items-center gap-3">
-                        <VegIcon />
-                        <Checkbox id="terms1" />
-                        <label htmlFor="terms1" className="w-full ">
-                          <div className="grid gap-1 text-sm">
-                            <div className="font-medium">
-                              1 x Spaghetti Bolognese
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Due in 5 mins
-                            </div>
-                          </div>
-                        </label>
+                    </CardHeader>
+                    <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                      <div className="grid gap-2">
+                        {val.orderItems.map((item: any) => {
+                          return (
+                            <>
+                              <div className="flex items-center gap-3">
+                                <VegIcon />
+                                <Checkbox id={item.id} />
+                                <label htmlFor={item.id} className="w-full ">
+                                  <div className="grid gap-1 text-sm">
+                                    <div className="font-medium">
+                                      {item.quantity} x {item.MenuItem.name}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      {item.CustomizationChoices.map(
+                                        (choice: any) => choice.name
+                                      ).join(",")}
+                                    </div>
+                                  </div>
+                                </label>
+                              </div>
+                            </>
+                          );
+                        })}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <VegIcon />
-
-                        <Checkbox id="terms2" />
-                        <label htmlFor="terms2" className="w-full ">
-                          <div className="grid gap-1 text-sm">
-                            <div className="font-medium">2 x Iced Tea</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Due in 3 mins
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   flex justify-center">
-                    <Button className="w-full">Start preparing</Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                    <CardFooter className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   flex justify-center">
+                      <Button className="w-full">Start preparing</Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
           </div>
         </TabsContent>
 
@@ -224,7 +244,7 @@ export default function ChefsPanelComponent() {
                 <div className="flex flex-col items-center w-[50px]">
                   <ClockIcon className="h-5 w-5" />
                   <CardTitle className="text-sm">
-                    {formatTime(seconds)}
+                    {/* {formatTime(seconds)} */}
                   </CardTitle>
                 </div>
                 <div className="flex-1">

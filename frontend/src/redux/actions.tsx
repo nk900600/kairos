@@ -499,3 +499,9 @@ export const deleteItemToCart = createAsyncThunk(
     }
   }
 );
+export const deleteAllCartItemFromTableSession = createAsyncThunk(
+  "tables/deleteAllCartItemFromTableSession",
+  async (tableSession: any, { rejectWithValue }) => {
+    return tableSession; // return the id to identify which table was deleted
+  }
+);

@@ -123,11 +123,11 @@ const allMenuItemsCompany = [
 function Sidebar() {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
+    dispatch(fetchAllEmployees());
     dispatch(fetchTables());
     dispatch(fetchAllTableSession());
-    // dispatch(fetchAllOrders());
+    dispatch(fetchAllOrders());
     dispatch(fetchAllMenus());
-    dispatch(fetchAllEmployees());
     dispatch(fetchAllMenuCategories());
   }, [dispatch]);
 

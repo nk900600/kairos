@@ -36,6 +36,7 @@ import { AppDispatch } from "../../redux/store";
 import { useDispatch } from "react-redux";
 import {
   createOrder,
+  deleteAllCartItemFromTableSession,
   deleteItemToCart,
   updateItemToCart,
 } from "../../redux/actions";
@@ -43,10 +44,16 @@ import { EmptyPlaceholder } from "../common/emptyPlaceholder";
 
 const items = [1, 2, 3];
 
-export function CurrentOrderContentComponent({ cart, tableSessionId }: any) {
+export function CurrentOrderContentComponent({
+  cart,
+  tableSessionId,
+  onCloseClick,
+}: any) {
   const [cartData, setCartData] = useState<any>(cart);
   const [totalAmount, setTotalAmount] = useState<any>(0);
   const dispatch: AppDispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     setTotalAmount(
       cartData.reduce((total: any, item: any) => {
@@ -86,7 +93,8 @@ export function CurrentOrderContentComponent({ cart, tableSessionId }: any) {
     setCartData(localCartData);
   };
 
-  const handleSendToChef = () => {
+  const handleSendToChef = async () => {
+    setIsLoading(true);
     const payload = {
       tableSessionId: tableSessionId,
       status: "Confirmed",
@@ -95,10 +103,15 @@ export function CurrentOrderContentComponent({ cart, tableSessionId }: any) {
         MenuItemId: item.MenuItem.id,
         quantity: item.quantity,
         amount: item.MenuItem.price,
-        customizations: item.CartItemCustomizations.map((val: any) => val.id),
+        customizations: item.CartItemCustomizations.map(
+          (val: any) => val.customizationChoiceId
+        ),
       })),
     };
-    dispatch(createOrder(payload));
+    await dispatch(createOrder(payload)).unwrap();
+    await dispatch(deleteAllCartItemFromTableSession(tableSessionId)).unwrap();
+    setIsLoading(false);
+    onCloseClick();
   };
 
   return (
@@ -245,7 +258,11 @@ export function CurrentOrderContentComponent({ cart, tableSessionId }: any) {
                   </CardContent>
                 </Card>
               </div>
-              <Button onClick={handleSendToChef} className="h-10 flex gap-3">
+              <Button
+                loading={isLoading}
+                onClick={handleSendToChef}
+                className="h-10 flex gap-3"
+              >
                 Sent to Chef
                 <ArrowRight></ArrowRight>
               </Button>

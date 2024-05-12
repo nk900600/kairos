@@ -12,6 +12,7 @@ import {
   createMenuCustomization,
   createOrder,
   createTableSession,
+  deleteAllCartItemFromTableSession,
   deleteEmployees,
   deleteItemToCart,
   deleteLeave,
@@ -404,7 +405,7 @@ const counterSlice = createSlice({
       .addCase(
         fetchAllCartData.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
-          state.allCartData = action.payload
+          state.allCartData = action.payload;
         }
       )
       .addCase(
@@ -416,6 +417,14 @@ const counterSlice = createSlice({
           if (index !== -1) {
             state.allCartData[index].quantity = action.payload.quantity;
           }
+        }
+      )
+      .addCase(
+        deleteAllCartItemFromTableSession.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allCartData = state.allCartData.filter(
+            (item) => item.tableSessionId != action.payload
+          );
         }
       )
       .addCase(
