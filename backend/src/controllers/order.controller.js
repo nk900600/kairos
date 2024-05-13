@@ -83,6 +83,9 @@ class OrderController {
               {
                 model: CustomizationChoice,
               },
+              {
+                model: MenuItem,
+              },
             ],
           },
         ],
@@ -254,15 +257,16 @@ class OrderController {
     const { orderItemId } = req.params;
 
     try {
+      if (!("isCompleted" in req.body)) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
       const orderItem = await OrderItem.findByPk(orderItemId);
       if (!orderItem) {
         return res.status(404).json({ message: "Order item not found" });
       }
 
-      if (req.body?.isCompleted) {
-        orderItem.isCompleted = req.body?.isCompleted;
-        await orderItem.save();
-      }
+      orderItem.isCompleted = req.body?.isCompleted;
+      await orderItem.save();
       if ("quantity" in req.body) {
         if (req.body?.quantity == 0) {
           const orderItem = await OrderItem.destroy({
@@ -332,6 +336,24 @@ class OrderController {
     } catch (error) {
       console.error("Error fetching average ratings:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  }
+  async updateOrderStatus(req, res) {
+    const { orderId } = req.params;
+
+    try {
+      const orderItem = await Order.findByPk(orderId);
+      if (!orderItem) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      if (req.body?.status) {
+        orderItem.status = req.body?.status;
+        await orderItem.save();
+      }
+      return res.status(200).json(orderItem);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   }
 }

@@ -1,4 +1,6 @@
 const sequelize = require("../db/db");
+const { CartItem, CartItemCustomization } = require("../models/cart.model");
+const { OrderItem, Order } = require("../models/order.model");
 const {
   MenuItem,
   Customization,
@@ -327,7 +329,34 @@ class MenuItemsController {
         )
       );
 
+      await Promise.all(
+        customizations.map((customization) =>
+          CartItemCustomization.destroy({
+            where: { customizationChoiceId: customization.id },
+          })
+        )
+      );
+
       await Customization.destroy({
+        where: { menuItemId: menuItemId },
+      });
+
+      const allOrderItemData = await OrderItem.findAll({
+        where: { MenuItemId: menuItemId },
+      });
+
+      await Promise.all(
+        allOrderItemData.map((orderItem) =>
+          Order.destroy({
+            where: { id: orderItem.OrderId },
+          })
+        )
+      );
+
+      await OrderItem.destroy({
+        where: { MenuItemId: menuItemId },
+      });
+      await CartItem.destroy({
         where: { menuItemId: menuItemId },
       });
 

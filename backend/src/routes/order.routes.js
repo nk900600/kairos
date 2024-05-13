@@ -6,6 +6,7 @@ router.post("/", OrderController.create);
 router.get("/get-orders", OrderController.GetOrderBetweenDatesRange);
 router.post("/:id/order-items", OrderController.createOrderItem);
 router.get("/", OrderController.findAll);
+router.post("/:orderId", OrderController.updateOrderStatus);
 router.get("/order-items/:id", OrderController.findOneOrderItem);
 router.get("/:id", OrderController.findOne);
 router.put("/order-items/:orderItemId", OrderController.updateOrderItem);
