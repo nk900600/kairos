@@ -165,6 +165,34 @@ export const createOrder = createAsyncThunk(
     }
   }
 );
+export const updateOrderStatus = createAsyncThunk(
+  "tables/updateOrderStatus",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      await axios.post(`${BASE_URL}/orders/${payload.id}`, {
+        status: payload.status,
+      });
+      return payload; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const updateOrderItemStatus = createAsyncThunk(
+  "tables/updateOrderItemStatus",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      await axios.put(`${BASE_URL}/orders/order-items/${payload.id}`, {
+        isCompleted: payload.isCompleted,
+      });
+      return payload; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
 
 // Leaves types
 export const fetchAllLeaveTypes = createAsyncThunk(

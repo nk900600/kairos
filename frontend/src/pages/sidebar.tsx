@@ -221,7 +221,7 @@ function Sidebar() {
         <Route path="/dashboard" Component={Dashboard} />
       </Routes>
       {!["/dashboard"].includes(location.pathname) && (
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-1 flex-col gap-4 p-2 lg:gap-6 lg:p-6">
           <Routes>
             <Route path="/tables" element={<TableComponent />} />
             <Route path="/menus" element={<MenusComponent />} />

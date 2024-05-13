@@ -115,6 +115,7 @@ export function TableComponent({ handleTableClick }: any) {
             title="No Tables Available"
             description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
             buttonText=""
+            type="table"
           ></EmptyPlaceholder>
         )}
       </div>

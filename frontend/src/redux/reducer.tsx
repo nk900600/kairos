@@ -35,6 +35,8 @@ import {
   updateLeaveStatus,
   updateMenu,
   updateMenuCustomization,
+  updateOrderItemStatus,
+  updateOrderStatus,
   updateTable,
   updateTableStatus,
 } from "./actions";
@@ -176,6 +178,32 @@ const counterSlice = createSlice({
         createOrder.fulfilled,
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allOrders.push(action.payload);
+        }
+      )
+      .addCase(
+        updateOrderStatus.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          const index = state.allOrders.findIndex(
+            (order) => order.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.allOrders[index] = {
+              ...state.allOrders[index],
+              status: action.payload.status,
+            };
+          }
+        }
+      )
+      .addCase(
+        updateOrderItemStatus.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allOrders.forEach((item) =>
+            item.orderItems.forEach((inner: any) => {
+              if (inner.id == action.payload.id) {
+                inner.isCompleted = action.payload.isCompleted;
+              }
+            })
+          );
         }
       )
 

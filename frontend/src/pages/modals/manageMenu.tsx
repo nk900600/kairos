@@ -73,7 +73,7 @@ export function ManageMenu({ menu }: any) {
       price: menu?.price || 0,
       categoryId: menu?.categoryId
         ? allMenuCategories?.find((val) => val.id == menu?.categoryId).title
-        : "",
+        : allMenuCategories[0].title,
       spiceLevel: menu?.spiceLevel || "Mild",
       dietType: menu?.dietType || "Vegetarian",
     },

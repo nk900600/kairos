@@ -68,6 +68,9 @@ import { RootState } from "../redux/reducer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllOrders, fetchTables } from "../redux/actions";
 import { AppDispatch } from "../redux/store";
+import { OrderStatuses } from "./chefsPanel";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
+import { Badge } from "../components/ui/badge";
 
 const AllTables = [
   {
@@ -97,570 +100,8 @@ const AllTables = [
   },
 ];
 
-const allOrderstatic = [
-  {
-    id: 8,
-    totalAmount: 26,
-    currency: "INR",
-    orderDate: "2024-04-01T16:27:53.000Z",
-    status: "Added to Order",
-    isPriority: false,
-    orderType: "dine-in",
-    customerNotes: null,
-    promoCodeApplied: null,
-    discountAmount: 0,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T16:27:53.000Z",
-    updatedAt: "2024-04-01T16:27:53.000Z",
-    tableSessionId: 3,
-    orderItems: [
-      {
-        id: 4,
-        quantity: 1,
-        amount: 6,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 4,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-      {
-        id: 3,
-        quantity: 20,
-        amount: 10,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 53,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 53,
-            },
-          },
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-    ],
-    TableSession: {
-      id: 3,
-      startTime: "2024-03-30T11:38:30.000Z",
-      endTime: null,
-      totalAmount: null,
-      customerName:
-        "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-      customerMobile: 1223123113,
-      orderCount: 0,
-      partySize: null,
-      paymentStatus: "pending",
-      paymentMethod: "Cash",
-      specialRequests: null,
-      serviceNotes: null,
-      status: "Active",
-      feedback: null,
-      foodRating: null,
-      serviceRating: null,
-      overallRating: null,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-03-31T11:16:16.000Z",
-      updatedAt: "2024-03-31T11:16:16.000Z",
-      tableId: 4,
-      table: {
-        id: 4,
-        tableName: "Table 1",
-        capacity: 4,
-        status: "Reserved",
-        reservationName: "Nikhil Kuamr",
-        reservationTime: "2024-03-30T11:38:30.000Z",
-        reservationPartySize: null,
-        imageUrl: null,
-        firmId: 1,
-        createdBy: 1,
-        updatedBy: null,
-        createdAt: "2024-03-31T11:04:06.000Z",
-        updatedAt: "2024-04-04T04:06:17.000Z",
-      },
-    },
-  },
-  {
-    id: 8,
-    totalAmount: 26,
-    currency: "INR",
-    orderDate: "2024-04-01T16:27:53.000Z",
-    status: "Completed",
-    isPriority: false,
-    orderType: "dine-in",
-    customerNotes: null,
-    promoCodeApplied: null,
-    discountAmount: 0,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T16:27:53.000Z",
-    updatedAt: "2024-04-01T16:27:53.000Z",
-    tableSessionId: 3,
-    orderItems: [
-      {
-        id: 4,
-        quantity: 1,
-        amount: 6,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 4,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-      {
-        id: 3,
-        quantity: 20,
-        amount: 10,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 53,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 53,
-            },
-          },
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-    ],
-    TableSession: {
-      id: 3,
-      startTime: "2024-03-30T11:38:30.000Z",
-      endTime: null,
-      totalAmount: null,
-      customerName:
-        "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-      customerMobile: 1223123113,
-      orderCount: 0,
-      partySize: null,
-      paymentStatus: "pending",
-      paymentMethod: "Cash",
-      specialRequests: null,
-      serviceNotes: null,
-      status: "Active",
-      feedback: null,
-      foodRating: null,
-      serviceRating: null,
-      overallRating: null,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-03-31T11:16:16.000Z",
-      updatedAt: "2024-03-31T11:16:16.000Z",
-      tableId: 4,
-      table: {
-        id: 4,
-        tableName: "Table 1",
-        capacity: 4,
-        status: "Reserved",
-        reservationName: "Nikhil Kuamr",
-        reservationTime: "2024-03-30T11:38:30.000Z",
-        reservationPartySize: null,
-        imageUrl: null,
-        firmId: 1,
-        createdBy: 1,
-        updatedBy: null,
-        createdAt: "2024-03-31T11:04:06.000Z",
-        updatedAt: "2024-04-04T04:06:17.000Z",
-      },
-    },
-  },
-  {
-    id: 8,
-    totalAmount: 26,
-    currency: "INR",
-    orderDate: "2024-04-01T16:27:53.000Z",
-    status: "Preparing",
-    isPriority: false,
-    orderType: "dine-in",
-    customerNotes: null,
-    promoCodeApplied: null,
-    discountAmount: 0,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T16:27:53.000Z",
-    updatedAt: "2024-04-01T16:27:53.000Z",
-    tableSessionId: 3,
-    orderItems: [
-      {
-        id: 4,
-        quantity: 1,
-        amount: 6,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 4,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-      {
-        id: 3,
-        quantity: 20,
-        amount: 10,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 53,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 53,
-            },
-          },
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-    ],
-    TableSession: {
-      id: 3,
-      startTime: "2024-03-30T11:38:30.000Z",
-      endTime: null,
-      totalAmount: null,
-      customerName:
-        "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-      customerMobile: 1223123113,
-      orderCount: 0,
-      partySize: null,
-      paymentStatus: "pending",
-      paymentMethod: "Cash",
-      specialRequests: null,
-      serviceNotes: null,
-      status: "Active",
-      feedback: null,
-      foodRating: null,
-      serviceRating: null,
-      overallRating: null,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-03-31T11:16:16.000Z",
-      updatedAt: "2024-03-31T11:16:16.000Z",
-      tableId: 4,
-      table: {
-        id: 4,
-        tableName: "Table 1",
-        capacity: 4,
-        status: "Reserved",
-        reservationName: "Nikhil Kuamr",
-        reservationTime: "2024-03-30T11:38:30.000Z",
-        reservationPartySize: null,
-        imageUrl: null,
-        firmId: 1,
-        createdBy: 1,
-        updatedBy: null,
-        createdAt: "2024-03-31T11:04:06.000Z",
-        updatedAt: "2024-04-04T04:06:17.000Z",
-      },
-    },
-  },
-  {
-    id: 8,
-    totalAmount: 26,
-    currency: "INR",
-    orderDate: "2024-04-01T16:27:53.000Z",
-    status: "Confirmed",
-    isPriority: false,
-    orderType: "dine-in",
-    customerNotes: null,
-    promoCodeApplied: null,
-    discountAmount: 0,
-    firmId: 1,
-    createdBy: 1,
-    updatedBy: null,
-    createdAt: "2024-04-01T16:27:53.000Z",
-    updatedAt: "2024-04-01T16:27:53.000Z",
-    tableSessionId: 3,
-    orderItems: [
-      {
-        id: 4,
-        quantity: 1,
-        amount: 6,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 22,
-        CustomizationChoices: [
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 4,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-      {
-        id: 3,
-        quantity: 20,
-        amount: 10,
-        currency: "INR",
-        specialInstructions: null,
-        isCompleted: false,
-        createdAt: "2024-04-01T17:02:43.000Z",
-        updatedAt: "2024-04-01T17:02:43.000Z",
-        OrderId: 8,
-        MenuItemId: 20,
-        CustomizationChoices: [
-          {
-            id: 53,
-            name: "Multigrain Honey Oats",
-            description: "Multigrain Honey Oats",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 53,
-            },
-          },
-          {
-            id: 54,
-            name: "Roasted Garlic",
-            description: "Roasted Garlic",
-            additionalPrice: 10,
-            currency: "INR",
-            dietType: "Vegetarian",
-            createdAt: "2024-03-30T17:08:30.000Z",
-            updatedAt: "2024-03-30T17:08:30.000Z",
-            CustomizationId: 32,
-            OrderItemCustomizationsChoices: {
-              createdAt: "2024-04-01T17:02:43.000Z",
-              updatedAt: "2024-04-01T17:02:43.000Z",
-              OrderItemId: 3,
-              CustomizationChoiceId: 54,
-            },
-          },
-        ],
-      },
-    ],
-    TableSession: {
-      id: 3,
-      startTime: "2024-03-30T11:38:30.000Z",
-      endTime: null,
-      totalAmount: null,
-      customerName:
-        "Enjoy your favourite Grills sandwich with a choice of drink and a cookie or veg kebabs.",
-      customerMobile: 1223123113,
-      orderCount: 0,
-      partySize: null,
-      paymentStatus: "pending",
-      paymentMethod: "Cash",
-      specialRequests: null,
-      serviceNotes: null,
-      status: "Active",
-      feedback: null,
-      foodRating: null,
-      serviceRating: null,
-      overallRating: null,
-      firmId: 1,
-      createdBy: null,
-      updatedBy: null,
-      createdAt: "2024-03-31T11:16:16.000Z",
-      updatedAt: "2024-03-31T11:16:16.000Z",
-      tableId: 4,
-      table: {
-        id: 4,
-        tableName: "Table 1",
-        capacity: 4,
-        status: "Reserved",
-        reservationName: "Nikhil Kuamr",
-        reservationTime: "2024-03-30T11:38:30.000Z",
-        reservationPartySize: null,
-        imageUrl: null,
-        firmId: 1,
-        createdBy: 1,
-        updatedBy: null,
-        createdAt: "2024-03-31T11:04:06.000Z",
-        updatedAt: "2024-04-04T04:06:17.000Z",
-      },
-    },
-  },
-];
 export default function OrdersComponent() {
-  const { alltables, allOrders } = useSelector(
+  const { alltables, allOrders, allEmployees } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
@@ -743,112 +184,424 @@ export default function OrdersComponent() {
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="completed" className="w-full">
-        <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-2">
+      <Tabs defaultValue="serve" className="w-full">
+        <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-4">
+          <TabsTrigger value="confirm">Confirmed</TabsTrigger>
+          <TabsTrigger value="serve">Serve</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="canceled">Canceled </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="confirm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+            {allOrders
+              .filter((val) => val.status == OrderStatuses.CONFIRMED)
+              .map((val: any) => {
+                return (
+                  <>
+                    <Card
+                      key="1"
+                      className="w-full  hover:bg-muted/50  cursor-pointer"
+                    >
+                      <CardHeader className="p-4 lg:p-6 md:p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-1">
+                            <CardTitle className="text-base">
+                              {
+                                alltables?.find(
+                                  (table: any) =>
+                                    table.id == val?.TableSession?.tableId
+                                )?.tableName
+                              }
+                            </CardTitle>
+
+                            <CardDescription className="text-xs">
+                              {
+                                allEmployees?.find(
+                                  (contact) => contact.id == val.createdBy
+                                )?.firstName
+                              }{" "}
+                              {
+                                allEmployees?.find(
+                                  (contact) => contact.id == val.createdBy
+                                )?.lastName
+                              }
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                        <div className="grid gap-2">
+                          {val.orderItems.map((item: any) => {
+                            return (
+                              <>
+                                <div className="flex items-center gap-3">
+                                  <VegIcon />
+
+                                  <label htmlFor={item.id} className="w-full ">
+                                    <div className="grid gap-1 text-sm">
+                                      <div className="font-medium">
+                                        {item.quantity} x {item.MenuItem.name}
+                                      </div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                        {item.CustomizationChoices.map(
+                                          (choice: any) => choice.name
+                                        ).join(",")}
+                                      </div>
+                                    </div>
+                                  </label>
+                                </div>
+                              </>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                      <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                        <Separator className="my-4" />
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs text-gray-500">
+                            21 Nov 2023 at 5:46PM
+                          </p>
+
+                          <Button variant="ghost" className=" h-3 gap-2">
+                            <span> $239</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  </>
+                );
+              })}
+          </div>
+
+          {!allOrders.filter((val) => val.status == OrderStatuses.CONFIRMED)
+            .length && (
+            <EmptyPlaceholder
+              buttonText=""
+              type="orders"
+              title="No Orders Available"
+              description="No active orders at the moment. New orders will appear here once placed"
+            />
+          )}
+        </TabsContent>
+
+        <TabsContent value="serve">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+            {allOrders
+              .filter((val) => val.status == OrderStatuses.READY_FOR_PICKUP)
+              .map((val: any) => {
+                return (
+                  <>
+                    <Sheet {...sheetProps}>
+                      <SheetTrigger asChild>
+                        <Card
+                          key="1"
+                          className="w-full  hover:bg-muted/50  cursor-pointer"
+                        >
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
+
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
+
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    </div>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-gray-500">
+                                21 Nov 2023 at 5:46PM
+                              </p>
+
+                              <Button variant="ghost" className=" h-3 gap-2">
+                                <span> $239</span>
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </SheetTrigger>
+                      <SheetContent className="w-full" {...handlers}>
+                        <SheetDemo></SheetDemo>
+                      </SheetContent>
+                    </Sheet>
+                  </>
+                );
+              })}
+          </div>
+
+          {!allOrders.filter(
+            (val) => val.status == OrderStatuses.READY_FOR_PICKUP
+          ).length && (
+            <EmptyPlaceholder
+              buttonText=""
+              type="orders"
+              title="No Orders Available"
+              description="No active orders at the moment. New orders will appear here once placed"
+            />
+          )}
+        </TabsContent>
+
         <TabsContent value="completed">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {allOrders.map((order: any) => {
-              return (
-                <>
-                  <Sheet {...sheetProps}>
-                    <SheetTrigger asChild>
-                      <Card
-                        key="1"
-                        className="w-full  hover:bg-muted/50  cursor-pointer"
-                      >
-                        <CardHeader className="p-4 lg:p-6 md:p-6">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1">
-                              <CardTitle className="text-base">
-                                Table - 5
-                              </CardTitle>
+            {allOrders
+              .filter((val) => val.status == OrderStatuses.COMPLETED)
+              .map((val: any) => {
+                return (
+                  <>
+                    <Sheet {...sheetProps}>
+                      <SheetTrigger asChild>
+                        <Card
+                          key="1"
+                          className="w-full  hover:bg-muted/50  cursor-pointer"
+                        >
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
 
-                              <CardDescription className="text-xs">
-                                Order no - 123
-                              </CardDescription>
-                            </div>
-
-                            {/* <div className="ml-auto">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="  h-8 w-8 "
-                                  >
-                                    <Ellipsis className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  className="w-56"
-                                  align="end"
-                                >
-                                  <DropdownMenuLabel>Mark as</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div> */}
-                          </div>
-                        </CardHeader>
-                        <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
-                          <div className="grid gap-2">
-                            <div className="flex items-center gap-4 ">
-                              <div className="flex items-center gap-3">
-                                <VegIcon></VegIcon>
-
-                                <div className="grid gap-1 text-sm">
-                                  <div className="font-medium">
-                                    1 x Spaghetti Bolognese
-                                  </div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    Due in 5 mins
-                                  </div>
-                                </div>
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
                               </div>
                             </div>
-                            <div className="flex items-center gap-4 ">
-                              <div className="flex items-center gap-3">
-                                <VegIcon></VegIcon>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
 
-                                <div className="grid gap-1 text-sm">
-                                  <div className="font-medium">
-                                    1 x Spaghetti Bolognese
-                                  </div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                                    Due in 5 mins
-                                  </div>
-                                </div>
-                              </div>
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    </div>
+                                  </>
+                                );
+                              })}
                             </div>
-                          </div>
-                        </CardContent>
-                        <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
-                          <Separator className="my-4" />
-                          <div className="flex justify-between items-center">
-                            <p className="text-xs text-gray-500">
-                              21 Nov 2023 at 5:46PM
-                            </p>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-gray-500">
+                                21 Nov 2023 at 5:46PM
+                              </p>
 
-                            <Button variant="ghost" className=" h-3 gap-2">
-                              <span> $239</span>
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardFooter>
-                      </Card>
-                    </SheetTrigger>
-                    <SheetContent className="w-full" {...handlers}>
-                      <SheetDemo></SheetDemo>
-                    </SheetContent>
-                  </Sheet>
-                </>
-              );
-            })}
+                              <Button variant="ghost" className=" h-3 gap-2">
+                                <span> $239</span>
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </SheetTrigger>
+                      <SheetContent className="w-full" {...handlers}>
+                        <SheetDemo></SheetDemo>
+                      </SheetContent>
+                    </Sheet>
+                  </>
+                );
+              })}
           </div>
+          {!allOrders.filter((val) => val.status == OrderStatuses.COMPLETED)
+            .length && (
+            <EmptyPlaceholder
+              buttonText=""
+              type="orders"
+              title="No Orders Available"
+              description="No active orders at the moment. New orders will appear here once placed"
+            />
+          )}
+        </TabsContent>
+        <TabsContent value="canceled">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+            {allOrders
+              .filter((val) => val.status == OrderStatuses.CANCELLED)
+              .map((val: any) => {
+                return (
+                  <>
+                    <Sheet {...sheetProps}>
+                      <SheetTrigger asChild>
+                        <Card
+                          key="1"
+                          className="w-full  hover:bg-muted/50  cursor-pointer"
+                        >
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-center gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
+
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
+
+                              <Badge variant={"destructive"}>
+                                {"Canceled"}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
+
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    </div>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-gray-500">
+                                21 Nov 2023 at 5:46PM
+                              </p>
+
+                              <Button variant="ghost" className=" h-3 gap-2">
+                                <span> $239</span>
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </SheetTrigger>
+                      <SheetContent className="w-full" {...handlers}>
+                        <SheetDemo></SheetDemo>
+                      </SheetContent>
+                    </Sheet>
+                  </>
+                );
+              })}
+          </div>
+
+          {!allOrders.filter((val) => val.status == OrderStatuses.CANCELLED)
+            .length && (
+            <EmptyPlaceholder
+              buttonText=""
+              type="orders"
+              title="No Orders Available"
+              description="No active orders at the moment. New orders will appear here once placed"
+            />
+          )}
         </TabsContent>
       </Tabs>
 

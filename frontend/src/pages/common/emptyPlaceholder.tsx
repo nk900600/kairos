@@ -10,6 +10,8 @@ const imageMapper: any = {
   customization: "../../Hamburger.gif",
   table: "../../closed_stores.gif",
   currentOrder: "../..//Empty.gif",
+  orders: "../../order_food.gif",
+  chefs: "../../Chef.gif",
 };
 export const EmptyPlaceholder = ({
   type,
@@ -18,7 +20,7 @@ export const EmptyPlaceholder = ({
   buttonText = "Add customization",
   onButtonClick = () => {},
 }: any) => {
-return (
+  return (
     <div className="flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12">
       <img
         alt="Empty state illustration"

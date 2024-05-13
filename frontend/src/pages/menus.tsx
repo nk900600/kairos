@@ -234,6 +234,13 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     setComponent("manageMenuDiscount");
     setCompProps({ menu: menu });
   };
+  const handleDeleteClick = (e: any, menu: any) => {
+    dispatch(deleteMenu(menu.id));
+  };
+  const handleMenuItemClick = (e: any, menu: any) => {
+    e.preventDefault();
+    // !canPlaceOrder && navigate(menu.id + "/customization");
+  };
 
   const DropdownMenuList = (menu: any) => (
     <DropdownMenuContent className="w-56" align="end">
@@ -273,7 +280,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
       </DropdownMenuItem>
       <DropdownMenuSeparator />
 
-      <DropdownMenuItem onClick={() => dispatch(deleteMenu(menu.id))}>
+      <DropdownMenuItem onClick={(e) => handleDeleteClick(e, menu)}>
         <Trash2 className="mr-2 h-4 w-4 text-destructive" />
         <span>Delete</span>
       </DropdownMenuItem>
@@ -325,10 +332,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
                               "bg-gray-200 opacity-50 cursor-not-allowed ") +
                             (!canPlaceOrder && " cursor-pointer ")
                           }
-                          onClick={() =>
-                            !canPlaceOrder &&
-                            navigate(menu.id + "/customization")
-                          }
+                          onClick={(e) => handleMenuItemClick(e, menu)}
                         >
                           <CardHeader className="p-3 lg:p-4 md:p-4  ">
                             <div className="flex items-start gap-4 items-center">
