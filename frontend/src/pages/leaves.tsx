@@ -232,8 +232,8 @@ export default function LeavesComponent() {
                         <div className=" flex w-full items-center gap-3 rounded-md ">
                           <CalendarClock className="h-6 w-6" />
 
-                          <div className="flex-col">
-                            <CardTitle className="text-base ">
+                          <div className="flex-col text-sm">
+                            <CardTitle className="text-sm ">
                               From {leave.startDate} To {leave.endDate}
                             </CardTitle>
 
@@ -317,7 +317,7 @@ export default function LeavesComponent() {
                           )}
 
                           <div className="flex-col">
-                            <CardTitle className="text-base ">
+                            <CardTitle className="text-sm ">
                               From {leave.startDate} To {leave.endDate}
                             </CardTitle>
 
@@ -366,7 +366,7 @@ export default function LeavesComponent() {
                   <div className="flex w-full justify-between items-center">
                     {" "}
                     <div className="flex-col">
-                      <CardTitle className="text-base">{leave.name}</CardTitle>
+                      <CardTitle className="text-sm">{leave.name}</CardTitle>
 
                       <CardDescription className="text-xs">
                         <p className="text-sm text-muted-foreground">

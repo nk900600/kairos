@@ -1,8 +1,11 @@
 import {
   Armchair,
   ArrowLeft,
+  ArrowRight,
+  CircleDollarSign,
   CirclePlus,
   ClockIcon,
+  DollarSign,
   Edit,
   Edit2,
   Edit3,
@@ -12,6 +15,7 @@ import {
   Plug,
   Plus,
   Ratio,
+  ShoppingBag,
   Trash2,
   UserIcon,
   Users,
@@ -34,7 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-
+import { ReactComponent as VegIcon } from "../VegIcon.svg";
 import {
   Card,
   CardContent,
@@ -89,8 +93,21 @@ import {
 import DrawerContext from "../context/drawerContext";
 import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 import { dateConvertor } from "../util/date";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { LiveTimer } from "../hooks/liveTImer";
+import { Separator } from "../components/ui/separator";
+import { currencyMap } from "./menus";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../components/ui/sheet";
+import { useSwipeable } from "react-swipeable";
+import { OrderStatuses } from "./chefsPanel";
+import { ScrollArea } from "../components/ui/scroll-area";
 const AllDesgination = [
   {
     id: 0,
@@ -132,11 +149,27 @@ export default function TableComponent() {
   } = useSelector((state: { table: RootState }) => state.table);
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
+  const [currentTable, setCurrentTable] = useState<any>();
+
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const handleClick = (e: any) => {
     setTableValue(e);
   };
+  const [isOpen, setOpenPanel] = useState<boolean | undefined>(undefined);
+
+  let sheetProps: any = {
+    open: isOpen,
+    onOpenChange: (data: any) => {
+      setOpenPanel(data);
+    },
+  };
+  const handlers = useSwipeable({
+    onSwipedRight: (eventData: any) => {
+      console.log(eventData);
+      setOpenPanel(false);
+    },
+  });
 
   useEffect(() => {
     let mytables = query.get("mytables");
@@ -189,19 +222,23 @@ export default function TableComponent() {
           </DropdownMenuItem>
         </>
       )} */}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => handleEditClick(table)}>
+      {!["Occupied", "Reserved"].includes(table.status) && (
         <>
-          <Pencil className="mr-2 h-4 w-4 " />
-          <span>Edit</span>
-        </>
-      </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => handleEditClick(table)}>
+            <>
+              <Pencil className="mr-2 h-4 w-4 " />
+              <span>Edit</span>
+            </>
+          </DropdownMenuItem>
 
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => dispatch(deleteTable(table.id))}>
-        <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-        <span>Delete</span>
-      </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => dispatch(deleteTable(table.id))}>
+            <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+            <span>Delete</span>
+          </DropdownMenuItem>
+        </>
+      )}
     </DropdownMenuContent>
   );
 
@@ -221,6 +258,10 @@ export default function TableComponent() {
   };
   const handleOrderClick = async (table: any) => {
     navigate("/place-order/table/" + table.id);
+  };
+  const handleCloseTabClick = async (table: any) => {
+    setCurrentTable(table);
+    setOpenPanel(true);
   };
 
   const allAvailableTables = tables.filter(
@@ -406,21 +447,6 @@ export default function TableComponent() {
                           </span>
                           {"  "}
                           <span>
-                            {/* {allTableSessions?.find(
-                              (session) => session.tableId == table.id
-                            )?.startTime
-                              ? format(
-                                  allTableSessions?.find(
-                                    (session) => session.tableId == table.id
-                                  )?.startTime || Date.now(),
-                                  "HH:mm:ss"
-                                )
-
-
-                              : ""} */}
-
-                            {/* <LiveTimer/> */}
-
                             {allTableSessions?.find(
                               (session) => session.tableId == table.id
                             )?.startTime && (
@@ -436,16 +462,62 @@ export default function TableComponent() {
                           </span>
                         </div>
                       </div>
+                      <div className="flex items-center">
+                        <ShoppingBag className="h-3 w-3 mr-1.5" />
+                        <div className="text-sm">
+                          <span className="text-muted-foreground text-xs ">
+                            Orders
+                          </span>
+                          {"  "}
+                          <span>
+                            {
+                              allTableSessions?.find(
+                                (session) => session.tableId == table.id
+                              )?.orderCount
+                            }
+                          </span>
+                        </div>
+                      </div>
                     </CardContent>
                     <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
-                      <Button variant="outline" size="sm" className="w-full">
-                        {table.status != "Occupied"
-                          ? "Cancel Reservation"
-                          : "Close tab"}
-                      </Button>
+                      {allTableSessions?.find(
+                        (session) => session.tableId == table.id
+                      )?.orderCount != 0 ? (
+                        <>
+                          {" "}
+                          <Button
+                            onClick={() => handleCloseTabClick(table)}
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                          >
+                            {table.status != "Occupied"
+                              ? "Cancel Reservation"
+                              : "Close tab"}
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          onClick={() =>
+                            dispatch(
+                              updateTableStatus({
+                                id: table.id,
+                                status: "Available",
+                              })
+                            )
+                          }
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        >
+                          {table.status != "Occupied"
+                            ? "Cancel Reservation"
+                            : "Make it Available"}
+                        </Button>
+                      )}
 
                       <Button
-                        variant="outline"
+                        variant="default"
                         size="sm"
                         className="w-full gap-2"
                         onClick={() => handleOrderClick(table)}
@@ -530,7 +602,13 @@ export default function TableComponent() {
                             Unavailable Since:
                           </span>
                           {"  "}
-                          <span>20 mins 52 sec</span>
+                          <span className=" text-sm">
+                            {" "}
+                            {format(
+                              parseISO(table.updatedAt),
+                              "dd MMM yyyy 'at' h:mma"
+                            )}
+                          </span>
                         </div>
                       </div>
                     </CardContent>
@@ -540,6 +618,18 @@ export default function TableComponent() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <Sheet {...sheetProps}>
+        <SheetTrigger asChild></SheetTrigger>
+        <SheetContent className="w-full" {...handlers}>
+          <ClosetabPanel
+            tableSessionObj={allTableSessions?.find(
+              (session) => session.tableId == currentTable?.id
+            )}
+          ></ClosetabPanel>
+          {/* <EditOrderComponent order={editOrderData}></EditOrderComponent> */}
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
@@ -731,3 +821,171 @@ export const ManageReservation = ({ tableData = {} }: any) => {
     </Form>
   );
 };
+
+export function ClosetabPanel({ tableSessionObj }: any) {
+  const [orderData, setOrderData] = useState<any>([]);
+  const [totalAmount, setTotalAmount] = useState<any>(0);
+  const { alltables, allOrders, allEmployees, allTableSessions } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
+
+  console.log(tableSessionObj);
+
+  useEffect(() => {
+    setTotalAmount(
+      allOrders
+        .filter((val) => val.tableSessionId == tableSessionObj.id)
+        .filter((val) => val.status != OrderStatuses.CANCELLED)
+        .reduce((total: any, item: any) => total + item.totalAmount, 0)
+    );
+  }, [allOrders]);
+  return (
+    <>
+      <ScrollArea className=" h-full">
+        <SheetHeader className="mb-4">
+          <SheetTitle>
+            {
+              alltables.find((val) => val.id == tableSessionObj.tableId)
+                ?.tableName
+            }
+          </SheetTitle>
+          <SheetDescription>
+            Waiter -{" "}
+            {
+              allEmployees?.find(
+                (contact) => contact.id == tableSessionObj.createdBy
+              )?.firstName
+            }{" "}
+            {
+              allEmployees?.find(
+                (contact) => contact.id == tableSessionObj.createdBy
+              )?.lastName
+            }
+          </SheetDescription>
+          <Separator className="my-2" />
+        </SheetHeader>
+        <CardContent className="p-0 mt-3 text-sm">
+          <div className="grid gap-3">
+            <div className="font-semibold">All Order Details</div>
+            <ul className="grid gap-3">
+              {allOrders
+                .filter((val) => val.tableSessionId == tableSessionObj.id)
+                .filter((val) => val.status != OrderStatuses.CANCELLED)
+                .map((orderData) => {
+                  return (
+                    <>
+                      <span className="text-muted-foreground flex items-center gap-2">
+                        Order - {orderData.id}
+                        {/* <span className=""> */}
+                        {"  "}{" "}
+                        {orderData.status == OrderStatuses.CANCELLED && (
+                          <Badge variant={"destructive"}>{"Canceled"}</Badge>
+                        )}{" "}
+                        {(orderData.status == OrderStatuses.CONFIRMED ||
+                          orderData.status == OrderStatuses.PREPARING) && (
+                          // <span className="flex h-2 w-2 rounded-full bg-green-600"></span>
+                          <Badge variant={"default"}>{"Ongoing"}</Badge>
+                        )}{" "}
+                        {/* </span> */}
+                      </span>
+
+                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  px-0  lg:px-0  md:px-0  ">
+                        <div className="grid gap-2">
+                          {orderData.orderItems.map((item: any) => {
+                            return (
+                              <>
+                                <div className="flex items-center gap-3">
+                                  <VegIcon />
+
+                                  <label htmlFor={item.id} className="w-full ">
+                                    <div className="grid gap-1 text-sm">
+                                      <div className="font-medium">
+                                        {item.quantity} x {item.MenuItem.name}
+                                      </div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                                        {item.CustomizationChoices.map(
+                                          (choice: any) => choice.name
+                                        ).join(",")}
+                                      </div>
+                                    </div>
+                                  </label>
+                                </div>
+                              </>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                      <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-2  md:pt-2 lg:px-0  md:px-0 lg:pb-0 pb-0  md:pb-0  ">
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs text-gray-500">
+                            {format(
+                              parseISO(orderData.orderDate),
+                              "dd MMM yyyy 'at' h:mma"
+                            )}
+                          </p>
+
+                          {/* <Button variant="ghost" className=" h-3 gap-2"> */}
+                          <span>
+                            {currencyMap.get("INR")}
+                            {orderData.totalAmount}
+                          </span>
+                          {/* </Button> */}
+                        </div>
+                      </CardFooter>
+                      <Separator className="mt-2" />
+                    </>
+                  );
+                })}
+            </ul>
+            <ul className="grid gap-3">
+              <li className="flex items-center justify-between font-semibold">
+                <span className="text-muted-foreground">Total</span>
+                <span>
+                  {" "}
+                  {currencyMap.get("INR")}
+                  {Math.round(totalAmount)}
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <Separator className="my-4" />
+
+          {allOrders
+            .filter((val) => val.tableSessionId == tableSessionObj.id)
+            .filter(
+              (val) =>
+                val.status == OrderStatuses.PREPARING ||
+                val.status == OrderStatuses.CONFIRMED
+            ).length ? (
+            <div className="bg-blue-100 p-4 rounded-md dark:bg-gray-800">
+              <div className="space-y-2">
+                <p className="text-gray-500 dark:text-gray-400">
+                  We can’t close the bill right now because your order is still
+                  being made. Once everything is ready, we can settle up. Thanks
+                  for waiting!
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="px-2">
+              <div className="grid gap-3">
+                <div className="font-semibold">Payment Information</div>
+
+                <Button
+                  variant={"outline"}
+                  className="px-6 py-4 text-center text-sm font-medium  flex flex-col items-center justify-center rounded-md h-full"
+                >
+                  <DollarSign className="mb-2 h-8 w-8" />
+                  <span>Cash</span>
+                </Button>
+                <Button> Settle Bill {"->"} 123</Button>
+                {/* <div className="p-6 pt-0 grid gap-6"><div role="radiogroup" aria-required="false" dir="ltr" className="grid grid-cols-3 gap-4" tabindex="0" style="outline: none;"><div><button type="button" role="radio" aria-checked="true" data-state="checked" value="card" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="card" aria-label="Card" tabindex="-1" data-radix-collection-item=""><span data-state="checked" className="flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-circle h-2.5 w-2.5 fill-current text-current"><circle cx="12" cy="12" r="10"></circle></svg></span></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" className="mb-3 h-6 w-6"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Card</label></div><div><button type="button" role="radio" aria-checked="false" data-state="unchecked" value="paypal" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="paypal" aria-label="Paypal" tabindex="-1" data-radix-collection-item=""></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="paypal"><svg role="img" viewBox="0 0 24 24" className="mb-3 h-6 w-6"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z" fill="currentColor"></path></svg>Paypal</label></div><div><button type="button" role="radio" aria-checked="false" data-state="unchecked" value="apple" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="apple" aria-label="Apple" tabindex="-1" data-radix-collection-item=""></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="apple"><svg role="img" viewBox="0 0 24 24" className="mb-3 h-6 w-6"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" fill="currentColor"></path></svg>Apple</label></div></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="name">Name</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="name" placeholder="First Last"></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="city">City</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="city" placeholder=""></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="number">Card number</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="number" placeholder=""></div><div className="grid grid-cols-3 gap-4"><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="month">Expires</label><button type="button" role="combobox" aria-controls="radix-:r8d:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1" id="month" aria-label="Month"><span style="pointer-events: none;">Month</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chevron-down h-4 w-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="year">Year</label><button type="button" role="combobox" aria-controls="radix-:r8e:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1" id="year" aria-label="Year"><span style="pointer-events: none;">Year</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chevron-down h-4 w-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="cvc">CVC</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="cvc" placeholder="CVC"></div></div></div> */}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </ScrollArea>
+    </>
+  );
+}

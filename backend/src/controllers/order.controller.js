@@ -72,6 +72,14 @@ class OrderController {
         },
         { transaction }
       );
+
+      const tableSession = await TableSession.findByPk(
+        orderDetails.tableSessionId,
+        { transaction }
+      );
+      tableSession.orderCount += 1;
+      await tableSession.save();
+
       await transaction.commit();
 
       const createdOrder = await Order.findByPk(order.id, {
@@ -241,9 +249,25 @@ class OrderController {
   async delete(req, res) {
     try {
       const { id } = req.params;
-      const deleted = await Order.destroy({
-        where: { id: id },
+      const transaction = await sequelize.transaction();
+      const order = await Order.findOne({ where: { id: id }, transaction });
+
+      if (!order) {
+        throw new Error("Order not found");
+      }
+
+      // Delete the order
+      const deleted = await Order.destroy({ where: { id: id }, transaction });
+
+      // Commit the transaction
+
+      const tableSession = await TableSession.findByPk(order.tableSessionId, {
+        transaction,
       });
+      tableSession.orderCount -= 1;
+      await tableSession.save();
+      await transaction.commit();
+
       if (deleted) {
         return res.status(204).send("Order deleted");
       }

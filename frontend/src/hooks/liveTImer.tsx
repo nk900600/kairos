@@ -10,9 +10,15 @@ export const LiveTimer = ({ initialDate }: any) => {
       const elapsedTimeInMilliseconds = now - new Date(startTime).getTime(); // Calculate elapsed time
       const totalSeconds = Math.floor(elapsedTimeInMilliseconds / 1000);
       const minutes = Math.floor(totalSeconds / 60) % 60;
-      const hours = Math.floor(totalSeconds / 3600);
+      let hours = Math.floor(totalSeconds / 3600);
+      const days = Math.floor(totalSeconds / (3600 * 30));
       const seconds = totalSeconds % 60;
-      if (hours) {
+      hours = hours % 24;
+      if (days) {
+        setElapsedTime(
+          `${days} days ${hours} hours ${minutes} mins ${seconds} sec`
+        );
+      } else if (hours) {
         setElapsedTime(`${hours} hours ${minutes} mins ${seconds} sec`);
       } else {
         setElapsedTime(`${minutes} mins ${seconds} sec`);

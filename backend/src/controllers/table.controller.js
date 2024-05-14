@@ -130,6 +130,13 @@ class TableController {
         },
         { where: { id: table.id } }
       );
+
+      if (req.body?.status == TableStatus.AVAILABLE) {
+        const session = await TableSession.findAll({
+          where: { tableId: req.params.id },
+        });
+        if (session) await session.destroy();
+      }
       return res.status(200).json(table);
     } catch (error) {
       return res.status(404).json({ error: "Table not found" });
