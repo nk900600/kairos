@@ -456,7 +456,10 @@ const counterSlice = createSlice({
             (table) => table.id == action.payload.id
           );
           if (index !== -1) {
-            state.allCartData[index].quantity = action.payload.quantity;
+            state.allCartData[index] = {
+              ...state.allCartData[index],
+              ...action.payload,
+            };
           }
         }
       )

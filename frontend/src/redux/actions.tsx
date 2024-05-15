@@ -509,8 +509,11 @@ export const updateItemToCart = createAsyncThunk(
   "tables/updateItemToCart",
   async (payload: any, { rejectWithValue }) => {
     try {
-      await axios.put(`${BASE_URL}/cart-items/${payload.id}`, payload);
-      return payload; // return the id to identify which table was deleted
+      const response = await axios.put(
+        `${BASE_URL}/cart-items/${payload.id}`,
+        payload
+      );
+      return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
       return rejectWithValue("Failed to delete table");

@@ -755,13 +755,52 @@ export const CustomizationComponent = ({
     if (quantity == 1) {
       setquantity(0);
       setOpen(false);
+      cartId && dispatch(deleteItemToCart(cartId));
       return;
     }
     setquantity(quantity - 1);
   };
+  const handleItemAddClick = () => {
+    setquantity(quantity + 1);
+  };
 
-  const handleAddItemClick = () => {
+  const handleAddItemClick = async () => {
     if (cartId) {
+      let customizationsToAdd: any = [];
+      let customizationsToRemove: any = [];
+      let cartCustomizationData = new Set();
+
+      let cartData = allCartData?.find((val) => val.id == cartId);
+
+      cartData.CartItemCustomizations.forEach((val: any) => {
+        cartCustomizationData.add(val.customizationChoiceId);
+      });
+
+      currentMenu.Customizations.forEach((item: any) => {
+        item.CustomizationChoices.forEach((val: any) => {
+          if (
+            selectedChoice.has(val.id) &&
+            !cartCustomizationData.has(val.id)
+          ) {
+            customizationsToAdd.push(val.id);
+          }
+          if (
+            !selectedChoice.has(val.id) &&
+            cartCustomizationData.has(val.id)
+          ) {
+            customizationsToRemove.push(val.id);
+          }
+        });
+      });
+
+      let payload = {
+        id: cartId,
+        quantity: quantity,
+        customizationsToAdd: customizationsToAdd,
+        customizationsToRemove: customizationsToRemove,
+      };
+      await dispatch(updateItemToCart(payload)).unwrap();
+      setOpen(false);
     } else {
       let payload = {
         customizations: Array.from(selectedChoice),
@@ -856,7 +895,7 @@ export const CustomizationComponent = ({
             <span className="text-sm font-semibold">{quantity}</span>
 
             <Button
-              onClick={() => setquantity(quantity + 1)}
+              onClick={() => handleItemAddClick()}
               variant="ghost"
               size={"icon"}
               className={" h-10 "}
