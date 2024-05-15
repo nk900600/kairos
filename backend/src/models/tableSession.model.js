@@ -62,7 +62,6 @@ const TableSession = sequelize.define(
     tableId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true, // Ensure no two sessions can reference the same table
       references: {
         model: "Tables",
         key: "id",

@@ -1,3 +1,4 @@
+const sequelize = require("../db/db.js");
 const { TableStatus } = require("../enums/tables.enum.js");
 const { Table } = require("../models/table.model.js");
 const {
@@ -112,11 +113,13 @@ class TableController {
     }
   }
   async updateStatus(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
       if (!req.body?.status) {
         return res.status(400).json({ message: "Missing required fields" });
       }
-      const table = await Table.findByPk(req.params.id);
+      const table = await Table.findByPk(req.params.id, { transaction });
       if (!table) {
         return res.status(404).json({ message: "Table not found" });
       }
@@ -128,17 +131,22 @@ class TableController {
           reservationTime: null,
           reservationPartySize: null,
         },
-        { where: { id: table.id } }
+        { where: { id: table.id }, transaction }
       );
 
       if (req.body?.status == TableStatus.AVAILABLE) {
-        const session = await TableSession.findAll({
-          where: { tableId: req.params.id },
-        });
-        if (session) await session.destroy();
+        await TableSession.update(
+          { status: SessionStatus.CLOSE },
+          {
+            where: { tableId: req.params.id, status: SessionStatus.ACTIVE },
+            transaction,
+          }
+        );
       }
+      await transaction.commit();
       return res.status(200).json(table);
     } catch (error) {
+      await transaction.rollback();
       return res.status(404).json({ error: "Table not found" });
     }
   }
