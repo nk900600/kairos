@@ -95,6 +95,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import ManageCustomization from "./modals/manageCustomization";
 import { convertToObject } from "typescript";
+import { toast } from "sonner";
 
 export const currencyMap = new Map([["INR", "₹"]]);
 
@@ -535,36 +536,218 @@ export function ShowCurrentOrder({
   );
 }
 
-export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
-  const [currentMenu, setCurrentMenu] = useState(
-    JSON.parse(JSON.stringify(menu))
+export const CustomizationPresentComp = ({
+  menu,
+  tableSessionId,
+  canAdd = true,
+}: any) => {
+  const [cartData, setCartData] = useState<any>([]);
+  const { allCartData, allEmployees } = useSelector(
+    (state: { table: RootState }) => state.table
   );
+  const [totalAmount, setTotalAmount] = useState<any>(0);
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(() => {
+    setCartData(allCartData);
+  }, [allCartData]);
+  const handleMinusClick = (e: any, cartItem: any, index: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    let localCartData = JSON.parse(JSON.stringify(cartData));
+    if (cartItem.quantity == 1) {
+      localCartData[index].quantity = 0;
+      localCartData = localCartData.filter((val: any) => val.id != cartItem.id);
+      setCartData(localCartData);
+      dispatch(deleteItemToCart(cartItem.id));
+    } else {
+      let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
+      dispatch(updateItemToCart(payload)).unwrap();
+      localCartData[index].quantity = cartItem.quantity - 1;
+      setCartData(localCartData);
+    }
+  };
+
+  const handleAddClick = (e: any, cartItem: any, index: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    let localCartData = JSON.parse(JSON.stringify(cartData));
+    const payload = { quantity: cartItem.quantity + 1, id: cartItem.id };
+    dispatch(updateItemToCart(payload)).unwrap();
+    localCartData[index].quantity = cartItem.quantity + 1;
+    setCartData(localCartData);
+  };
+
+  const {
+    open,
+    setOpen,
+    title,
+    setTitle,
+    setComponent,
+    setDescription,
+    setCompProps,
+  } = useContext(DrawerContext);
+
+  const handleNewCustomization = () => {
+    setOpen(true);
+    setTitle("Edit Item");
+    setDescription(" ");
+    setComponent("customizationComponent");
+    setCompProps({ menu: menu, tableSessionId });
+  };
+
+  const handleUpdateCustomization = (cartId: number) => {
+    setOpen(true);
+    setTitle("Edit Item");
+    setDescription(" ");
+    setComponent("customizationComponent");
+    setCompProps({ menu: menu, tableSessionId, cartId });
+  };
+  return (
+    <>
+      <>
+        <CardContent className="grid gap-2.5 p-0 text-sm">
+          <div className="flex flex-col gap-4">
+            {cartData
+              .filter((val: any) => val.menuItemId == menu.id)
+              .map((item: any, index: number) => {
+                return (
+                  <div
+                    onClick={() => handleUpdateCustomization(item.id)}
+                    className="flex items-start gap-4 items-center cursor-pointer"
+                  >
+                    <div className="flex flex-col items-center ">
+                      <VegIcon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">{item.MenuItem.name}</div>
+                      <div className="text-xm text-gray-500 dark:text-gray-400">
+                        {item.CartItemCustomizations.map(
+                          (data: any) => data.CustomizationChoice.name
+                        ).join(", ")}
+                      </div>
+                    </div>
+
+                    <div className="flex-col items-center space-x-4">
+                      <div className="rounded-lg border bg-card h-6 flex items-center gap-1">
+                        <Button
+                          onClick={(e) => handleMinusClick(e, item, index)}
+                          variant="ghost"
+                          size={"icon"}
+                          className="h-6"
+                        >
+                          <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+                        </Button>
+
+                        <span className="text-sm font-semibold ">
+                          {item.quantity}
+                        </span>
+
+                        <Button
+                          onClick={(e) => handleAddClick(e, item, index)}
+                          variant="ghost"
+                          size={"icon"}
+                          className=" h-6 "
+                        >
+                          <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+                        </Button>
+                      </div>
+                      <div className="ml-auto text-right">
+                        <div className="font-medium text-sm mt-1">
+                          {currencyMap.get(item.MenuItem.currency)}{" "}
+                          {(item.CartItemCustomizations.map(
+                            (choice: any) =>
+                              choice.CustomizationChoice.additionalPrice
+                          ).reduce((acc: any, val: any) => acc + val, 0) +
+                            item.MenuItem.price) *
+                            item.quantity}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            {/* TODO: Disocunt feature */}
+
+            {canAdd && (
+              <>
+                <Separator className="my-2" />
+
+                <Button
+                  onClick={handleNewCustomization}
+                  className="h-10 flex gap-3"
+                >
+                  Add new customization
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </>
+    </>
+  );
+};
+
+export const CustomizationComponent = ({
+  menu,
+  tableSessionId,
+  cartId = null,
+}: any) => {
+  const [currentMenu, setCurrentMenu] = useState<any>([]);
 
   const { allTableSessions, allCartData } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const { setOpen } = useContext(DrawerContext);
-  const [selectedChoice, setSelectedChoice] = useState<any>([]);
+  const [selectedChoice, setSelectedChoice] = useState(new Set());
   const [quantity, setquantity] = useState(
-    allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 1
+    cartId ? allCartData?.find((val) => val.id == cartId)?.quantity : 1
   );
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
-    currentMenu.orderTotal = currentMenu.price;
-    setCurrentMenu(JSON.parse(JSON.stringify(currentMenu)));
-  }, []);
+    let customizationIdCheckMap: any = {};
+    let localTotal = 0;
+    menu = JSON.parse(JSON.stringify(menu));
+    if (cartId) {
+      let cartData = allCartData?.find((val) => val.id == cartId);
 
-  const handleCheckBoxClick = (event: any, option: any) => {
-    if (event) {
+      cartData.CartItemCustomizations.forEach((val: any) => {
+        customizationIdCheckMap[val.customizationChoiceId] = true;
+      });
+    }
+    menu.Customizations.forEach((item: any) => {
+      item.CustomizationChoices.forEach((val: any) => {
+        if (val.id in customizationIdCheckMap) {
+          val.checked = true;
+          localTotal += val.additionalPrice;
+          selectedChoice.add(val.id);
+        } else val.checked = false;
+      });
+    });
+
+    menu.orderTotal = menu.price + localTotal;
+    setCurrentMenu(JSON.parse(JSON.stringify(menu)));
+  }, [menu]);
+
+  const handleCheckBoxClick = (event: any, option: any, choicesData: any) => {
+    let selectedData = choicesData.CustomizationChoices.filter(
+      (val: any) => val.checked
+    );
+    if (selectedData.length >= choicesData.maxMultiSelect && event) {
+      toast.info(`Max choices can be seleted is ${choicesData.maxMultiSelect}`);
+      option.checked = false;
+      return;
+    }
+    option.checked = event;
+    if (option.checked) {
       currentMenu.orderTotal += option.additionalPrice;
-      selectedChoice.push(option.id);
-      setSelectedChoice(selectedChoice);
+      selectedChoice.add(option.id);
     } else {
       currentMenu.orderTotal -= option.additionalPrice;
-      selectedChoice.filter((id: any) => id != option.id);
-      setSelectedChoice(selectedChoice);
+      selectedChoice.delete(option.id);
     }
+    setSelectedChoice(new Set(selectedChoice));
     setCurrentMenu(JSON.parse(JSON.stringify(currentMenu)));
   };
 
@@ -578,21 +761,24 @@ export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
   };
 
   const handleAddItemClick = () => {
-    let payload = {
-      customizations: selectedChoice,
-      quantity: quantity,
-      menuItemId: menu.id,
-      tableSessionId: tableSessionId,
-    };
-    dispatch(addItemToCart(payload));
-    setOpen(false);
+    if (cartId) {
+    } else {
+      let payload = {
+        customizations: Array.from(selectedChoice),
+        quantity: quantity,
+        menuItemId: menu.id,
+        tableSessionId: tableSessionId,
+      };
+      dispatch(addItemToCart(payload));
+      setOpen(false);
+    }
   };
   return (
     <ScrollArea className=" max-h-screen">
       <>
         <CardContent className="p-0 mb-4 mt-3 text-sm gap-4 flex flex-col">
           <div>
-            {menu.Customizations?.map((item: any, index: number) => {
+            {currentMenu.Customizations?.map((item: any, index: number) => {
               return (
                 <>
                   <div className="grid gap-3">
@@ -637,8 +823,9 @@ export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
                               </label>
                               <Checkbox
                                 id={options.id}
+                                checked={options.checked}
                                 onCheckedChange={(event) =>
-                                  handleCheckBoxClick(event, options)
+                                  handleCheckBoxClick(event, options, item)
                                 }
                               />
                             </div>
@@ -683,7 +870,8 @@ export const CustomizationComponent = ({ menu, tableSessionId }: any) => {
             className="h-10 w-full"
             onClick={handleAddItemClick}
           >
-            Add Item - {currencyMap.get(menu.currency)} {currentMenu.orderTotal}
+            {cartId ? "Edit" : "Add"} Item - {currencyMap.get(menu.currency)}{" "}
+            {currentMenu.orderTotal}
           </Button>
         </div>
       </>
@@ -697,9 +885,7 @@ export function MenuAddButton({ menu, tableSessionId }: any) {
   );
 
   const [isOpen, setLocalOpen] = useState<boolean | undefined>(undefined);
-  const [count, setCount] = useState<number>(
-    allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 0
-  );
+  const [count, setCount] = useState<number>(0);
   const {
     open,
     setOpen,
@@ -719,7 +905,9 @@ export function MenuAddButton({ menu, tableSessionId }: any) {
 
   useEffect(() => {
     setCount(
-      allCartData?.find((val) => val.menuItemId == menu.id)?.quantity || 0
+      allCartData
+        ?.filter((val) => val.menuItemId == menu.id)
+        .reduce((acc, val) => acc + val.quantity, 0) || 0
     );
   }, [allCartData]);
 
@@ -731,11 +919,19 @@ export function MenuAddButton({ menu, tableSessionId }: any) {
 
   const handleAddClick = () => {
     if (menu?.Customizations?.length) {
-      setOpen(true);
-      setTitle("Edit Item");
-      setDescription(" ");
-      setComponent("customizationComponent");
-      setCompProps({ menu: menu, tableSessionId });
+      if (allCartData?.filter((val) => val.menuItemId == menu.id).length) {
+        setOpen(true);
+        setTitle("Apply previous customization");
+        setDescription(" ");
+        setComponent("customizationPresentComp");
+        setCompProps({ menu: menu, tableSessionId });
+      } else {
+        setOpen(true);
+        setTitle("Edit Item");
+        setDescription(" ");
+        setComponent("customizationComponent");
+        setCompProps({ menu: menu, tableSessionId });
+      }
     } else {
       setCount(count + 1);
       let payload: any = {
@@ -753,7 +949,18 @@ export function MenuAddButton({ menu, tableSessionId }: any) {
   };
 
   const handleMinusClick = () => {
-    let cartData = allCartData.find((val) => val.menuItemId == menu.id);
+    let cartData: any = allCartData.filter((val) => val.menuItemId == menu.id);
+
+    if (cartData.length > 1) {
+      setOpen(true);
+      setTitle("Double check the customization");
+      setDescription(" ");
+      setComponent("customizationPresentComp");
+      setCompProps({ menu: menu, tableSessionId, canAdd: false });
+      return;
+    } else {
+      cartData = cartData[0];
+    }
 
     if (count == 1) {
       setCount(0);

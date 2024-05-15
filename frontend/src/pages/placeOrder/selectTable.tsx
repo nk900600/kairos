@@ -85,11 +85,10 @@ export function TableComponent({ handleTableClick }: any) {
     (state: { table: RootState }) => state.table
   );
 
-  const availbleTables = tables
-    .filter((val) => val.status == "Available")
-    .filter(
-      (val) => !allTableSessions.map((tab) => tab.tableId).includes(val.id)
-    );
+  const availbleTables = tables.filter((val) => val.status == "Available");
+  // .filter(
+  //   (val) => !allTableSessions.map((tab) => tab.tableId).includes(val.id)
+  // );
 
   return (
     <>

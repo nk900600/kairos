@@ -782,19 +782,24 @@ export function ViewOrder({ order }: any) {
             </div>
           </dl>
         </div> */}
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Payment Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="flex items-center gap-1 text-muted-foreground">
-                <CircleDollarSign className="h-4 w-4" />
-                Cash
-              </dt>
-              {/* <dd>**** **** **** 4532</dd> */}
+
+        {orderData.status != OrderStatuses.CANCELLED && (
+          <>
+            <Separator className="my-4" />
+            <div className="grid gap-3">
+              <div className="font-semibold">Payment Information</div>
+              <dl className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <dt className="flex items-center gap-1 text-muted-foreground">
+                    <CircleDollarSign className="h-4 w-4" />
+                    Cash
+                  </dt>
+                  {/* <dd>**** **** **** 4532</dd> */}
+                </div>
+              </dl>
             </div>
-          </dl>
-        </div>
+          </>
+        )}
         <Separator className="my-4" />
       </CardContent>
     </>

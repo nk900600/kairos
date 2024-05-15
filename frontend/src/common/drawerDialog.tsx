@@ -24,7 +24,10 @@ import { ManageReservation, ManageTable } from "../pages/tables";
 import DrawerContext from "../context/drawerContext";
 import { ManageEmployees } from "../pages/contacts";
 import { ManageLeave, ManageLeaveType } from "../pages/leaves";
-import { CustomizationComponent } from "../pages/menus";
+import {
+  CustomizationComponent,
+  CustomizationPresentComp,
+} from "../pages/menus";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { ManageMenu } from "../pages/modals/manageMenu";
 import { ManageMenuDiscount } from "../pages/modals/manageMenuDiscount";
@@ -42,6 +45,7 @@ export function DrawerDialogComponent({
     manageLeaveType: ManageLeaveType,
     manageLeave: ManageLeave,
     customizationComponent: CustomizationComponent,
+    customizationPresentComp: CustomizationPresentComp,
     manageMenu: ManageMenu,
     manageMenuDiscount: ManageMenuDiscount,
     manageCustomization: ManageCustomization,

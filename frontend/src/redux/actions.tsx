@@ -453,7 +453,9 @@ export const createTableSession = createAsyncThunk(
       const response = await axios.post(`${BASE_URL}/tables-session/`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error(
+        "Something went wrong while creating new session, please try again"
+      );
       return rejectWithValue("Failed to delete table");
     }
   }

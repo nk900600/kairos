@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   CirclePlus,
   ClockIcon,
+  CreditCard,
   DollarSign,
   Edit,
   Edit2,
@@ -126,6 +127,14 @@ const AllDesgination = [
   },
 ];
 
+const TableStatus = Object.freeze({
+  AVAILABLE: "Available",
+  OCCUPIED: "Occupied",
+  RESERVED: "Reserved",
+  CLEANING: "Cleaning",
+  MAINTENANCE: "Maintenance",
+});
+
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
@@ -246,15 +255,17 @@ export default function TableComponent() {
     dispatch(updateTableStatus({ id: table.id, status: status }));
   };
   const handleNewOrderClick = async (table: any) => {
-    await dispatch(
-      createTableSession({
-        startTime: Date.now(),
-        customerName: "",
-        customerMobile: 0,
-        tableId: table.id,
-      })
-    ).unwrap();
-    navigate("/place-order/table/" + table.id);
+    try {
+      await dispatch(
+        createTableSession({
+          startTime: Date.now(),
+          customerName: "",
+          customerMobile: 0,
+          tableId: table.id,
+        })
+      ).unwrap();
+      navigate("/place-order/table/" + table.id);
+    } catch (e) {}
   };
   const handleOrderClick = async (table: any) => {
     navigate("/place-order/table/" + table.id);
@@ -528,16 +539,18 @@ export default function TableComponent() {
                   </Card>
                 );
               })}
-
-            {/* {!availbleTables?.length && (
-              <EmptyPlaceholder
-                title="No Tables Available"
-                description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
-                buttonText=""
-                image="./closed_stores.gif"
-              ></EmptyPlaceholder>
-            )} */}
           </div>
+          {!tables.filter(
+            (table: any) =>
+              table.status == "Occupied" || table.status == "Reserved"
+          )?.length && (
+            <EmptyPlaceholder
+              title="No Tables Occupied"
+              description="No tables are in use at the moment. Enjoy the calm before the rush, or seat your first guest now!"
+              buttonText=""
+              type="table"
+            ></EmptyPlaceholder>
+          )}
         </TabsContent>
         <TabsContent value="others">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
@@ -617,6 +630,17 @@ export default function TableComponent() {
               })}
           </div>
         </TabsContent>
+        {!tables.filter(
+          (table: any) =>
+            !["Occupied", "Available", "Reserved"].includes(table.status)
+        )?.length && (
+          <EmptyPlaceholder
+            title="Bravo! All tables are in use "
+            description="Congratulations! All tables are currently in use. Ensure every guest has a wonderful dining experience.!"
+            buttonText=""
+            type="table"
+          ></EmptyPlaceholder>
+        )}
       </Tabs>
 
       <Sheet {...sheetProps}>
@@ -626,6 +650,7 @@ export default function TableComponent() {
             tableSessionObj={allTableSessions?.find(
               (session) => session.tableId == currentTable?.id
             )}
+            onClose={() => setOpenPanel(false)}
           ></ClosetabPanel>
           {/* <EditOrderComponent order={editOrderData}></EditOrderComponent> */}
         </SheetContent>
@@ -822,14 +847,15 @@ export const ManageReservation = ({ tableData = {} }: any) => {
   );
 };
 
-export function ClosetabPanel({ tableSessionObj }: any) {
+export function ClosetabPanel({ tableSessionObj, onClose }: any) {
   const [orderData, setOrderData] = useState<any>([]);
   const [totalAmount, setTotalAmount] = useState<any>(0);
+  const [currentPayment, setCurrentPayment] = useState<any>("cash");
+  const [loading, setLoading] = useState<any>(false);
   const { alltables, allOrders, allEmployees, allTableSessions } = useSelector(
     (state: { table: RootState }) => state.table
   );
-
-  console.log(tableSessionObj);
+  const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     setTotalAmount(
@@ -839,6 +865,18 @@ export function ClosetabPanel({ tableSessionObj }: any) {
         .reduce((total: any, item: any) => total + item.totalAmount, 0)
     );
   }, [allOrders]);
+
+  const handleSettleBill = async () => {
+    setLoading(true);
+    await dispatch(
+      updateTableStatus({
+        id: tableSessionObj.tableId,
+        status: TableStatus.AVAILABLE,
+      })
+    ).unwrap();
+    setLoading(false);
+    onClose();
+  };
   return (
     <>
       <ScrollArea className=" h-full">
@@ -970,16 +1008,35 @@ export function ClosetabPanel({ tableSessionObj }: any) {
           ) : (
             <div className="px-2">
               <div className="grid gap-3">
-                <div className="font-semibold">Payment Information</div>
+                {/* <div className="font-semibold">Payment Information</div>
 
-                <Button
-                  variant={"outline"}
-                  className="px-6 py-4 text-center text-sm font-medium  flex flex-col items-center justify-center rounded-md h-full"
-                >
-                  <DollarSign className="mb-2 h-8 w-8" />
-                  <span>Cash</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant={"outline"}
+                    className={`px-6 py-6  text-center text-sm font-medium  flex flex-col items-center justify-center rounded-md h-full ${
+                      currentPayment == "cash" && "border border-primary"
+                    }`}
+                    onClick={() => setCurrentPayment("cash")}
+                  >
+                    <DollarSign className="mb-2 h-8 w-8" />
+                    <span>Cash</span>
+                  </Button>
+                  <Button
+                    variant={"outline"}
+                    className={`px-6 py-6 text-center text-sm font-medium  flex flex-col items-center justify-center rounded-md h-full ${
+                      currentPayment == "card" && "border border-primary"
+                    }`}
+                    onClick={() => setCurrentPayment("card")}
+                  >
+                    <CreditCard className="mb-2 h-8 w-8" />
+                    <span>Card</span>
+                  </Button>
+                </div> */}
+
+                <Button loading={loading} onClick={handleSettleBill}>
+                  {" "}
+                  Settle Bill
                 </Button>
-                <Button> Settle Bill {"->"} 123</Button>
                 {/* <div className="p-6 pt-0 grid gap-6"><div role="radiogroup" aria-required="false" dir="ltr" className="grid grid-cols-3 gap-4" tabindex="0" style="outline: none;"><div><button type="button" role="radio" aria-checked="true" data-state="checked" value="card" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="card" aria-label="Card" tabindex="-1" data-radix-collection-item=""><span data-state="checked" className="flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-circle h-2.5 w-2.5 fill-current text-current"><circle cx="12" cy="12" r="10"></circle></svg></span></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" className="mb-3 h-6 w-6"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="M2 10h20"></path></svg>Card</label></div><div><button type="button" role="radio" aria-checked="false" data-state="unchecked" value="paypal" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="paypal" aria-label="Paypal" tabindex="-1" data-radix-collection-item=""></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="paypal"><svg role="img" viewBox="0 0 24 24" className="mb-3 h-6 w-6"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.005 7.201-9.138 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z" fill="currentColor"></path></svg>Paypal</label></div><div><button type="button" role="radio" aria-checked="false" data-state="unchecked" value="apple" className="aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer sr-only" id="apple" aria-label="Apple" tabindex="-1" data-radix-collection-item=""></button><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&amp;:has([data-state=checked])]:border-primary" for="apple"><svg role="img" viewBox="0 0 24 24" className="mb-3 h-6 w-6"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" fill="currentColor"></path></svg>Apple</label></div></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="name">Name</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="name" placeholder="First Last"></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="city">City</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="city" placeholder=""></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="number">Card number</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="number" placeholder=""></div><div className="grid grid-cols-3 gap-4"><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="month">Expires</label><button type="button" role="combobox" aria-controls="radix-:r8d:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1" id="month" aria-label="Month"><span style="pointer-events: none;">Month</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chevron-down h-4 w-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="year">Year</label><button type="button" role="combobox" aria-controls="radix-:r8e:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-placeholder="" className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1" id="year" aria-label="Year"><span style="pointer-events: none;">Year</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-chevron-down h-4 w-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div><div className="grid gap-2"><label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="cvc">CVC</label><input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="cvc" placeholder="CVC"></div></div></div> */}
               </div>
             </div>

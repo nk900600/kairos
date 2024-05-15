@@ -192,6 +192,19 @@ const counterSlice = createSlice({
               status: action.payload.status,
             };
           }
+
+          if (action.payload.status == "Completed") {
+            let tableSessionIndex = state.allTableSessions.findIndex(
+              (session) => session.id == state.allOrders[index].tableSessionId
+            );
+            if (tableSessionIndex !== -1) {
+              state.allTableSessions[tableSessionIndex] = {
+                ...state.allTableSessions[tableSessionIndex],
+                orderCount:
+                  state.allTableSessions[tableSessionIndex].orderCount + 1,
+              };
+            }
+          }
         }
       )
       .addCase(

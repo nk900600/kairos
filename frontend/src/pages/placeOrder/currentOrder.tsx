@@ -119,154 +119,110 @@ export function CurrentOrderContentComponent({
       <ScrollArea className="h-full ">
         <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center gap-3">
-            {/* <VegIcon className="h-5 w-5" />
-        Paneer masala */}
-            {/* <div className="mr-4 -m-2.5"> */}
-            <PackageIcon className="h-7 w-7" />
+            {/* <PackageIcon className="h-7 w-7" /> */}
             <span className="sr-only">Acme Inc</span>
-            {/* </div> */}
             <h1 className="font-semibold text-base">My Cart</h1>
           </SheetTitle>
-          {/* <SheetDescription>Date: November 23, 2023.</SheetDescription> */}
           <Separator className="my-2" />
         </SheetHeader>
+
         {!!cartData.length ? (
           <>
-            <div className="flex flex-col gap-4">
-              <Card>
+            <CardContent className="grid gap-2.5 p-0 text-sm">
+              <div className="flex flex-col gap-4">
                 {cartData.map((item: any, index: number) => {
                   return (
-                    <CardContent className="grid gap-2.5 p-4 text-sm">
-                      <div className="flex items-start gap-4 items-center">
-                        <div className="flex flex-col items-center ">
-                          <VegIcon className="h-5 w-5" />
+                    <div className="flex items-start gap-4 items-center">
+                      <div className="flex flex-col items-center ">
+                        <VegIcon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold">
+                          {item.MenuItem.name}
                         </div>
-                        <div className="flex-1">
-                          <div className="font-semibold">
-                            {item.MenuItem.name}
-                          </div>
-                          <div className="text-xm text-gray-500 dark:text-gray-400">
-                            {item.CartItemCustomizations.map(
-                              (data: any) => data.CustomizationChoice.name
-                            ).join(", ")}
-                          </div>
+                        <div className="text-xm text-gray-500 dark:text-gray-400">
+                          {item.CartItemCustomizations.map(
+                            (data: any) => data.CustomizationChoice.name
+                          ).join(", ")}
                         </div>
+                      </div>
 
-                        <div className="flex-col items-center space-x-4">
-                          <div className="rounded-lg border bg-card h-6 flex items-center gap-1">
-                            <Button
-                              onClick={() => handleMinusClick(item, index)}
-                              variant="ghost"
-                              size={"icon"}
-                              className="h-6"
-                            >
-                              <MinusIcon className="h-4 w-4 -translate-x-0.5" />
-                            </Button>
+                      <div className="flex-col items-center space-x-4">
+                        <div className="rounded-lg border bg-card h-6 flex items-center gap-1">
+                          <Button
+                            onClick={() => handleMinusClick(item, index)}
+                            variant="ghost"
+                            size={"icon"}
+                            className="h-6"
+                          >
+                            <MinusIcon className="h-4 w-4 -translate-x-0.5" />
+                          </Button>
 
-                            <span className="text-sm font-semibold ">
-                              {item.quantity}
-                            </span>
+                          <span className="text-sm font-semibold ">
+                            {item.quantity}
+                          </span>
 
-                            <Button
-                              onClick={() => handleAddClick(item, index)}
-                              variant="ghost"
-                              size={"icon"}
-                              className=" h-6 "
-                            >
-                              <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
-                            </Button>
-                          </div>
-                          <div className="ml-auto text-right">
-                            <div className="font-medium text-sm mt-1">
-                              {currencyMap.get(item.MenuItem.currency)}{" "}
-                              {(item.CartItemCustomizations.map(
-                                (choice: any) =>
-                                  choice.CustomizationChoice.additionalPrice
-                              ).reduce((acc: any, val: any) => acc + val, 0) +
-                                item.MenuItem.price) *
-                                item.quantity}
-                            </div>
+                          <Button
+                            onClick={() => handleAddClick(item, index)}
+                            variant="ghost"
+                            size={"icon"}
+                            className=" h-6 "
+                          >
+                            <PlusIcon className="h-4 w-4 -translate-x-0.5 " />
+                          </Button>
+                        </div>
+                        <div className="ml-auto text-right">
+                          <div className="font-medium text-sm mt-1">
+                            {currencyMap.get(item.MenuItem.currency)}{" "}
+                            {(item.CartItemCustomizations.map(
+                              (choice: any) =>
+                                choice.CustomizationChoice.additionalPrice
+                            ).reduce((acc: any, val: any) => acc + val, 0) +
+                              item.MenuItem.price) *
+                              item.quantity}
                           </div>
                         </div>
                       </div>
-                    </CardContent>
+                    </div>
                   );
                 })}
-              </Card>
-              {/* TODO: Disocunt feature */}
-              {/* <div className="space-y-4">
-            <Card>
-              <CardContent className="grid gap-1 text-sm p-4">
-                <div className="flex items-center">
-                  <div className="flex gap-2">
-                    <SquarePercent />
-                    Discount
-                  </div>
-                  <div className="ml-auto">
-                    <Select>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select a fruit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Fruits</SelectLabel>
-                          <SelectItem value="apple">Apple</SelectItem>
-                          <SelectItem value="banana">Banana</SelectItem>
-                          <SelectItem value="blueberry">Blueberry</SelectItem>
-                          <SelectItem value="grapes">Grapes</SelectItem>
-                          <SelectItem value="pineapple">Pineapple</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {/* TODO: Disocunt feature */}
+                <Separator className="my-2" />
+                <ul className="grid gap-3">
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>
+                      {" "}
+                      {currencyMap.get("INR")} {totalAmount}{" "}
+                    </span>
+                  </li>
 
-                  <div className="ml-auto">$60.00</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div> */}
-              <div className="space-y-4">
-                <Card>
-                  <CardContent className="grid gap-1 text-sm p-4">
-                    <div className="flex items-center">
-                      <div>Subtotal</div>
-                      <div className="ml-auto">
-                        {" "}
-                        {currencyMap.get("INR")} {totalAmount}{" "}
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <div>GST 18%</div>
-                      <div className="ml-auto">
-                        {" "}
-                        {currencyMap.get("INR")}{" "}
-                        {(totalAmount * 0.18).toFixed(2)}
-                      </div>
-                    </div>
-                    {/* <div className="flex items-center">
-                  <div>Discount</div>
-                  <div className="ml-auto">-$6.00</div>
-                </div> */}
-                    <Separator className="border-color-gray-200" />
-                    <div className="flex items-center font-medium">
-                      <div>Total</div>
-                      <div className="ml-auto">
-                        {currencyMap.get("INR")}{" "}
-                        {Math.round(totalAmount + totalAmount * 0.18)}{" "}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Tax - 18%</span>
+                    <span>
+                      {currencyMap.get("INR")} {(totalAmount * 0.18).toFixed(2)}
+                    </span>
+                  </li>
+                  <li className="flex items-center justify-between font-semibold">
+                    <span className="text-muted-foreground">Total</span>
+                    <span>
+                      {" "}
+                      {currencyMap.get("INR")}{" "}
+                      {Math.round(totalAmount + totalAmount * 0.18)}{" "}
+                    </span>
+                  </li>
+                </ul>
+
+                <Button
+                  loading={isLoading}
+                  onClick={handleSendToChef}
+                  className="h-10 flex gap-3"
+                >
+                  Sent to Chef
+                  <ArrowRight></ArrowRight>
+                </Button>
               </div>
-              <Button
-                loading={isLoading}
-                onClick={handleSendToChef}
-                className="h-10 flex gap-3"
-              >
-                Sent to Chef
-                <ArrowRight></ArrowRight>
-              </Button>
-            </div>
+            </CardContent>
           </>
         ) : (
           <EmptyPlaceholder
