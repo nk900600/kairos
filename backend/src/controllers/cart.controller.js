@@ -94,6 +94,7 @@ class CartController {
   }
 
   async updateCartItem(req, res) {
+    const transaction = await sequelize.transaction();
     try {
       const { id } = req.params;
       if (!req.body?.quantity) {
@@ -103,34 +104,60 @@ class CartController {
       if (quantity == 0) {
         res.status(400).json({ message: "Cart quantity cannot be zero" });
       }
-      const cartItem = await CartItem.findByPk(id);
-      if (cartItem) {
-        cartItem.quantity = quantity;
-        await cartItem.save();
+      await CartItem.update({ quantity }, { where: { id }, transaction });
 
-        const returObj = await CartItem.findByPk(cartItem.id, {
-          include: [
+      // Add new customizations
+      if (
+        req.body?.customizationsToAdd &&
+        req.body?.customizationsToAdd.length > 0
+      ) {
+        const { customizationsToAdd } = req.body;
+        for (let customizationId of customizationsToAdd) {
+          await CartItemCustomization.create(
             {
-              model: MenuItem,
-              attributes: ["id", "name", "price", "description", "currency"],
+              cartItemId: id,
+              customizationChoiceId: customizationId,
             },
-            {
-              model: CartItemCustomization,
-              include: [
-                {
-                  model: CustomizationChoice,
-                  attributes: ["id", "name", "description", "additionalPrice"],
-                },
-              ],
-            },
-          ],
-          attributes: ["id", "quantity", "menuItemId", "tableSessionId"],
-        });
-
-        res.status(201).json(returObj);
-      } else {
-        res.status(404).json({ message: "Cart item not found" });
+            { transaction }
+          );
+        }
       }
+
+      // Remove specified customizations
+      if (req.body?.customizationsToRemove &&  req.body?.customizationsToRemove.length > 0) {
+        const { customizationsToRemove } = req.body;
+        for (let customizationId of customizationsToRemove) {
+          await CartItemCustomization.destroy({
+            where: {
+              cartItemId: id,
+              customizationChoiceId: customizationId,
+            },
+            transaction,
+          });
+        }
+      }
+
+      await transaction.commit();
+      const returObj = await CartItem.findByPk(id, {
+        include: [
+          {
+            model: MenuItem,
+            attributes: ["id", "name", "price", "description", "currency"],
+          },
+          {
+            model: CartItemCustomization,
+            include: [
+              {
+                model: CustomizationChoice,
+                attributes: ["id", "name", "description", "additionalPrice"],
+              },
+            ],
+          },
+        ],
+        attributes: ["id", "quantity", "menuItemId", "tableSessionId"],
+      });
+
+      res.status(201).json(returObj);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
