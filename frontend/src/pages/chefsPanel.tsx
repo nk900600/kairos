@@ -118,7 +118,7 @@ export default function ChefsPanelComponent() {
 
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-lg sm:text-2xl  font-semibold tracking-tight ">
           Chef's Panel
         </h1>
         {/* {addButtonLabel && (
@@ -217,15 +217,15 @@ export default function ChefsPanelComponent() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56" align="end">
-                              <DropdownMenuItem
+                              {/* <DropdownMenuItem
                                 onClick={() => handleFinishClick(val)}
                               >
                                 <>
                                   <Check className="mr-2 h-4 w-4 " />
                                   <span> Finish</span>
                                 </>
-                              </DropdownMenuItem>{" "}
-                              <DropdownMenuSeparator />
+                              </DropdownMenuItem> */}
+                              {/* <DropdownMenuSeparator /> */}
                               {!confirmDelete && (
                                 <DropdownMenuItem
                                   onClick={(e) => handleConfirmDelete(e)}

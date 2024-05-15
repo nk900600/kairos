@@ -19,7 +19,7 @@ export function MainSettings() {
       />
       <div className="flex items-center gap-4">
         <GoBackButton />
-        <h1 className="flex-1  whitespace-nowrap text-lg font-semibold tracking-tight ">
+        <h1 className="flex-1  whitespace-nowrap text-lg sm:text-2xl  font-semibold tracking-tight ">
           Account Settings
         </h1>
       </div>
