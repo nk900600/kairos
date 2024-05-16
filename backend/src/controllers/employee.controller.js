@@ -1,6 +1,10 @@
 const sequelize = require("../db/db.js");
 const { Employee, Designation, Role } = require("../models/employee.model.js");
 const { Firm } = require("../models/firm.model.js");
+const {
+  Subscription,
+  FirmSubscription,
+} = require("../models/subscription.model.js");
 const { mobileNumberRegex, emailRegex } = require("../utils/const.js");
 
 class EmployeeController {
@@ -158,6 +162,28 @@ class EmployeeController {
       }
     } catch (error) {
       return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getCurrentuserInfo(req, res) {
+    try {
+      let isEmployee = await Employee.findOne({
+        where: { id: req.user.id },
+        include: [
+          {
+            model: Firm,
+          },
+          { model: Role },
+          Designation,
+        ],
+      });
+
+      let subscripition = await FirmSubscription.findOne({
+        where: { FirmId: req.user.firmId },
+      });
+      return res.status(200).json({ employee: isEmployee, subscripition }); //
+    } catch (error) {
+      res.status(404).json({ error: error.message });
     }
   }
 }
