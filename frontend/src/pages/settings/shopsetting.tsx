@@ -16,16 +16,25 @@ import { PencilIcon } from "lucide-react";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/reducer";
 
-export function GeneralSetting() {
+export function ShopSetting() {
   const [image, setImage] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [name, setName] = useState("");
 
   const { myAccount }: any = useSelector(
     (state: { table: RootState }) => state.table
   );
+
+  useEffect(() => {
+    setName(myAccount?.employee.Firm?.name);
+    setEmail(myAccount?.employee.Firm?.email);
+    setMobile(myAccount?.employee.Firm?.mobileNumber);
+  }, [myAccount]);
   // Handles the file input change
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
@@ -41,28 +50,28 @@ export function GeneralSetting() {
     <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
       <div className="grid grid-cols-1 items-start">
         {/* <div className="flex flex-col items-center gap-2">
-          <div className="relative">
-            <Avatar className="h-12 w-12 border">
-              <AvatarImage alt="User avatar" src="/placeholder-user.jpg" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <Button
-              className="absolute -top-2 -right-2"
-              size="sm"
-              variant="ghost"
-            >
-              <PencilIcon className="h-4 w-4" />
-              <span className="sr-only">Edit avatar</span>
-            </Button>
-          </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            General
-          </span>
-        </div> */}
+            <div className="relative">
+              <Avatar className="h-12 w-12 border">
+                <AvatarImage alt="User avatar" src="/placeholder-user.jpg" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <Button
+                className="absolute -top-2 -right-2"
+                size="sm"
+                variant="ghost"
+              >
+                <PencilIcon className="h-4 w-4" />
+                <span className="sr-only">Edit avatar</span>
+              </Button>
+            </div>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              General
+            </span>
+          </div> */}
         <div className="grid gap-4">
           <Card>
             <CardHeader className="pb-0">
-              <CardTitle className="text-lg">Avatar</CardTitle>
+              <CardTitle className="text-lg">Shop Avatar</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center text-sm text-muted-foreground">
@@ -101,10 +110,7 @@ export function GeneralSetting() {
             </CardHeader>
             <CardContent>
               <form>
-                <Input
-                  placeholder="Store Name"
-                  value={myAccount?.employee.Firm?.name}
-                />
+                <Input placeholder="Store Name" value={name} />
               </form>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
@@ -118,10 +124,7 @@ export function GeneralSetting() {
             </CardHeader>
             <CardContent>
               <form>
-                <Input
-                  placeholder="1213123122"
-                  value={myAccount?.employee.Firm?.mobileNumber}
-                />
+                <Input placeholder="1213123122" value={mobile} />
               </form>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">
@@ -135,7 +138,7 @@ export function GeneralSetting() {
             </CardHeader>
             <CardContent>
               <form>
-                <Input placeholder="Sample@sam.com" />
+                <Input placeholder="Sample@sam.com" value={email} />
               </form>
             </CardContent>
             <CardFooter className="border-t px-6 py-4">

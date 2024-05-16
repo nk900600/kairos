@@ -13,7 +13,21 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import SalesChart from "./common/chart";
+import PieChartComponent from "./common/pieChart";
 
+const productCategoryData = [
+  { name: "Beverages", value: 400 },
+  { name: "Snacks", value: 300 },
+  { name: "Main Course", value: 300 },
+  { name: "Desserts", value: 200 },
+];
+
+const tableNumberData = [
+  { name: "Table 1", value: 500 },
+  { name: "Table 2", value: 300 },
+  { name: "Table 3", value: 200 },
+  { name: "Table 4", value: 100 },
+];
 const activeOrder = [1, 2, 3, 4];
 export function DashBoardContent() {
   return (
@@ -165,6 +179,7 @@ export function DashBoardContent() {
             })}
           </CardContent>
         </Card>
+
         {/* <Card className="sm:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle>Your Orders</CardTitle>
@@ -178,6 +193,22 @@ export function DashBoardContent() {
           </CardFooter>
         </Card> */}
       </div>
+      {/* <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Revenue Breakdown
+          </CardTitle>
+          <CreditCard className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <PieChartComponent
+          data={productCategoryData}
+          title="Revenue by Product Category"
+        />
+        <PieChartComponent
+          data={tableNumberData}
+          title="Revenue by Table Number"
+        />
+      </Card> */}
     </main>
   );
 }

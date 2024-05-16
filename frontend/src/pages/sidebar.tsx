@@ -62,6 +62,7 @@ import {
   fetchAllMenus,
   fetchAllOrders,
   fetchAllTableSession,
+  fetchMyAccount,
   fetchTables,
 } from "../redux/actions";
 import { useDispatch } from "react-redux";
@@ -124,6 +125,7 @@ function Sidebar() {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     dispatch(fetchAllEmployees());
+    dispatch(fetchMyAccount());
     dispatch(fetchTables());
     dispatch(fetchAllTableSession());
     dispatch(fetchAllOrders());
@@ -197,7 +199,7 @@ function Sidebar() {
               })}
             </nav>
           </div>
-          <div className="mt-auto p-4">
+          {/* <div className="mt-auto p-4">
             <Card x-chunk="dashboard-02-chunk-0">
               <CardHeader className="p-2 pt-0 md:p-4">
                 <CardTitle>Upgrade to Pro</CardTitle>
@@ -212,7 +214,7 @@ function Sidebar() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
       </div>
 
