@@ -21,7 +21,9 @@ class LeaveTypeController {
   // Get all LeaveTypes
   async getAllLeaveTypes(req, res) {
     try {
-      const leaveTypes = await LeaveType.findAll();
+      const leaveTypes = await LeaveType.findAll({
+        where: { firmId: req.user.firmId },
+      });
       return res.status(200).json(leaveTypes);
     } catch (error) {
       return res.status(500).json({ message: error.message });

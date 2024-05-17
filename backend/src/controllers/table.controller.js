@@ -9,7 +9,9 @@ const {
 class TableController {
   async getAllTables(req, res) {
     try {
-      const tables = await Table.findAll();
+      const tables = await Table.findAll({
+        where: { firmId: req.user.firmId },
+      });
       return res.status(200).json(tables);
     } catch (error) {
       return res.status(500).json({ error: error.message });

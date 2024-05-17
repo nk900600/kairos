@@ -27,7 +27,9 @@ class DesignationController {
   // Get all designations
   static async getAllDesignations(req, res) {
     try {
-      const designations = await Designation.findAll();
+      const designations = await Designation.findAll({
+        where: { firmId: req.user.firmId },
+      });
       res.json(designations);
     } catch (error) {
       res.status(500).json({ error: "Error fetching designations" });

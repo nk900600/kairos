@@ -30,6 +30,7 @@ class FirmSubscriptionController {
     try {
       const firmSubscriptions = await FirmSubscription.findAll({
         include: [Subscription, Firm],
+        where: { firmId: req.user.firmId },
       });
       return res.status(200).json(firmSubscriptions);
     } catch (error) {

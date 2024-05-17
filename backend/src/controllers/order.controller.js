@@ -110,6 +110,7 @@ class OrderController {
   async findAll(req, res) {
     try {
       const order = await Order.findAll({
+        where: { firmId: req.user.firmId },
         include: [
           {
             model: OrderItem,
@@ -346,6 +347,7 @@ class OrderController {
       // Query the database for average ratings
       const orders = await Order.findAll({
         where: {
+          firmId: req.user.firmId,
           orderDate: {
             [Op.between]: [new Date(startDate), new Date(endDate)],
           },

@@ -13,6 +13,7 @@ class MenuItemsController {
   async getAllMenuItems(req, res) {
     try {
       const menuItems = await MenuItem.findAll({
+        where: { firmId: req.user.firmId },
         include: [
           {
             model: Customization,
@@ -33,7 +34,9 @@ class MenuItemsController {
   }
   async getAllCategories(req, res) {
     try {
-      const menuItems = await Category.findAll({});
+      const menuItems = await Category.findAll({
+        where: { firmId: req.user.firmId },
+      });
 
       return res.json(menuItems);
     } catch (error) {

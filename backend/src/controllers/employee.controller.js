@@ -12,6 +12,7 @@ class EmployeeController {
     try {
       const employees = await Employee.findAll({
         include: [Role, Firm, Designation],
+        where: { firmId: req.user.firmId },
       });
       return res.status(200).json(employees);
     } catch (error) {
