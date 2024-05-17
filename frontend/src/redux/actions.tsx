@@ -550,3 +550,33 @@ export const deleteAllCartItemFromTableSession = createAsyncThunk(
     return tableSession; // return the id to identify which table was deleted
   }
 );
+
+//Auth
+export const createNewFirm = createAsyncThunk(
+  "tables/createNewFirm",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.post(`${BASE_URL}/auth/signup`, payload);
+      localStorage.setItem("token", respopnse.data.token);
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const generateOtp = createAsyncThunk(
+  "tables/generateOtp",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.post(
+        `${BASE_URL}/auth/generate-otp`,
+        payload
+      );
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
