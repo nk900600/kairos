@@ -12,14 +12,42 @@ class FirmSubscriptionController {
       if (!req.body?.billingCycle || !req.body?.SubscriptionId) {
         return res.status(400).json({ message: "Missing required fields" });
       }
+
+      const { SubscriptionId } = req.body;
+
+      const subscription = await Subscription.findByPk(SubscriptionId, {});
+      if (!subscription) {
+        return res.status(400).json({ message: "subscription not found" });
+      }
+
+      const firmSubscriptions = await FirmSubscription.findOne({
+        where: { firmId: req.user.firmId },
+      });
+
+      if (firmSubscriptions && firmSubscriptions.trialStartDate) {
+        return res.status(400).json({ message: "Trail already availed" });
+      }
+      if (firmSubscriptions) {
+        return res
+          .status(400)
+          .json({ message: "Already have a active subscription" });
+      }
+
       let nextBillingDate = calculateNextBillingDate(req.body?.billingCycle);
       const firmSubscription = await FirmSubscription.create({
         ...req.body,
         nextBillingDate,
         lastBillingDate: new Date(),
+        trialEndDate: null,
+        trialStartDate: null,
         FirmId: req.user.firmId,
       });
-      return res.status(201).json(firmSubscription);
+
+      let subs = await FirmSubscription.findOne({
+        where: { id: firmSubscription.id },
+        include: [{ model: Subscription }],
+      });
+      return res.status(201).json(subs);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
@@ -164,7 +192,11 @@ class FirmSubscriptionController {
         nextBillingDate: futureDate,
         FirmId: req.user.firmId,
       });
-      return res.status(201).json(firmSubscription);
+      let subs = await FirmSubscription.findOne({
+        where: { id: firmSubscription.id },
+        include: [{ model: Subscription }],
+      });
+      return res.status(201).json(subs);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

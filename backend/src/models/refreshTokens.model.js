@@ -5,7 +5,7 @@ const RefreshToken = sequelize.define(
   "RefreshToken",
   {
     token: {
-      type: DataTypes.STRING(),
+      type: DataTypes.STRING(752),
       allowNull: false,
       unique: true,
     },

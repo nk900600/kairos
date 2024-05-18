@@ -8,7 +8,7 @@ const { mobileNumberRegex, emailRegex } = require("../utils/const");
 const sequelize = require("../db/db");
 const RefreshToken = require("../models/refreshTokens.model");
 
-const TOKEN_EXPIRY = "365d";
+const TOKEN_EXPIRY = "1m";
 const TOKEN_REFRESH_EXPIRY = "365d";
 class AuthController {
   constructor() {
@@ -21,6 +21,7 @@ class AuthController {
     this.generateToken = this.generateToken.bind(this);
     this.refreshAccessToken = this.refreshAccessToken.bind(this);
     this.getRefreshToken = this.getRefreshToken.bind(this);
+    this.createTokenApi = this.createTokenApi.bind(this);
     this.generateAndStoreRefreshToken =
       this.generateAndStoreRefreshToken.bind(this);
   }
@@ -59,11 +60,13 @@ class AuthController {
 
       const otpVerified = await this.verifyOtp(req.body);
       if (otpVerified) {
-        response.employee = await this.onboarding(req.body, transaction);
-        response.token = this.generateToken(response.employee);
-        response.refreshToken = await this.generateAndStoreRefreshToken(
-          response.employee
+        const { employee, refreshToken } = await this.onboarding(
+          req.body,
+          transaction
         );
+        response.token = this.generateToken(response.employee);
+        response.employee = employee;
+        response.refreshToken = refreshToken;
       } else {
         return res.status(401).json({ message: "OTP verification failed" });
       }
@@ -136,7 +139,26 @@ class AuthController {
         },
         { transaction }
       );
-      return employee;
+
+      const refreshToken = jwt.sign(
+        { user: employee },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: TOKEN_REFRESH_EXPIRY,
+        }
+      );
+
+      // Store the refresh token in the database
+      await RefreshToken.create(
+        {
+          token: refreshToken,
+          employeeId: employee.id,
+          expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        },
+        { transaction }
+      );
+
+      return { employee, refreshToken };
       // Implement login logic
     } catch (error) {
       console.error(error);
@@ -153,6 +175,14 @@ class AuthController {
         return res
           .status(400)
           .json({ message: "Invalid mobile number format" });
+      }
+
+      const user = await Employee.findOne({
+        where: { mobileNumber: otpDetails.mobileNumber },
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: "user not found" });
       }
 
       otpDetails.ipAddress = otpDetails?.ipAddress || req.ip;
@@ -330,7 +360,7 @@ class AuthController {
       }
 
       const user = await Employee.findOne({
-        where: { id: decoded.user },
+        where: { id: decoded.user.id },
       });
 
       const newAccessToken = await this.generateToken(user);
@@ -343,7 +373,7 @@ class AuthController {
 
   async generateAndStoreRefreshToken(user) {
     // Generate a refresh token
-    const refreshToken = jwt.sign({ user: user.id }, process.env.JWT_SECRET, {
+    const refreshToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
       expiresIn: TOKEN_REFRESH_EXPIRY,
     });
 
@@ -353,8 +383,51 @@ class AuthController {
       employeeId: user.id,
       expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
     });
-    console.log(refreshToken);
     return refreshToken;
+  }
+
+  async createTokenApi(req, res) {
+    try {
+      const refreshToken = req.headers["x-refresh-token"];
+      if (!refreshToken) {
+        return res.status(401).json({ error: "Refresh token is missing" });
+      }
+
+      const { user } = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
+      console.log("useruseruser", user);
+
+      const storedToken = await RefreshToken.findOne({
+        where: { token: refreshToken },
+      });
+      if (!storedToken || storedToken.expiryDate < new Date()) {
+        await RefreshToken.destroy({ where: { token: refreshToken } });
+        throw new Error("Invalid or expired refresh token");
+      }
+
+      // Generate new tokens
+      const newAccessToken = this.generateToken({ dataValues: user });
+      const newRefreshToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+        expiresIn: TOKEN_REFRESH_EXPIRY,
+      });
+
+      // Store the new refresh token in the database
+      await RefreshToken.update(
+        {
+          token: newRefreshToken,
+          userId: user.id,
+          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days expiry
+        },
+        { where: { token: refreshToken } }
+      );
+
+      return res.json({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
+    } catch (error) {
+      return res.status(401).json({ error: error.message });
+    }
   }
 
   generateToken(tokenObj) {

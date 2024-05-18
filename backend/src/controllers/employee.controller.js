@@ -181,6 +181,7 @@ class EmployeeController {
 
       let subscripition = await FirmSubscription.findOne({
         where: { FirmId: req.user.firmId },
+        include: [{ model: Subscription }],
       });
       return res.status(200).json({ employee: isEmployee, subscripition }); //
     } catch (error) {
