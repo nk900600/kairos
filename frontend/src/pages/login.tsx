@@ -6,7 +6,7 @@
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   CardHeader,
   Card,
@@ -23,9 +23,75 @@ import {
 import { useState } from "react";
 import { OtpComponent } from "./common/otp";
 import { Image } from "@radix-ui/react-avatar";
-
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
+import { BASE_URL, login } from "../redux/actions";
+import axiosInstance from "../redux/axios";
+import { AppDispatch } from "../redux/store";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+const loginSchema = z.object({
+  mobileNumber: z
+    .number()
+    .min(1111111111, "Please Enter a valid mobile number")
+    .max(9999999999, "Please Enter a valid mobile number"),
+});
 export default function Login() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      mobileNumber: undefined,
+    },
+  });
+  const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
+  const onSubmit = async (data: any) => {
+    try {
+      await generateOtp();
+    } catch (e) {
+      console.log(e);
+      toast.error("user not found");
+      return;
+    }
+    setCurrentStep(2);
+  };
+
+  const generateOtp = async () => {
+    await axiosInstance.post(`${BASE_URL}/auth/generate-otp`, {
+      mobileNumber: form.getValues().mobileNumber,
+      otpType: "login",
+    });
+  };
+
+  const handleCreate = (otpValue: any) => {
+    setIsLoading(true);
+    let data = form.getValues();
+    let payload = {
+      mobileNumber: `${data.mobileNumber}`,
+      otpType: "login",
+      otpValue: otpValue,
+    };
+    try {
+      dispatch(login(payload)).unwrap();
+      setIsLoading(false);
+    } catch (e) {
+      setIsLoading(false);
+      return;
+    }
+    navigate("/dashboard");
+  };
+
   return (
     <div className="w-full h-lvh gap-10  lg:grid  lg:grid-cols-2 lg:gap-0 ">
       <div className="flex items-center  h-lvh justify-center py-12">
@@ -38,20 +104,43 @@ export default function Login() {
                   Enter your detail below
                 </p>
               </div>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="username">Mobile Number</Label>
-                  <Input id="username" placeholder="1234567890" required />
-                </div>
-
-                <Button
-                  className="w-full"
-                  type="submit"
-                  onClick={() => setCurrentStep(2)}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="grid gap-4"
                 >
-                  Send OTP
-                </Button>
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="mobileNumber"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="mobileNumber">
+                          Mobile Number
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            id="mobileNumber"
+                            type="number"
+                            placeholder="1234567890"
+                            {...field}
+                            onChange={(e: any) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        {fieldState.error && (
+                          <FormMessage>{fieldState.error.message}</FormMessage>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button className="w-full" type="submit">
+                    Send OTP
+                  </Button>
+                </form>
+              </Form>
+
               <div className="mt-4 text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <NavLink to="/signup" className="underline">
@@ -62,7 +151,12 @@ export default function Login() {
           )}
 
           {currentStep == 2 && (
-            <OtpComponent goBack={() => setCurrentStep(1)}></OtpComponent>
+            <OtpComponent
+              submit={handleCreate}
+              goBack={() => setCurrentStep(1)}
+              resendSms={() => generateOtp()}
+              buttonText="Login"
+            ></OtpComponent>
           )}
         </div>
       </div>

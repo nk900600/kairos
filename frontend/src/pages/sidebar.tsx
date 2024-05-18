@@ -122,20 +122,22 @@ const allMenuItemsCompany = [
 ];
 
 function Sidebar() {
-  const dispatch: AppDispatch = useDispatch();
-  useEffect(() => {
-    dispatch(fetchAllEmployees());
-    dispatch(fetchMyAccount());
-    dispatch(fetchTables());
-    dispatch(fetchAllTableSession());
-    dispatch(fetchAllOrders());
-    dispatch(fetchAllMenus());
-    dispatch(fetchAllMenuCategories());
-  }, [dispatch]);
-
   const location = useLocation();
   const hideSidebarOnRoutes = ["/login", "/signup"];
   const showSidebar = !hideSidebarOnRoutes.includes(location.pathname);
+
+  const dispatch: AppDispatch = useDispatch();
+  useEffect(() => {
+    if (showSidebar) {
+      dispatch(fetchAllEmployees());
+      dispatch(fetchMyAccount());
+      dispatch(fetchTables());
+      dispatch(fetchAllTableSession());
+      dispatch(fetchAllOrders());
+      dispatch(fetchAllMenus());
+      dispatch(fetchAllMenuCategories());
+    }
+  }, [showSidebar]);
 
   if (!showSidebar) {
     return null;

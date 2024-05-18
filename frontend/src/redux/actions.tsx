@@ -558,6 +558,7 @@ export const createNewFirm = createAsyncThunk(
     try {
       let respopnse = await axios.post(`${BASE_URL}/auth/signup`, payload);
       localStorage.setItem("token", respopnse.data.token);
+      localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -565,6 +566,34 @@ export const createNewFirm = createAsyncThunk(
     }
   }
 );
+export const login = createAsyncThunk(
+  "tables/login",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.post(`${BASE_URL}/auth/login`, payload);
+      localStorage.setItem("token", respopnse.data.token);
+      localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      // return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const logout = createAsyncThunk(
+  "tables/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.post(`${BASE_URL}/auth/logout`);
+      localStorage.clear();
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      // return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
 export const generateOtp = createAsyncThunk(
   "tables/generateOtp",
   async (payload: any, { rejectWithValue }) => {
@@ -574,6 +603,38 @@ export const generateOtp = createAsyncThunk(
         payload
       );
       return respopnse.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+//subscriptions
+export const createSubcription = createAsyncThunk(
+  "tables/createSubcription",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/firm-subscriptions`,
+        payload
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something wnet wrong while adding, please try again");
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const createSubcriptionTrial = createAsyncThunk(
+  "tables/createSubcriptionTrial",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/firm-subscriptions/trail`,
+        payload
+      );
+      return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
       return rejectWithValue("Failed to delete table");

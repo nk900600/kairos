@@ -1,4 +1,5 @@
 import axios from "axios";
+// import { useNavigate } from "react-router-dom";
 
 // Create an instance of axios
 const axiosInstance = axios.create({
@@ -8,6 +9,21 @@ const axiosInstance = axios.create({
   },
 });
 
+let isRefreshing = false;
+let failedQueue: any = [];
+
+const processQueue = (error: any, token = null) => {
+  failedQueue.forEach((prom: any) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -16,11 +32,13 @@ axiosInstance.interceptors.request.use(
     // const token = localStorage.getItem("authToken");
     // if (token) {
     config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+    config.headers["x-refresh-token"] = `${localStorage.getItem(
+      "refreshtoken"
+    )}`;
     // }
     return config;
   },
   (error) => {
-    // Do something with request error
     return Promise.reject(error);
   }
 );
@@ -32,10 +50,58 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Any status codes that fall outside the range of 2xx cause this function to trigger
-    // Handle errors
+    // return;
+    const originalRequest = error.config;
+
     if (error.response.status === 401) {
-      // Example: Unauthorized access - perhaps redirect to login or refresh the token
+      if (isRefreshing) {
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers["Authorization"] = "Bearer " + token;
+            originalRequest.headers[
+              "x-refresh-token"
+            ] = `${localStorage.getItem("refreshtoken")}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem("refreshtoken");
+      // const navigate = useNavigate();
+      return new Promise(function (resolve, reject) {
+        axiosInstance
+          .get("/auth/token")
+          .then(({ data }) => {
+            console.log(data.token);
+            localStorage.setItem("token", data.accessToken);
+            localStorage.setItem("refreshtoken", data.refreshToken);
+            axiosInstance.defaults.headers.common["Authorization"] =
+              "Bearer " + data.refreshToken;
+            originalRequest.headers["Authorization"] =
+              "Bearer " + data.accessToken;
+            originalRequest.headers["x-refresh-token"] =
+              "Bearer " + data.refreshToken;
+            processQueue(null, data.accessToken);
+            resolve(axiosInstance(originalRequest));
+          })
+          .catch((err) => {
+            processQueue(err, null);
+            localStorage.clear();
+            // navigate("/login");
+
+            reject(err);
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      });
     }
     return Promise.reject(error);
   }

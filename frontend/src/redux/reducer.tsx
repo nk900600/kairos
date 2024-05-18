@@ -11,6 +11,8 @@ import {
   createMenu,
   createMenuCustomization,
   createOrder,
+  createSubcription,
+  createSubcriptionTrial,
   createTableSession,
   deleteAllCartItemFromTableSession,
   deleteEmployees,
@@ -46,6 +48,7 @@ import { toast } from "sonner";
 export interface RootState {
   alltables: TableType[];
   myAccount: any;
+  isAuthenticted: boolean;
   allEmployees: any[];
   allLeavesTypes: any[];
   allMenu: any[];
@@ -62,6 +65,7 @@ export interface RootState {
 const initialState: RootState = {
   alltables: [],
   allEmployees: [],
+  isAuthenticted: false,
   myAccount: {},
   allLeavesTypes: [],
   allCartData: [],
@@ -486,6 +490,20 @@ const counterSlice = createSlice({
           state.allCartData = state.allCartData.filter(
             (data) => data.id != action.payload
           );
+        }
+      )
+
+      // Subscriptions
+      .addCase(
+        createSubcription.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = action.payload;
+        }
+      )
+      .addCase(
+        createSubcriptionTrial.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = action.payload;
         }
       );
   },

@@ -35,8 +35,14 @@ import {
 } from "../components/ui/form";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
-import { BASE_URL, createNewFirm } from "../redux/actions";
-import axios from "axios";
+import {
+  BASE_URL,
+  createNewFirm,
+  createSubcription,
+  createSubcriptionTrial,
+} from "../redux/actions";
+import { useQuery } from "../util/query";
+import axiosInstance from "../redux/axios";
 
 const signUpschema = z.object({
   firstName: z
@@ -71,12 +77,14 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
+  let query = useQuery();
+
   const form = useForm({
     resolver: zodResolver(signUpschema),
     defaultValues: {
       firstName: "",
       lastName: "",
-      mobileNumber: 0,
+      mobileNumber: undefined,
       email: "",
       resturant: "",
     },
@@ -88,7 +96,7 @@ export default function SignUp() {
   };
 
   const generateOtp = async () => {
-    await axios.post(`${BASE_URL}/auth/generate-otp`, {
+    await axiosInstance.post(`${BASE_URL}/auth/generate-otp`, {
       mobileNumber: form.getValues().mobileNumber,
       otpType: "signup",
     });
@@ -109,11 +117,15 @@ export default function SignUp() {
     };
     try {
       dispatch(createNewFirm(payload)).unwrap();
-      navigate("/dashboard");
+      dispatch(
+        createSubcriptionTrial({ billingCycle: "monthly", SubscriptionId: "1" })
+      ).unwrap();
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
+      return;
     }
+    navigate("/dashboard");
   };
 
   return (
@@ -215,7 +227,6 @@ export default function SignUp() {
                           <Input
                             id="email"
                             placeholder="m@example.com"
-                            type="email"
                             {...field}
                           />
                         </FormControl>

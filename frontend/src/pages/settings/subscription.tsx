@@ -35,6 +35,7 @@ import {
 import { RootState } from "../../redux/reducer";
 import { useSelector } from "react-redux";
 import { Separator } from "../../components/ui/separator";
+import { Badge } from "../../components/ui/badge";
 
 // Employee Management
 // Table/Appointment Management
@@ -86,7 +87,10 @@ export function Subscription() {
       <div key="1" className="grid gap-4 grid-col-1">
         <Card>
           <CardHeader className="">
-            <CardTitle className="text-lg">Basic Plan</CardTitle>
+            <CardTitle className="text-lg flex gap-4">
+              <div>Basic Plan</div>
+              {myAccount?.subscripition?.trialEndDate && <Badge>Trail</Badge>}
+            </CardTitle>
             <CardDescription>
               {myAccount?.subscripition?.Subscription?.additionalNotes}
             </CardDescription>

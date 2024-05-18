@@ -57,6 +57,9 @@ import CalenderComponent from "./calender";
 import { useSwipeable } from "react-swipeable";
 import CreateOrderComponent from "./placeOrder/selectTable";
 import { DashBoardContent } from "./dashboardContent";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { logout } from "../redux/actions";
 
 const allMenuItems = [
   {
@@ -128,8 +131,10 @@ export function Dashboard() {
   });
 
   const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
 
-  const handleLoginROute = () => {
+  const handleLoginROute = async () => {
+    await dispatch(logout()).unwrap();
     navigate("/login");
   };
 

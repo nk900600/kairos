@@ -9,7 +9,12 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "../../redux/actions";
 import axios from "axios";
-export function OtpComponent({ goBack, submit, resendSms }: any) {
+export function OtpComponent({
+  goBack,
+  submit,
+  resendSms,
+  buttonText = "Create Account",
+}: any) {
   const [value, setValue] = useState("");
   return (
     <div className="mx-auto sm:w-[350px] w-full space-y-6">
@@ -59,7 +64,7 @@ export function OtpComponent({ goBack, submit, resendSms }: any) {
             type="submit"
             onClick={() => submit(value)}
           >
-            Create Account
+            {buttonText}
           </Button>
         </div>
       </div>

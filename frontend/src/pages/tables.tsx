@@ -109,6 +109,7 @@ import {
 import { useSwipeable } from "react-swipeable";
 import { OrderStatuses } from "./chefsPanel";
 import { ScrollArea } from "../components/ui/scroll-area";
+import { useQuery } from "../util/query";
 const AllDesgination = [
   {
     id: 0,
@@ -135,9 +136,7 @@ const TableStatus = Object.freeze({
   MAINTENANCE: "Maintenance",
 });
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
+
 
 export default function TableComponent() {
   const {
