@@ -113,6 +113,7 @@ import {
 } from "../components/ui/select";
 import { DatePickerWithRange } from "./common/datePicker";
 import { addDays, format, subDays } from "date-fns";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 export default function LeavesComponent() {
   const [addButtonLabel, setAddButtonLabel] = useState("Apply Leave");
@@ -298,6 +299,15 @@ export default function LeavesComponent() {
                 );
               })}
           </div>
+          {!allLeaves.length && (
+            <EmptyPlaceholder
+              title="No Leaves Applied yet"
+              description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
+              buttonText="Apply leaves"
+              type="leaves"
+              onButtonClick={() => handleAddPolicyClick()}
+            ></EmptyPlaceholder>
+          )}
         </TabsContent>
         <TabsContent value="history">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
@@ -355,6 +365,14 @@ export default function LeavesComponent() {
                 );
               })}
           </div>
+          {!allLeaves.length && (
+            <EmptyPlaceholder
+              title="No Leaves history yet"
+              description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
+              type="leaves"
+              buttonText=""
+            ></EmptyPlaceholder>
+          )}
         </TabsContent>
         <TabsContent value="policy">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6   ">
@@ -394,6 +412,15 @@ export default function LeavesComponent() {
               );
             })}
           </div>
+          {!allLeavesTypes.length && (
+            <EmptyPlaceholder
+              title="No Leave Policy Added yet"
+              description=""
+              buttonText="Add new policy"
+              type="leaves"
+              onButtonClick={() => handleAddPolicyClick()}
+            ></EmptyPlaceholder>
+          )}
         </TabsContent>
       </Tabs>
     </>

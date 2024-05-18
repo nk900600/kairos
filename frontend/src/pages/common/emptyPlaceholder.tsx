@@ -12,6 +12,7 @@ const imageMapper: any = {
   currentOrder: "../..//Empty.gif",
   orders: "../../order_food.gif",
   chefs: "../../Chef.gif",
+  leaves: "../../Trip.gif",
 };
 export const EmptyPlaceholder = ({
   type,

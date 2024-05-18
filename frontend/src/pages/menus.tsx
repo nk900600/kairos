@@ -96,6 +96,7 @@ import {
 import ManageCustomization from "./modals/manageCustomization";
 import { convertToObject } from "typescript";
 import { toast } from "sonner";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 export const currencyMap = new Map([["INR", "₹"]]);
 
@@ -221,6 +222,13 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     setCompProps({ menu: menu });
   };
 
+  const handleAddClick = () => {
+    setOpen(true);
+    setTitle("Add New Item");
+    setDescription(" ");
+    setComponent("manageMenu");
+  };
+
   const handleEditMenuClick = (table: any) => {
     setOpen(true);
     setTitle("Edit Item");
@@ -292,134 +300,147 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     <>
       {!canPlaceOrder && <MenuHeaderComponent />}
 
-      <div>
-        <div className="flex h-14 items-center gap-2  lg:h-[60px] lg:gap-4">
-          <div className="w-full flex-1">
-            <form>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search Menu item..."
-                  className="w-full appearance-none bg-background pl-8 shadow-none "
-                />
-              </div>
-            </form>
+      {!!allMenu.length && (
+        <div>
+          <div className="flex h-14 items-center gap-2  lg:h-[60px] lg:gap-4">
+            <div className="w-full flex-1">
+              <form>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search Menu item..."
+                    className="w-full appearance-none bg-background pl-8 shadow-none "
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
 
-        {allMenuCategories.map((category) => {
-          let validMenu = allMenu.filter(
-            (menu: any) => menu.categoryId === category.id
-          );
-          if (!validMenu.length) return <></>;
-          return (
-            <Accordion
-              defaultValue={allMenuCategories.map((val) => val.title)}
-              type="multiple"
-              className="w-full"
-            >
-              <AccordionItem value="item-1">
-                <AccordionTrigger>{category.title}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2  gap-4 sm:gap-6 ">
-                    {validMenu.map((menu) => {
-                      return (
-                        <Card
-                          aria-disabled={menu.available}
-                          className={
-                            "w-full   " +
-                            (!menu.available &&
-                              "bg-gray-200 opacity-50 cursor-not-allowed ") +
-                            (!canPlaceOrder && " cursor-pointer ")
-                          }
-                          onClick={(e) => handleMenuItemClick(e, menu)}
-                        >
-                          <CardHeader className="p-3 lg:p-4 md:p-4  ">
-                            <div className="flex items-start gap-4 items-center">
-                              <div className="flex flex-col items-center ">
-                                <VegIcon className="h-5 w-5" />
-                              </div>
-                              <div className="flex-1">
-                                <CardTitle className="text-base flex-1 text-md sm:text-base">
-                                  {menu.name}
-                                  {!menu.available && (
-                                    <Badge
-                                      className="ml-3"
-                                      variant={"destructive"}
-                                    >
-                                      {" "}
-                                      Not available
-                                    </Badge>
+          {allMenuCategories.map((category) => {
+            let validMenu = allMenu.filter(
+              (menu: any) => menu.categoryId === category.id
+            );
+            if (!validMenu.length) return <></>;
+            return (
+              <Accordion
+                defaultValue={allMenuCategories.map((val) => val.title)}
+                type="multiple"
+                className="w-full"
+              >
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>{category.title}</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2  gap-4 sm:gap-6 ">
+                      {validMenu.map((menu) => {
+                        return (
+                          <Card
+                            aria-disabled={menu.available}
+                            className={
+                              "w-full   " +
+                              (!menu.available &&
+                                "bg-gray-200 opacity-50 cursor-not-allowed ") +
+                              (!canPlaceOrder && " cursor-pointer ")
+                            }
+                            onClick={(e) => handleMenuItemClick(e, menu)}
+                          >
+                            <CardHeader className="p-3 lg:p-4 md:p-4  ">
+                              <div className="flex items-start gap-4 items-center">
+                                <div className="flex flex-col items-center ">
+                                  <VegIcon className="h-5 w-5" />
+                                </div>
+                                <div className="flex-1">
+                                  <CardTitle className="text-base flex-1 text-md sm:text-base">
+                                    {menu.name}
+                                    {!menu.available && (
+                                      <Badge
+                                        className="ml-3"
+                                        variant={"destructive"}
+                                      >
+                                        {" "}
+                                        Not available
+                                      </Badge>
+                                    )}
+                                  </CardTitle>
+
+                                  {menu.Customizations?.length ? (
+                                    <CardDescription className="text-xs">
+                                      Customization
+                                    </CardDescription>
+                                  ) : (
+                                    ""
                                   )}
-                                </CardTitle>
+                                </div>
 
-                                {menu.Customizations?.length ? (
-                                  <CardDescription className="text-xs">
-                                    Customization
-                                  </CardDescription>
-                                ) : (
-                                  ""
-                                )}
+                                <div className="ml-auto">
+                                  {canPlaceOrder && (
+                                    <MenuAddButton
+                                      menu={menu}
+                                      tableSessionId={tableSessionId}
+                                    />
+                                  )}
+
+                                  {!canPlaceOrder && (
+                                    <div className="ml-auto">
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="  h-8 w-8 "
+                                          >
+                                            <Ellipsis className="h-4 w-4" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        {DropdownMenuList(menu)}
+                                      </DropdownMenu>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-
-                              <div className="ml-auto">
-                                {canPlaceOrder && (
-                                  <MenuAddButton
-                                    menu={menu}
-                                    tableSessionId={tableSessionId}
-                                  />
-                                )}
-
-                                {!canPlaceOrder && (
-                                  <div className="ml-auto">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="  h-8 w-8 "
-                                        >
-                                          <Ellipsis className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      {DropdownMenuList(menu)}
-                                    </DropdownMenu>
-                                  </div>
-                                )}
+                            </CardHeader>
+                            <CardContent className="p-3 pt-0 lg:p-4 md:p-4 lg:pt-0 md:pt-0 ">
+                              <div className="flex justify-between align-start">
+                                <div>
+                                  <p className="text-xs font-bold">
+                                    {currencyMap.get(menu.currency)}{" "}
+                                    {menu.price}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    223.2 kcal - 7g Protein - 19.1.g Carbs -
+                                    11.8g Fat
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="p-3 pt-0 lg:p-4 md:p-4 lg:pt-0 md:pt-0 ">
-                            <div className="flex justify-between align-start">
-                              <div>
-                                <p className="text-xs font-bold">
-                                  {currencyMap.get(menu.currency)} {menu.price}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  223.2 kcal - 7g Protein - 19.1.g Carbs - 11.8g
-                                  Fat
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          );
-        })}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            );
+          })}
 
-        {canPlaceOrder && (
-          <>
-            <ShowAllCategories {...categoriesProps}></ShowAllCategories>
-            <ShowCurrentOrder {...currentOrdersProps}></ShowCurrentOrder>
-          </>
-        )}
-      </div>
+          {canPlaceOrder && (
+            <>
+              <ShowAllCategories {...categoriesProps}></ShowAllCategories>
+              <ShowCurrentOrder {...currentOrdersProps}></ShowCurrentOrder>
+            </>
+          )}
+        </div>
+      )}
+
+      {!allMenu.length && (
+        <EmptyPlaceholder
+          title="No Menu added yet"
+          description="It looks like your menu is currently empty. To provide a great dining experience and allow customers to see what your restaurant has to offer, please add menu items to your system."
+          buttonText="Add Menu"
+          type="customization"
+          onButtonClick={() => handleAddClick()}
+        ></EmptyPlaceholder>
+      )}
     </>
   );
 }

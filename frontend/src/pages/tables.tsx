@@ -365,7 +365,7 @@ export default function TableComponent() {
               );
             })}
           </div>
-          {!allAvailableTables?.length && (
+          {!!tables.length && !allAvailableTables?.length && (
             <EmptyPlaceholder
               title="No Tables Available"
               description="Sorry, we are fully booked at the moment. Please check back later or try reserving for another time."
@@ -540,17 +540,18 @@ export default function TableComponent() {
                 );
               })}
           </div>
-          {!tables.filter(
-            (table: any) =>
-              table.status == "Occupied" || table.status == "Reserved"
-          )?.length && (
-            <EmptyPlaceholder
-              title="No Tables Occupied"
-              description="No tables are in use at the moment. Enjoy the calm before the rush, or seat your first guest now!"
-              buttonText=""
-              type="table"
-            ></EmptyPlaceholder>
-          )}
+          {!!tables.length &&
+            !tables.filter(
+              (table: any) =>
+                table.status == "Occupied" || table.status == "Reserved"
+            )?.length && (
+              <EmptyPlaceholder
+                title="No Tables Occupied"
+                description="No tables are in use at the moment. Enjoy the calm before the rush, or seat your first guest now!"
+                buttonText=""
+                type="table"
+              ></EmptyPlaceholder>
+            )}
         </TabsContent>
         <TabsContent value="others">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
@@ -629,16 +630,26 @@ export default function TableComponent() {
                 );
               })}
           </div>
+          {!!tables.length &&
+            !tables.filter(
+              (table: any) =>
+                !["Occupied", "Available", "Reserved"].includes(table.status)
+            )?.length && (
+              <EmptyPlaceholder
+                title="Bravo! All tables are in use "
+                description="Congratulations! All tables are currently in use. Ensure every guest has a wonderful dining experience.!"
+                buttonText=""
+                type="table"
+              ></EmptyPlaceholder>
+            )}
         </TabsContent>
-        {!tables.filter(
-          (table: any) =>
-            !["Occupied", "Available", "Reserved"].includes(table.status)
-        )?.length && (
+        {!tables.length && (
           <EmptyPlaceholder
-            title="Bravo! All tables are in use "
-            description="Congratulations! All tables are currently in use. Ensure every guest has a wonderful dining experience.!"
-            buttonText=""
+            title="No Tables Added yet"
+            description="To ensure we can accommodate more guests and optimize our seating arrangement, please add a new table to your restaurant management system."
+            buttonText="Add Table"
             type="table"
+            onButtonClick={() => handleAddClick("")}
           ></EmptyPlaceholder>
         )}
       </Tabs>

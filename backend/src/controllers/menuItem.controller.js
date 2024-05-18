@@ -34,9 +34,7 @@ class MenuItemsController {
   }
   async getAllCategories(req, res) {
     try {
-      const menuItems = await Category.findAll({
-        where: { firmId: req.user.firmId },
-      });
+      const menuItems = await Category.findAll({});
 
       return res.json(menuItems);
     } catch (error) {
