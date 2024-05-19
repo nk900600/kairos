@@ -5,7 +5,7 @@ const RefreshToken = sequelize.define(
   "RefreshToken",
   {
     token: {
-      type: DataTypes.STRING(752),
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
@@ -27,6 +27,24 @@ const RefreshToken = sequelize.define(
   }
 );
 
-// RefreshToken.sync({ alter: true });
+// Have to do manaully
+// ALTER TABLE `RefreshTokens`
+// MODIFY COLUMN `token` LONGTEXT NOT NULL;
 
+// sequelize
+//   .query(
+//     `
+//   ALTER TABLE RefreshTokens
+//   MODIFY COLUMN token NVARCHAR(MAX) NOT NULL UNIQUE;
+// `
+//   )
+//   .then(() => {
+//     console.log("Column type changed successfully.");
+//   })
+//   .catch((error) => {
+//     console.error("Error changing column type:", error);
+//   });
+
+// RefreshToken.sync({ alter: true });
+//
 module.exports = RefreshToken;

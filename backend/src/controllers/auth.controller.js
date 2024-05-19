@@ -64,7 +64,7 @@ class AuthController {
           req.body,
           transaction
         );
-        response.token = this.generateToken(response.employee);
+        response.token = this.generateToken(employee);
         response.employee = employee;
         response.refreshToken = refreshToken;
       } else {
@@ -181,8 +181,13 @@ class AuthController {
         where: { mobileNumber: otpDetails.mobileNumber },
       });
 
-      if (!user) {
+      if (!user && otpDetails.otpType !== "signup") {
         return res.status(400).json({ message: "user not found" });
+      }
+      if (user && otpDetails.otpType == "signup") {
+        return res
+          .status(400)
+          .json({ message: "User is already registered, please login" });
       }
 
       otpDetails.ipAddress = otpDetails?.ipAddress || req.ip;
@@ -241,8 +246,7 @@ class AuthController {
           existingOtpRecord.save();
           return {
             success: false,
-            message:
-              "Too many failed attempts. Please try again after 10 mins later.",
+            message: "Too many attempts. Please try again after 10 mins later.",
           };
         }
 
@@ -328,7 +332,8 @@ class AuthController {
   async logout(req, res) {
     try {
       const refreshToken = req.headers["x-refresh-token"];
-      await RefreshToken.destroy({ where: { token: refreshToken } });
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      await RefreshToken.destroy({ where: { employeeId: decoded.user.id } });
       res.status(204).end();
     } catch (error) {
       res.status(500).json({ error: "Error logging out" });
