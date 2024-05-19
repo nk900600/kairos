@@ -68,7 +68,7 @@ const signUpschema = z.object({
     ),
   resturant: z
     .string()
-    .regex(/^[A-Za-z\s]*$/, "Please enter a resturant Name")
+    .regex(/^[A-Za-z0-9\s]*$/, "Please enter a resturant Name")
     .min(1, "Resturant Name is required.")
     .max(50, "Character lkmit exceeded"),
 });
@@ -138,7 +138,7 @@ export default function SignUp() {
       setIsLoading(false);
       navigate("/dashboard");
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      toast.error(e);
       setIsLoading(false);
       return;
     }

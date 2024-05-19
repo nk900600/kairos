@@ -24,10 +24,7 @@ const Firm = sequelize.define(
     zip: DataTypes.STRING,
     country: DataTypes.STRING,
     mobileNumber: DataTypes.STRING,
-    email: {
-      unique: true,
-      type: DataTypes.STRING,
-    },
+    email: DataTypes.STRING,
     website: DataTypes.STRING,
 
     // You can add more fields as needed, such as opening hours, description, etc.
@@ -68,5 +65,5 @@ Firm.beforeDestroy((table, options) => {
   }
 });
 
-// FirmType.sync({});
+// FirmType.sync({ alter: true });
 module.exports = { Firm, FirmType };

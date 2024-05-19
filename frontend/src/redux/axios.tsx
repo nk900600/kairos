@@ -54,6 +54,7 @@ axiosInstance.interceptors.response.use(
 
     if (error.response.status === 401 && !originalRequest._retry) {
       if (originalRequest.url === "/auth/token") {
+        localStorage.clear();
         // @ts-ignore
         window.location = "/login"; // Set the flag to redirect
       }
