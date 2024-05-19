@@ -6,10 +6,12 @@ import {
   addEmployee,
   addItemToCart,
   addTable,
+  authenticateUser,
   createAllLeaveTypes,
   createLeave,
   createMenu,
   createMenuCustomization,
+  createNewFirm,
   createOrder,
   createSubcription,
   createSubcriptionTrial,
@@ -32,6 +34,8 @@ import {
   fetchDesgination,
   fetchMyAccount,
   fetchTables,
+  login,
+  logout,
   updateEmployees,
   updateItemToCart,
   updateLeave,
@@ -504,6 +508,34 @@ const counterSlice = createSlice({
         createSubcriptionTrial.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount.subscripition = action.payload;
+        }
+      )
+
+      // LGOin
+      .addCase(
+        login.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.isAuthenticted = true;
+        }
+      )
+      .addCase(
+        logout.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.isAuthenticted = false;
+          // @ts-ignore
+          window.location = "/login";
+        }
+      )
+      .addCase(
+        authenticateUser.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.isAuthenticted = action.payload;
+        }
+      )
+      .addCase(
+        createNewFirm.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.isAuthenticted = true;
         }
       );
   },

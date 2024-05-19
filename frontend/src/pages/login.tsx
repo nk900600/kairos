@@ -59,9 +59,8 @@ export default function Login() {
   const onSubmit = async (data: any) => {
     try {
       await generateOtp();
-    } catch (e) {
-      console.log(e);
-      toast.error("user not found");
+    } catch (e: any) {
+      toast.error(e.response.data.message);
       return;
     }
     setCurrentStep(2);
@@ -74,7 +73,16 @@ export default function Login() {
     });
   };
 
-  const handleCreate = (otpValue: any) => {
+  const handleTryAgain = async () => {
+    try {
+      await generateOtp();
+    } catch (e: any) {
+      toast.error(e.response.data.message);
+      return;
+    }
+  };
+
+  const handleCreate = async (otpValue: any) => {
     setIsLoading(true);
     let data = form.getValues();
     let payload = {
@@ -83,13 +91,14 @@ export default function Login() {
       otpValue: otpValue,
     };
     try {
-      dispatch(login(payload)).unwrap();
+      await dispatch(login(payload)).unwrap();
       setIsLoading(false);
-    } catch (e) {
+      navigate("/dashboard");
+    } catch (e: any) {
+      toast.error(e);
       setIsLoading(false);
       return;
     }
-    navigate("/dashboard");
   };
 
   return (
@@ -154,7 +163,7 @@ export default function Login() {
             <OtpComponent
               submit={handleCreate}
               goBack={() => setCurrentStep(1)}
-              resendSms={() => generateOtp()}
+              resendSms={() => handleTryAgain()}
               buttonText="Login"
             ></OtpComponent>
           )}

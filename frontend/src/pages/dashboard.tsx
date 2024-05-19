@@ -135,7 +135,6 @@ export function Dashboard() {
 
   const handleLoginROute = async () => {
     await dispatch(logout()).unwrap();
-    navigate("/login");
   };
 
   return (

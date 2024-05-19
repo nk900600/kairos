@@ -56,6 +56,7 @@ import { MainSettings } from "./settings/main";
 import { CustomizationPage } from "./customizations";
 import { AppDispatch } from "../redux/store";
 import {
+  authenticateUser,
   fetchAllCartData,
   fetchAllEmployees,
   fetchAllMenuCategories,
@@ -65,7 +66,8 @@ import {
   fetchMyAccount,
   fetchTables,
 } from "../redux/actions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/reducer";
 
 const allMenuItems = [
   {
@@ -125,10 +127,12 @@ function Sidebar() {
   const location = useLocation();
   const hideSidebarOnRoutes = ["/login", "/signup"];
   const showSidebar = !hideSidebarOnRoutes.includes(location.pathname);
-
+  const { isAuthenticted } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
-    if (showSidebar) {
+    if (isAuthenticted) {
       dispatch(fetchAllEmployees());
       dispatch(fetchMyAccount());
       dispatch(fetchTables());
@@ -137,9 +141,12 @@ function Sidebar() {
       dispatch(fetchAllMenus());
       dispatch(fetchAllMenuCategories());
     }
-  }, [showSidebar]);
+  }, [isAuthenticted]);
+  useEffect(() => {
+    dispatch(authenticateUser());
+  }, []);
 
-  if (!showSidebar) {
+  if (!isAuthenticted) {
     return null;
   }
 

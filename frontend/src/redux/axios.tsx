@@ -1,5 +1,4 @@
 import axios from "axios";
-// import { useNavigate } from "react-router-dom";
 
 // Create an instance of axios
 const axiosInstance = axios.create({
@@ -53,7 +52,11 @@ axiosInstance.interceptors.response.use(
     // return;
     const originalRequest = error.config;
 
-    if (error.response.status === 401) {
+    if (error.response.status === 401 && !originalRequest._retry) {
+      if (originalRequest.url === "/auth/token") {
+        // @ts-ignore
+        window.location = "/login"; // Set the flag to redirect
+      }
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
@@ -74,7 +77,6 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       const refreshToken = localStorage.getItem("refreshtoken");
-      // const navigate = useNavigate();
       return new Promise(function (resolve, reject) {
         axiosInstance
           .get("/auth/token")
@@ -94,8 +96,6 @@ axiosInstance.interceptors.response.use(
           .catch((err) => {
             processQueue(err, null);
             localStorage.clear();
-            // navigate("/login");
-
             reject(err);
           })
           .finally(() => {

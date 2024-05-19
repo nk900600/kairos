@@ -560,9 +560,22 @@ export const createNewFirm = createAsyncThunk(
       localStorage.setItem("token", respopnse.data.token);
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
-    } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
-      return rejectWithValue("Failed to delete table");
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
+    }
+  }
+);
+export const authenticateUser = createAsyncThunk(
+  "tables/authenticateUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      return !!(
+        localStorage.getItem("token") && localStorage.getItem("refreshtoken")
+      );
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
     }
   }
 );
@@ -574,8 +587,9 @@ export const login = createAsyncThunk(
       localStorage.setItem("token", respopnse.data.token);
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
-    } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      throw new Error(error);
       // return rejectWithValue("Failed to delete table");
     }
   }

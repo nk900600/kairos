@@ -43,6 +43,7 @@ import {
 } from "../redux/actions";
 import { useQuery } from "../util/query";
 import axiosInstance from "../redux/axios";
+import { toast } from "sonner";
 
 const signUpschema = z.object({
   firstName: z
@@ -91,8 +92,22 @@ export default function SignUp() {
   });
 
   const onSubmit = async (data: any) => {
-    await generateOtp();
+    try {
+      await generateOtp();
+    } catch (e: any) {
+      toast.error(e.response.data.message);
+      return;
+    }
     setCurrentStep(2);
+  };
+
+  const handleTryAgain = async () => {
+    try {
+      await generateOtp();
+    } catch (e: any) {
+      toast.error(e.response.data.message);
+      return;
+    }
   };
 
   const generateOtp = async () => {
@@ -102,7 +117,7 @@ export default function SignUp() {
     });
   };
 
-  const handleCreate = (otpValue: any) => {
+  const handleCreate = async (otpValue: any) => {
     setIsLoading(true);
     let data = form.getValues();
     let payload = {
@@ -116,16 +131,17 @@ export default function SignUp() {
       otpValue: otpValue,
     };
     try {
-      dispatch(createNewFirm(payload)).unwrap();
-      dispatch(
+      await dispatch(createNewFirm(payload)).unwrap();
+      await dispatch(
         createSubcriptionTrial({ billingCycle: "monthly", SubscriptionId: "1" })
       ).unwrap();
       setIsLoading(false);
-    } catch (e) {
+      navigate("/dashboard");
+    } catch (e: any) {
+      toast.error(e.response.data.message);
       setIsLoading(false);
       return;
     }
-    navigate("/dashboard");
   };
 
   return (
@@ -270,7 +286,7 @@ export default function SignUp() {
             <OtpComponent
               submit={handleCreate}
               goBack={() => setCurrentStep(1)}
-              resendSms={() => generateOtp()}
+              resendSms={() => handleTryAgain()}
             ></OtpComponent>
           )}
         </div>
