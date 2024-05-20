@@ -8,8 +8,20 @@ const { mobileNumberRegex, emailRegex } = require("../utils/const");
 const sequelize = require("../db/db");
 const RefreshToken = require("../models/refreshTokens.model");
 
-const TOKEN_EXPIRY = "1m";
+const TOKEN_EXPIRY = "365d";
 const TOKEN_REFRESH_EXPIRY = "365d";
+const FASt2SMSTOKEN = process.env.FASt2SMSTOKEN;
+const axios = require("axios");
+
+// Create an instance of axios with a base URL and default headers
+const fast2smsApiAxios = axios.create({
+  baseURL: "https://www.fast2sms.com/dev/", // Replace with your API's base URL
+  headers: {
+    "Content-Type": "application/json",
+    authorization: FASt2SMSTOKEN,
+  },
+});
+
 class AuthController {
   constructor() {
     this.generateOtp = this.generateOtp.bind(this);
@@ -275,6 +287,11 @@ class AuthController {
       const otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
+      await fast2smsApiAxios.post("bulkV2", {
+        route: "otp",
+        variables_values: otpValue,
+        numbers: mobileNumber,
+      });
       let otpRecord;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {

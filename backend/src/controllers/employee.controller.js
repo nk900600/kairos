@@ -5,7 +5,10 @@ const {
   Subscription,
   FirmSubscription,
 } = require("../models/subscription.model.js");
+const { s3 } = require("../utils/aws-obj.js");
 const { mobileNumberRegex, emailRegex } = require("../utils/const.js");
+
+const fs = require("fs");
 
 class EmployeeController {
   async getAllEmployees(req, res) {
@@ -184,6 +187,62 @@ class EmployeeController {
         include: [{ model: Subscription }],
       });
       return res.status(200).json({ employee: isEmployee, subscripition }); //
+    } catch (error) {
+      res.status(404).json({ error: error.message });
+    }
+  }
+
+  async uploadUserPic(req, res) {
+    try {
+      console.log(req.file.path);
+      const fileContent = fs.readFileSync(req.file.path);
+      const params = {
+        Bucket: "kairos-userpics",
+        Key: req.file.originalname,
+        Body: fileContent,
+        ACL: "private",
+        Expires: 36000,
+      };
+
+      s3.upload(params, async (err, data) => {
+        // Delete the file from the local uploads folder
+        fs.unlinkSync(req.file.path);
+        console.log(data);
+        if (err) {
+          return res.status(500).json({ error: err });
+        }
+
+        await Employee.update(
+          {
+            userPic: data.Location,
+          },
+          { where: { id: req.user.id } },
+          { userId: req.user.id }
+        );
+
+        const params = {
+          Bucket: "kairos-userpics",
+          Key: data.key,
+          Expires: 36000, // URL valid for 1 hour
+        };
+
+        s3.getSignedUrl("getObject", params, (err, url) => {
+          if (err) {
+            return res.status(500).json({ error: err });
+          }
+          console.log(url);
+
+          return res.json({
+            message: "File uploaded successfully",
+            url: url,
+          });
+        });
+        // return res.json({
+        //   message: "File uploaded successfully",
+        //   url: data.Location,
+        // });
+      });
+      // return res.status(200).json({ employee: isEmployee, subscripition }); //
     } catch (error) {
       res.status(404).json({ error: error.message });
     }

@@ -12,7 +12,7 @@ import {
   CardContent,
   CardFooter,
 } from "../../components/ui/card";
-import { PencilIcon } from "lucide-react";
+import { Loader2, PencilIcon } from "lucide-react";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -85,6 +85,7 @@ export function GeneralSetting() {
   const [isOtp, setIsOtp] = useState(false);
   const [isOtpEmail, setIsOtpEmil] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [imageLoader, setImageLoader] = useState(false);
   const { myAccount }: any = useSelector(
     (state: { table: RootState }) => state.table
   );
@@ -123,14 +124,35 @@ export function GeneralSetting() {
   }, [myAccount]);
 
   // Handles the file input change
-  const handleImageChange = (e: any) => {
+  const handleImageChange = async (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      const reader: any = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        setImageLoader(true);
+        const response = await axiosInstance.post(
+          "/employees/" + myAccount.employee.id + "/user-pic",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent: any) => {
+              const progress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              // setUploadProgress(progress);
+            },
+          }
+        );
+
+        // setUploadURL(response.data.url);
+        setImageLoader(false);
+        console.log("File uploaded successfully:", response.data.url);
+        setImage(response.data.url);
+      } catch (e) {}
     }
   };
 
@@ -231,15 +253,18 @@ export function GeneralSetting() {
                       onChange={handleImageChange}
                       className="hidden"
                       id="fileInput"
-                      value={image}
                     />
                     <label htmlFor="fileInput" className="cursor-pointer">
-                      <Avatar className="h-20 w-20 border">
-                        <AvatarImage
-                          alt="User avatar"
-                          src="/placeholder-user.jpg"
-                        />
-                        <AvatarFallback>JD</AvatarFallback>
+                      <Avatar className="h-20 w-20 border ">
+                        <AvatarImage alt="User avatar" src={image} />
+                        <AvatarFallback className="uppercase">
+                          {imageLoader ? (
+                            <Loader2 className=" h-4 w-4 animate-spin" />
+                          ) : (
+                            myAccount?.employee?.firstName[0] +
+                            myAccount?.employee?.lastName[0]
+                          )}
+                        </AvatarFallback>
                       </Avatar>
                     </label>
                   </div>
