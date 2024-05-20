@@ -23,6 +23,7 @@ const basicFirms = [
       { title: "Busser" },
       { title: "Sommelier" },
       { title: "Barista" },
+      { title: "Owner" },
     ],
     categoriesType: [
       { title: "Appetizer" },

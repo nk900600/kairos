@@ -181,13 +181,21 @@ class AuthController {
         where: { mobileNumber: otpDetails.mobileNumber },
       });
 
-      if (!user && otpDetails.otpType !== "signup") {
-        return res.status(400).json({ message: "user not found" });
-      }
-      if (user && otpDetails.otpType == "signup") {
-        return res
-          .status(400)
-          .json({ message: "User is already registered, please login" });
+      if (otpDetails.otpType == "setting") {
+        if (user) {
+          return res
+            .status(400)
+            .json({ message: "User is already registered" });
+        }
+      } else {
+        if (!user && otpDetails.otpType !== "signup") {
+          return res.status(400).json({ message: "user not found" });
+        }
+        if (user && otpDetails.otpType == "signup") {
+          return res
+            .status(400)
+            .json({ message: "User is already registered, please login" });
+        }
       }
 
       otpDetails.ipAddress = otpDetails?.ipAddress || req.ip;
@@ -242,7 +250,7 @@ class AuthController {
           existingOtpRecord.cooldownUntil &&
           existingOtpRecord.cooldownUntil > new Date()
         ) {
-          existingOtpRecord.otpValue = null;
+          // existingOtpRecord.otpValue = null;
           existingOtpRecord.save();
           return {
             success: false,
@@ -399,8 +407,6 @@ class AuthController {
       }
 
       const { user } = jwt.verify(refreshToken, process.env.JWT_SECRET);
-
-      console.log("useruseruser", user);
 
       const storedToken = await RefreshToken.findOne({
         where: { token: refreshToken },

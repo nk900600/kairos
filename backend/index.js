@@ -63,9 +63,9 @@ async function init() {
     console.log(`Server is running on http://localhost:${port}`);
   });
 
-  await initializeRoles();
-  await initializeFirmTypes();
-  await initializeSubsription();
+  // await initializeRoles();
+  // await initializeFirmTypes();
+  // await initializeSubsription();
   // await sequelize.sync({ alter: true });
 }
 

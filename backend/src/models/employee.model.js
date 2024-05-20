@@ -18,6 +18,7 @@ const Employee = sequelize.define(
       type: DataTypes.STRING,
     },
     mobileNumber: {
+      unique: true,
       type: DataTypes.STRING,
     },
     email: {
@@ -169,5 +170,5 @@ Employee.beforeDestroy((table, options) => {
 Employee.belongsTo(Firm, { foreignKey: "firmId" });
 Employee.belongsTo(Role, { foreignKey: "roleId" });
 Employee.belongsTo(Designation, { foreignKey: "designationId" });
-
+// Employee.sync({ alter: true });
 module.exports = { Employee, Role, Document, Designation };

@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Designation } = require("../models/employee.model");
 const { Firm } = require("../models/firm.model");
 
@@ -27,8 +28,16 @@ class DesignationController {
   // Get all designations
   static async getAllDesignations(req, res) {
     try {
+      const firm = await Firm.findOne({
+        where: { id: req.user.firmId },
+      });
       const designations = await Designation.findAll({
-        where: { firmId: req.user.firmId },
+        where: { firmTypeId: firm.type },
+        // where: {
+        //   firmId: {
+        //     [Op.in]: [req.user.firmId],
+        //   },
+        // },
       });
       res.json(designations);
     } catch (error) {

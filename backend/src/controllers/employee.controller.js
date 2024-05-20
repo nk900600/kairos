@@ -94,7 +94,7 @@ class EmployeeController {
         {
           ...req.body,
           roleId: req.body.role,
-          firmId: req.body.firmId,
+          firmId: req.user.firmId,
           designationId: req.body.designation,
         },
         { userId: req.user.id, transaction }
