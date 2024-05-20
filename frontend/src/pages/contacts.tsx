@@ -81,6 +81,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { toast } from "sonner";
+import { RoleEnum } from "../util/role";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 const AllDesgination = [
   {
@@ -149,7 +152,7 @@ const AllEmployees = [
 ];
 
 export default function ContactsComponent() {
-  const { allEmployees, allDesgination } = useSelector(
+  const { allEmployees, allDesgination, isAdmin } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const {
@@ -190,18 +193,23 @@ export default function ContactsComponent() {
       });
       allDesginationCopy[0].checked = true;
       setAllDesginationCopy(JSON.parse(JSON.stringify(allDesginationCopy)));
+      setAllEmployeesCopy(allEmployees);
       return;
     }
 
     allDesginationCopy[index].checked = isChecked;
     setAllDesginationCopy(JSON.parse(JSON.stringify(allDesginationCopy)));
+    filterEmployeeData(
+      allDesginationCopy.filter((val) => val.checked).map((val) => val.id)
+    );
   };
 
-  const filterEmployeeData = () => {
-    // let newData = allEmployees.filter((val) =>
-    //   val.employee.toLowerCase().includes(e.target.value.toLowerCase())
-    // );
-    // setAllEmployeesCopy(newData);
+  const filterEmployeeData = (designations: any) => {
+    // allDesgination.length == designations.lengtn;
+    let newData = allEmployees.filter((val) =>
+      designations.includes(val.designationId)
+    );
+    setAllEmployeesCopy(newData);
   };
 
   const handleSearchChange = (e: any) => {
@@ -246,7 +254,15 @@ export default function ContactsComponent() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 h-8 ">
                 <ListFilter className="h-4 w-4" />
-                <span className="hidden sm:block">Filters</span>
+                <span className="hidden sm:block">
+                  Filters(
+                  {
+                    allDesginationCopy
+                      .filter((val) => val.checked)
+                      .map((val) => val.id).length
+                  }
+                  )
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
@@ -265,14 +281,16 @@ export default function ContactsComponent() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button
-            onClick={handleAddClick}
-            variant="default"
-            className="gap-2 h-8 "
-          >
-            <CirclePlus className="h-4 w-4" />
-            <span className="hidden sm:block">Add new</span>
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={handleAddClick}
+              variant="default"
+              className="gap-2 h-8 "
+            >
+              <CirclePlus className="h-4 w-4" />
+              <span className="hidden sm:block">Add new</span>
+            </Button>
+          )}
         </div>
       </div>
       <Card>
@@ -296,7 +314,7 @@ export default function ContactsComponent() {
         <CardContent className="grid gap-8">
           {allEmployeesCopy.map((employee) => {
             return (
-              <div className="flex items-center gap-4  cursor-pointer ">
+              <div className="flex items-center gap-4  ">
                 <Avatar className="hidden h-9 w-9 sm:flex">
                   <AvatarImage
                     src="https://avatar.iran.liara.run/public"
@@ -318,20 +336,30 @@ export default function ContactsComponent() {
                         )?.title}
                   </p>
                 </div>
-                <div className="ml-auto font-medium gap-4">
-                  <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
-                    <div
-                      onClick={() => handleEditClick(employee)}
-                      className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
-                    >
-                      <Pencil className="h-3 w-3" />
+                {isAdmin && (
+                  <div className="ml-auto font-medium gap-4">
+                    <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
+                      <div
+                        onClick={() => handleEditClick(employee)}
+                        className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </div>
                     </div>
+                    <AlertDialogDemo employeeId={employee.id}></AlertDialogDemo>
                   </div>
-                  <AlertDialogDemo employeeId={employee.id}></AlertDialogDemo>
-                </div>
+                )}
               </div>
             );
           })}
+
+          {!allEmployeesCopy.length && allEmployees.length && (
+            <EmptyPlaceholder
+              title="No Employees found with selected filter"
+              buttonText=""
+              description=""
+            ></EmptyPlaceholder>
+          )}
         </CardContent>
       </Card>
     </>
@@ -410,7 +438,6 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
     try {
       //TODO: remove static firmId value
       let idData = {
-        firmId: 1,
         role: 3,
         designation: allDesgination.find((val) => val.title == desgination)?.id,
       };
@@ -425,7 +452,9 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
       }
       setOpen(false);
     } catch (error) {
-      console.error("Failed to add table:", error);
+      toast.error(
+        "Something went wrong while adding or updating the employee "
+      );
     }
     setIsLoading(false);
   };

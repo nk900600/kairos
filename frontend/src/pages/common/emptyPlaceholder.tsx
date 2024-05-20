@@ -23,13 +23,15 @@ export const EmptyPlaceholder = ({
 }: any) => {
   return (
     <div className="flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12">
-      <img
-        alt="Empty state illustration"
-        className="w-full max-w-[300px]"
-        height="00"
-        src={imageMapper[type]}
-        width="300"
-      />
+      {type && (
+        <img
+          alt="Empty state illustration"
+          className="w-full max-w-[300px]"
+          height="00"
+          src={imageMapper[type]}
+          width="300"
+        />
+      )}
       <div className="space-y-2 text-center">
         <h3 className="text-2xl font-bold">{title}</h3>
         <p className="text-gray-500 dark:text-gray-400">{description}</p>

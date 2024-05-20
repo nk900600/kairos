@@ -33,34 +33,151 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { RootState } from "../../redux/reducer";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Separator } from "../../components/ui/separator";
 import { Badge } from "../../components/ui/badge";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../../components/ui/form";
+import { AppDispatch } from "../../redux/store";
+import { updateEmployees } from "../../redux/actions";
 
-// Employee Management
-// Table/Appointment Management
-// Order/Service Management
-// Dashboard Overview
-// Leave Management
-// Menu/Service Menu Management
+const stateEnum = z.enum([
+  "AP",
+  "AR",
+  "AS",
+  "BR",
+  "CT",
+  "GA",
+  "GJ",
+  "HR",
+  "HP",
+  "JK",
+  "JH",
+  "KA",
+  "KL",
+  "MP",
+  "MH",
+  "MN",
+  "ML",
+  "MZ",
+  "NL",
+  "OD",
+  "PB",
+  "RJ",
+  "SK",
+  "TN",
+  "TG",
+  "TR",
+  "UP",
+  "UT",
+  "WB",
+  "AN",
+  "CH",
+  "DN",
+  "LD",
+  "DL",
+  "PY",
+  "LA",
+]);
+
+const states = [
+  { id: "AP", name: "Andhra Pradesh" },
+  { id: "AR", name: "Arunachal Pradesh" },
+  { id: "AS", name: "Assam" },
+  { id: "BR", name: "Bihar" },
+  { id: "CT", name: "Chhattisgarh" },
+  { id: "GA", name: "Goa" },
+  { id: "GJ", name: "Gujarat" },
+  { id: "HR", name: "Haryana" },
+  { id: "HP", name: "Himachal Pradesh" },
+  { id: "JK", name: "Jammu and Kashmir" },
+  { id: "JH", name: "Jharkhand" },
+  { id: "KA", name: "Karnataka" },
+  { id: "KL", name: "Kerala" },
+  { id: "MP", name: "Madhya Pradesh" },
+  { id: "MH", name: "Maharashtra" },
+  { id: "MN", name: "Manipur" },
+  { id: "ML", name: "Meghalaya" },
+  { id: "MZ", name: "Mizoram" },
+  { id: "NL", name: "Nagaland" },
+  { id: "OD", name: "Odisha" },
+  { id: "PB", name: "Punjab" },
+  { id: "RJ", name: "Rajasthan" },
+  { id: "SK", name: "Sikkim" },
+  { id: "TN", name: "Tamil Nadu" },
+  { id: "TG", name: "Telangana" },
+  { id: "TR", name: "Tripura" },
+  { id: "UP", name: "Uttar Pradesh" },
+  { id: "UT", name: "Uttarakhand" },
+  { id: "WB", name: "West Bengal" },
+  { id: "AN", name: "Andaman and Nicobar Islands" },
+  { id: "CH", name: "Chandigarh" },
+  { id: "DN", name: "Dadra and Nagar Haveli and Daman and Diu" },
+  { id: "LD", name: "Lakshadweep" },
+  { id: "DL", name: "Delhi" },
+  { id: "PY", name: "Puducherry" },
+  { id: "LA", name: "Ladakh" },
+];
+
+const countryEnum = z.enum(["IN"]);
+const BillingSchema = z.object({
+  state: stateEnum,
+  country: countryEnum,
+  address: z
+    .string()
+    .regex(/^[A-Za-z0-9\s]*$/, "Please enter a valid address ")
+    .min(1, "Address is required.")
+    .max(50, "Character lkmit exceeded"),
+  city: z
+    .string()
+    .regex(/^[A-Za-z0-9\s]*$/, "Please enter a valid city ")
+    .min(1, "City name is required.")
+    .max(500, "Character lkmit exceeded"),
+  pincode: z
+    .number()
+    .min(111111, "Please Enter a valid Pincode ")
+    .max(999999, "Please Enter a valid Pincode"),
+});
 export function Subscription() {
   const [image, setImage] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
-  const [isOtp, setIsOtp] = useState(false);
-  const [isOtpEmail, setIsOtpEmil] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [allFeatures, setAllFeatures] = useState([]);
 
   const { myAccount }: any = useSelector(
     (state: { table: RootState }) => state.table
   );
 
+  const form = useForm({
+    resolver: zodResolver(BillingSchema),
+    defaultValues: {
+      state: "CH",
+      address: "",
+      city: "",
+      pincode: "",
+      country: "IN",
+    },
+  });
+  const dispatch: AppDispatch = useDispatch();
+
   useEffect(() => {
     setName(myAccount?.employee.Firm?.name);
-    setEmail(myAccount?.employee.Firm?.email);
-    setMobile(myAccount?.employee.Firm?.mobileNumber);
     setAllFeatures(JSON.parse(myAccount?.subscripition.Subscription.features));
+    if (myAccount.employee) {
+      form.setValue("state", myAccount.employee.state || "");
+      form.setValue("address", myAccount.employee.street || "");
+      form.setValue("city", myAccount.employee.city || "");
+      form.setValue("pincode", myAccount.employee.zip || "");
+      form.setValue("country", myAccount.employee.country || "");
+    }
   }, [myAccount]);
   // Handles the file input change
   const handleImageChange = (e: any) => {
@@ -73,13 +190,21 @@ export function Subscription() {
       reader.readAsDataURL(file);
     }
   };
-  const handleMobileChange = (e: any) => {
-    setMobile(e.target.value);
-  };
-  const handleEmailChange = (e: any) => {
-    setEmail(e.target.value);
-  };
 
+  const onBillingSubmit = async (data: any) => {
+    setLoading(true);
+    await dispatch(
+      updateEmployees({
+        id: myAccount?.employee.id,
+        street: data.address,
+        city: data.city,
+        state: data.state,
+        zip: data.pincode,
+        country: data.country,
+      })
+    ).unwrap();
+    setLoading(false);
+  };
   return (
     // <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
     //   <div className="grid grid-cols-1 items-start">
@@ -116,7 +241,7 @@ export function Subscription() {
           </CardContent>
           <CardFooter className="border-t px-6 py-4 flex gap-4 ">
             <Button disabled>Upgrade Plan</Button>
-            <Button variant={"link"}>Need to Cancel,Are you sure?</Button>
+            <Button variant={"link"}>Need to Cancel?</Button>
           </CardFooter>
         </Card>
       </div>
@@ -166,174 +291,146 @@ export function Subscription() {
                 <Input disabled placeholder="Store Name" value={name} />
               </form>
             </CardContent>
-            <CardFooter className="border-t px-6 py-4">
+            {/* <CardFooter className="border-t px-6 py-4">
               <Button>Save</Button>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Mobile Number</CardTitle>
-              <CardDescription>Please enter the Mobile Number</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!isOtp && (
-                <form>
-                  <Input
-                    placeholder="1213123122"
-                    value={mobile}
-                    onChange={handleMobileChange}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onBillingSubmit)}>
+                <CardHeader>
+                  <CardTitle className="text-lg">Shop Address</CardTitle>
+                  <CardDescription>
+                    If you’d like to add a postal address to every invoice,
+                    enter it here.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 gap-4 w-1/2">
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            id="address"
+                            placeholder="street no 42"
+                            {...field}
+                          />
+                        </FormControl>
+                        {fieldState.error && (
+                          <FormMessage>{fieldState.error.message}</FormMessage>
+                        )}
+                      </FormItem>
+                    )}
                   />
-                </form>
-              )}
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            id="city"
+                            placeholder="Chandigard"
+                            {...field}
+                          />
+                        </FormControl>
+                        {fieldState.error && (
+                          <FormMessage>{fieldState.error.message}</FormMessage>
+                        )}
+                      </FormItem>
+                    )}
+                  />
 
-              {isOtp && (
-                <form className="mt-2">
-                  <Label htmlFor="name" className="mb-2">
-                    OTP Confirmation
-                  </Label>
-                  <InputOTP maxLength={6}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      {/* </InputOTPGroup> */}
-                      {/* <InputOTPSeparator /> */}
-                      {/* <InputOTPGroup> */}
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>{" "}
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Didn't get the OTP?
-                    <Button variant={"link"} className=" text-xs" type="submit">
-                      Resend SMS
-                    </Button>
-                  </p>
-                </form>
-              )}
-            </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              {!isOtp && <Button onClick={() => setIsOtp(true)}>Verify</Button>}
-              {isOtp && (
-                <div className="gap-2 flex">
-                  <Button onClick={() => setIsOtp(false)}>Save</Button>
-                  <Button onClick={() => setIsOtp(false)}>Cancel</Button>
-                </div>
-              )}
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Email</CardTitle>
-              <CardDescription>Please enter the email address</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!isOtpEmail && (
-                <form>
-                  <Input
-                    value={email}
-                    placeholder="Sample@sam.com"
-                    onChange={handleEmailChange}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="state"
+                        render={({ field, fieldState }) => (
+                          <FormItem>
+                            <Select defaultValue="CH">
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a State" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {states.map((val) => {
+                                  return (
+                                    <SelectItem value={val.id}>
+                                      {val.name}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                            {fieldState.error && (
+                              <FormMessage>
+                                {fieldState.error.message}
+                              </FormMessage>
+                            )}
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control}
+                        name="pincode"
+                        render={({ field, fieldState }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                id="pincode"
+                                placeholder="111111"
+                                {...field}
+                                onChange={(e: any) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            {fieldState.error && (
+                              <FormMessage>
+                                {fieldState.error.message}
+                              </FormMessage>
+                            )}
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <Select defaultValue="IN">
+                          <FormControl>
+                            <SelectTrigger className="">
+                              <SelectValue placeholder="Select a country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="IN">India</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        {fieldState.error && (
+                          <FormMessage>{fieldState.error.message}</FormMessage>
+                        )}
+                      </FormItem>
+                    )}
                   />
-                </form>
-              )}
-              {isOtpEmail && (
-                <form className="mt-2">
-                  <Label htmlFor="name" className="mb-2">
-                    OTP Confirmation
-                  </Label>
-                  <InputOTP maxLength={6}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>{" "}
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Didn't get the OTP?
-                    <Button variant={"link"} className=" text-xs" type="submit">
-                      Resend SMS
-                    </Button>
-                  </p>
-                </form>
-              )}
-            </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              {!isOtpEmail && (
-                <Button onClick={() => setIsOtpEmil(true)}>Verify</Button>
-              )}
-              {isOtpEmail && (
-                <div className="gap-2 flex">
-                  <Button onClick={() => setIsOtpEmil(false)}>Save</Button>
-                  <Button onClick={() => setIsOtpEmil(false)}>Cancel</Button>
-                </div>
-              )}
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Billing Address</CardTitle>
-              <CardDescription>
-                If you’d like to add a postal address to every invoice, enter it
-                here.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4">
-              <Input
-                placeholder="Address "
-                className="w-1/2"
-                onChange={handleEmailChange}
-              />
-              <Input
-                className="w-1/2"
-                placeholder="city"
-                onChange={handleEmailChange}
-              />
-              <div className="grid w-1/2 grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="State" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Fruits</SelectLabel>
-                        <SelectItem value="apple">Apple</SelectItem>
-                        <SelectItem value="banana">Banana</SelectItem>
-                        <SelectItem value="blueberry">Blueberry</SelectItem>
-                        <SelectItem value="grapes">Grapes</SelectItem>
-                        <SelectItem value="pineapple">Pineapple</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Input id="last-name" placeholder="Robinson" required />
-                </div>
-              </div>
-              <Select>
-                <SelectTrigger className="w-1/2">
-                  <SelectValue placeholder="Select a country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Fruits</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              <Button onClick={() => {}}>Save</Button>
-            </CardFooter>
+                </CardContent>
+                <CardFooter className="border-t px-6 py-4">
+                  <Button type="submit">Save</Button>
+                </CardFooter>
+              </form>
+            </Form>
           </Card>
           <Card className="border-red-200">
             <CardHeader>

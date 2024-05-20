@@ -48,6 +48,7 @@ import {
   updateTableStatus,
 } from "./actions";
 import { toast } from "sonner";
+import { RoleEnum } from "../util/role";
 
 export interface RootState {
   alltables: TableType[];
@@ -63,6 +64,7 @@ export interface RootState {
   allDesgination: any[];
   allMenuCategories: any[];
   isLoading: boolean;
+  isAdmin: boolean;
   error: string | null;
 }
 
@@ -81,6 +83,7 @@ const initialState: RootState = {
   allOrders: [],
   isLoading: false,
   error: null,
+  isAdmin: false,
 };
 
 const counterSlice = createSlice({
@@ -143,8 +146,9 @@ const counterSlice = createSlice({
       )
       .addCase(
         fetchMyAccount.fulfilled,
-        (state: RootState, action: PayloadAction<TableType[]>) => {
+        (state: RootState, action: PayloadAction<any>) => {
           state.myAccount = action.payload;
+          state.isAdmin = action.payload.employee.Role.name == RoleEnum.ADMIN;
         }
       )
       .addCase(

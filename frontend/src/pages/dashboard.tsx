@@ -256,7 +256,7 @@ export function Dashboard() {
             <DropdownMenuItem onClick={() => navigate("/settings")}>
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
+            {/* <DropdownMenuItem>Support</DropdownMenuItem> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLoginROute}>
               Logout
