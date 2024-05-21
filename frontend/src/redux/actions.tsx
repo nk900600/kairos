@@ -566,6 +566,41 @@ export const createNewFirm = createAsyncThunk(
     }
   }
 );
+export const updateFirm = createAsyncThunk(
+  "tables/updateFirm",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.put(
+        `${BASE_URL}/firms/${payload.id}`,
+        payload
+      );
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
+    }
+  }
+);
+export const updateFirmImage = createAsyncThunk(
+  "tables/updateFirmImage",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let respopnse = await axios.put(
+        `${BASE_URL}/firms/${payload.id}/image`,
+        payload.payload,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
+    }
+  }
+);
 export const authenticateUser = createAsyncThunk(
   "tables/authenticateUser",
   async (_, { rejectWithValue }) => {

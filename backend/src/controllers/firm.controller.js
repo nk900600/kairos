@@ -1,6 +1,7 @@
 const { Firm } = require("../models/firm.model.js");
+const { s3 } = require("../utils/aws-obj.js");
 const { mobileNumberRegex } = require("../utils/const.js");
-
+const fs = require("fs");
 class FirmController {
   async getFirmById(req, res) {
     try {
@@ -53,6 +54,51 @@ class FirmController {
     } catch (error) {
       console.error("Error deleting firm:", error);
       res.status(500).send("Error deleting firm");
+    }
+  }
+  async uploadImage(req, res) {
+    try {
+      const fileContent = fs.readFileSync(req.file.path);
+      const params = {
+        Bucket: "kairos-userpics",
+        Key: req.file.originalname,
+        Body: fileContent,
+        ACL: "private",
+        Expires: 36000,
+      };
+
+      s3.upload(params, async (err, data) => {
+        // Delete the file from the local uploads folder
+        fs.unlinkSync(req.file.path);
+        if (err) {
+          return res.status(500).json({ error: err });
+        }
+
+        const params = {
+          Bucket: "kairos-userpics",
+          Key: data.key,
+          Expires: 504800, // URL valid for 10 years
+        };
+
+        s3.getSignedUrl("getObject", params, async (err, url) => {
+          if (err) {
+            return res.status(500).json({ error: err });
+          }
+          await Firm.update(
+            {
+              image: url,
+            },
+            { where: { id: req.user.firmId } },
+            { userId: req.user.id }
+          );
+          return res.json({
+            message: "File uploaded successfully",
+            url: url,
+          });
+        });
+      });
+    } catch (error) {
+      res.status(404).json({ error: error.message });
     }
   }
 }

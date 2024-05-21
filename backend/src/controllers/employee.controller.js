@@ -212,37 +212,29 @@ class EmployeeController {
           return res.status(500).json({ error: err });
         }
 
-        await Employee.update(
-          {
-            userPic: data.Location,
-          },
-          { where: { id: req.user.id } },
-          { userId: req.user.id }
-        );
-
         const params = {
           Bucket: "kairos-userpics",
           Key: data.key,
-          Expires: 36000, // URL valid for 1 hour
+          Expires: 504800, // URL valid for 10 years
         };
 
-        s3.getSignedUrl("getObject", params, (err, url) => {
+        s3.getSignedUrl("getObject", params, async (err, url) => {
           if (err) {
             return res.status(500).json({ error: err });
           }
-          console.log(url);
-
+          await Employee.update(
+            {
+              userPic: url,
+            },
+            { where: { id: req.user.id } },
+            { userId: req.user.id }
+          );
           return res.json({
             message: "File uploaded successfully",
             url: url,
           });
         });
-        // return res.json({
-        //   message: "File uploaded successfully",
-        //   url: data.Location,
-        // });
       });
-      // return res.status(200).json({ employee: isEmployee, subscripition }); //
     } catch (error) {
       res.status(404).json({ error: error.message });
     }

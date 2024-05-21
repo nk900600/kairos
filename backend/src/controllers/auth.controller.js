@@ -320,7 +320,7 @@ class AuthController {
       // Send the OTP to the user's mobile number (implementation depends on your SMS service)
       // await sendOtpToMobile(mobileNumber, otpValue);
 
-      return { success: true, otpRecord };
+      return { success: true };
     } catch (error) {
       console.log(error);
       return { success: false, message: "Error generating OTP" };

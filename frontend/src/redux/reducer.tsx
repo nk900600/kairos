@@ -37,6 +37,8 @@ import {
   login,
   logout,
   updateEmployees,
+  updateFirm,
+  updateFirmImage,
   updateItemToCart,
   updateLeave,
   updateLeaveStatus,
@@ -540,6 +542,18 @@ const counterSlice = createSlice({
         createNewFirm.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.isAuthenticted = true;
+        }
+      )
+      .addCase(
+        updateFirm.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.employee.Firm = action.payload;
+        }
+      )
+      .addCase(
+        updateFirmImage.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.employee.Firm.image = action.payload.url;
         }
       );
   },

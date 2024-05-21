@@ -12,7 +12,7 @@ import {
   CardContent,
   CardFooter,
 } from "../../components/ui/card";
-import { CheckIcon, PencilIcon } from "lucide-react";
+import { CheckIcon, Loader2, PencilIcon } from "lucide-react";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -47,46 +47,16 @@ import {
   FormMessage,
 } from "../../components/ui/form";
 import { AppDispatch } from "../../redux/store";
-import { updateEmployees } from "../../redux/actions";
+import {
+  updateEmployees,
+  updateFirm,
+  updateFirmImage,
+} from "../../redux/actions";
+import axiosInstance from "../../redux/axios";
 
-const stateEnum = z.enum([
-  "AP",
-  "AR",
-  "AS",
-  "BR",
-  "CT",
-  "GA",
-  "GJ",
-  "HR",
-  "HP",
-  "JK",
-  "JH",
-  "KA",
-  "KL",
-  "MP",
-  "MH",
-  "MN",
-  "ML",
-  "MZ",
-  "NL",
-  "OD",
-  "PB",
-  "RJ",
-  "SK",
-  "TN",
-  "TG",
-  "TR",
-  "UP",
-  "UT",
-  "WB",
-  "AN",
-  "CH",
-  "DN",
-  "LD",
-  "DL",
-  "PY",
-  "LA",
-]);
+// const stateEnum = z.enum([
+
+// ]);
 
 const states = [
   { id: "AP", name: "Andhra Pradesh" },
@@ -127,9 +97,16 @@ const states = [
   { id: "LA", name: "Ladakh" },
 ];
 
-const countryEnum = z.enum(["IN"]);
+const countryEnum = z.enum(["India"], {
+  required_error: "You need to select a country.",
+});
 const BillingSchema = z.object({
-  state: stateEnum,
+  state: z.enum<any, any>(
+    states.map((val) => val.name),
+    {
+      required_error: "You need to select a state.",
+    }
+  ),
   country: countryEnum,
   address: z
     .string()
@@ -159,44 +136,29 @@ export function Subscription() {
   const form = useForm({
     resolver: zodResolver(BillingSchema),
     defaultValues: {
-      state: "CH",
-      address: "",
-      city: "",
-      pincode: "",
-      country: "IN",
+      state: myAccount.employee.Firm.state || "",
+      address: myAccount.employee.Firm.address || "",
+      city: myAccount.employee.Firm.city || "",
+      pincode: myAccount.employee.Firm.zip
+        ? Number(myAccount.employee.Firm.zip)
+        : undefined,
+      country: myAccount.employee.Firm.country || "",
     },
   });
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     setName(myAccount?.employee.Firm?.name);
+    setImage(myAccount?.employee.Firm?.image);
     setAllFeatures(JSON.parse(myAccount?.subscripition.Subscription.features));
-    if (myAccount.employee) {
-      form.setValue("state", myAccount.employee.state || "");
-      form.setValue("address", myAccount.employee.street || "");
-      form.setValue("city", myAccount.employee.city || "");
-      form.setValue("pincode", myAccount.employee.zip || "");
-      form.setValue("country", myAccount.employee.country || "");
-    }
   }, [myAccount]);
-  // Handles the file input change
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader: any = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const onBillingSubmit = async (data: any) => {
     setLoading(true);
     await dispatch(
-      updateEmployees({
-        id: myAccount?.employee.id,
-        street: data.address,
+      updateFirm({
+        id: myAccount?.employee.Firm.id,
+        address: data.address,
         city: data.city,
         state: data.state,
         zip: data.pincode,
@@ -205,6 +167,22 @@ export function Subscription() {
     ).unwrap();
     setLoading(false);
   };
+  const [imageLoader, setImageLoader] = useState(false);
+
+  const handleImageChange = async (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        setImageLoader(true);
+        await dispatch(updateFirmImage({id: myAccount?.employee.Firm.id, payload:formData})).unwrap();
+        setImageLoader(false);
+      } catch (e) {}
+    }
+  };
+
   return (
     // <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
     //   <div className="grid grid-cols-1 items-start">
@@ -241,7 +219,9 @@ export function Subscription() {
           </CardContent>
           <CardFooter className="border-t px-6 py-4 flex gap-4 ">
             <Button disabled>Upgrade Plan</Button>
-            <Button variant={"link"}>Need to Cancel?</Button>
+            {!myAccount?.subscripition?.trialEndDate && (
+              <Button variant={"link"}>Need to Cancel?</Button>
+            )}
           </CardFooter>
         </Card>
       </div>
@@ -267,12 +247,17 @@ export function Subscription() {
                     id="fileInput"
                   />
                   <label htmlFor="fileInput" className="cursor-pointer">
-                    <Avatar className="h-20 w-20 border">
-                      <AvatarImage
-                        alt="User avatar"
-                        src="/placeholder-user.jpg"
-                      />
-                      <AvatarFallback>JD</AvatarFallback>
+                    <Avatar className="h-20 w-20 border ">
+                      <AvatarImage alt="User avatar" src={image} />
+                      <AvatarFallback className="uppercase">
+                        {imageLoader ? (
+                          <Loader2 className=" h-4 w-4 animate-spin" />
+                        ) : !!name ? (
+                          name[0] + name[1]
+                        ) : (
+                          ""
+                        )}
+                      </AvatarFallback>
                     </Avatar>
                   </label>
                 </div>
@@ -350,7 +335,10 @@ export function Subscription() {
                         name="state"
                         render={({ field, fieldState }) => (
                           <FormItem>
-                            <Select defaultValue="CH">
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a State" />
@@ -359,7 +347,7 @@ export function Subscription() {
                               <SelectContent>
                                 {states.map((val) => {
                                   return (
-                                    <SelectItem value={val.id}>
+                                    <SelectItem value={val.name}>
                                       {val.name}
                                     </SelectItem>
                                   );
@@ -407,7 +395,10 @@ export function Subscription() {
                     name="country"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <Select defaultValue="IN">
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger className="">
                               <SelectValue placeholder="Select a country" />
@@ -415,7 +406,7 @@ export function Subscription() {
                           </FormControl>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectItem value="IN">India</SelectItem>
+                              <SelectItem value="India">India</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -436,9 +427,9 @@ export function Subscription() {
             <CardHeader>
               <CardTitle className="text-lg">Delete Account</CardTitle>
               <CardDescription>
-                Permanently remove your Personal Account and all of its contents
-                from the Vercel platform. This action is not reversible, so
-                please continue with caution.
+                Permanently remove your Shop Account and all of its contents
+                from the Shop Busniess platform. This action is not reversible,
+                so please continue with caution.
               </CardDescription>
             </CardHeader>
 

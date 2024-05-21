@@ -18,6 +18,7 @@ const Firm = sequelize.define(
         key: "id",
       },
     },
+    image: DataTypes.STRING(750),
     address: DataTypes.STRING,
     city: DataTypes.STRING,
     state: DataTypes.STRING,
@@ -65,5 +66,5 @@ Firm.beforeDestroy((table, options) => {
   }
 });
 
-// FirmType.sync({ alter: true });
+// Firm.sync({ alter: true });
 module.exports = { Firm, FirmType };

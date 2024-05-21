@@ -15,7 +15,7 @@ const Employee = sequelize.define(
       allowNull: false,
     },
     userPic: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(750),
     },
     mobileNumber: {
       unique: true,
