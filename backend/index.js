@@ -16,6 +16,7 @@ const {
 const initializeSubsription = require("./src/utils/create-subscription");
 const authMiddleware = require("./src/middleware/auth.middleware");
 const authController = require("./src/controllers/auth.controller");
+const { subscriptions } = require("./src/utils/web-notification");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -58,6 +59,15 @@ async function init() {
   app.use("/api/tables-session", authMiddleware, tableSessionRoutes);
   app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
   app.use("/api/cart-items", authMiddleware, cartRoutes);
+
+  
+
+  app.post("/api/subscribe", (req, res) => {
+    const subscription = req.body;
+    subscriptions.push(subscription);
+    console.log(subscription);
+    res.status(201).json({});
+  });
 
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
