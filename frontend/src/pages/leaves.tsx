@@ -117,7 +117,7 @@ import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 export default function LeavesComponent() {
   const [addButtonLabel, setAddButtonLabel] = useState("Apply Leave");
-  const { allLeavesTypes, allLeaves } = useSelector(
+  const { allLeavesTypes, allLeaves , myAccount} = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
@@ -279,7 +279,7 @@ export default function LeavesComponent() {
                         >
                           <span className="">Edit</span>
                         </Button>
-                        <Button
+                        {!myAccount?.employee.managerId } <Button
                           onClick={() => handleApproveClick(leave)}
                           size="sm"
                           className="gap-2"

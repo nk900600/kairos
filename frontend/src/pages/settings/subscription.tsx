@@ -177,7 +177,12 @@ export function Subscription() {
 
       try {
         setImageLoader(true);
-        await dispatch(updateFirmImage({id: myAccount?.employee.Firm.id, payload:formData})).unwrap();
+        await dispatch(
+          updateFirmImage({
+            id: myAccount?.employee.Firm.id,
+            payload: formData,
+          })
+        ).unwrap();
         setImageLoader(false);
       } catch (e) {}
     }

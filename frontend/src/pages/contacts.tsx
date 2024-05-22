@@ -402,34 +402,45 @@ export function AlertDialogDemo({ employeeId }: any) {
 const addEmployeeSchema = z.object({
   firstName: z
     .string()
-    .regex(/^[A-Za-z]*$/, "Please enter a valid Name")
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
     .min(1, "First Name is required.")
     .max(50, "Character lkmit exceeded"),
   lastName: z
     .string()
-    .regex(/^[A-Za-z]*$/, "Please enter a valid Name")
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
     .min(1, "Last Name is required.")
     .max(50, "Character lkmit exceeded"),
   mobileNumber: z
     .number()
     .min(1111111111, "Seat capacity must be at least 1.")
     .max(9999999999, "Please Enter number less than 30"),
+  desgination: z.string().nonempty("Designation is required."),
+  manager: z.string().nonempty("Manager is required."),
 });
 
 export const ManageEmployees = ({ employeeData = {} }: any) => {
   const { setOpen }: any = React.useContext(DrawerContext);
-  const { allDesgination } = useSelector(
+  const { allDesgination, allEmployees } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [desgination, setDesgination] = useState("Waiter/Waitress");
   const form = useForm({
     resolver: zodResolver(addEmployeeSchema),
     defaultValues: {
       firstName: employeeData?.firstName || "",
       lastName: employeeData?.lastName || "",
       mobileNumber: Number(employeeData?.mobileNumber) || "",
+      desgination: employeeData?.designationId
+        ? allDesgination.find((val) => val.id == employeeData?.designationId)
+            ?.title
+        : "",
+      manager: employeeData?.managerId
+        ? allEmployees.find((val) => val.id == employeeData?.managerId)
+            .firstName +
+          " " +
+          allEmployees.find((val) => val.id == employeeData?.managerId).lastName
+        : "",
     },
   });
 
@@ -439,7 +450,11 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
       //TODO: remove static firmId value
       let idData = {
         role: 3,
-        designation: allDesgination.find((val) => val.title == desgination)?.id,
+        designation: allDesgination.find((val) => val.title == data.desgination)
+          ?.id,
+        managerId: allEmployees.find(
+          (item) => item.firstName + " " + item.lastName == data.manager
+        )?.id,
       };
       data = { ...data, ...idData };
 
@@ -459,9 +474,6 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
     setIsLoading(false);
   };
 
-  const handleDesginationChange = (data: any) => {
-    setDesgination(data);
-  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
@@ -519,24 +531,64 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
             </FormItem>
           )}
         />
-        <FormItem>
-          <FormLabel htmlFor="desgination">Designation</FormLabel>
-          <Select
-            onValueChange={handleDesginationChange}
-            defaultValue={desgination}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a verified email to display" />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {allDesgination.map((item) => {
-                return <SelectItem value={item.title}>{item.title}</SelectItem>;
-              })}
-            </SelectContent>
-          </Select>
-        </FormItem>
+
+        <FormField
+          control={form.control}
+          name="desgination"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="desgination">Designation</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a employee desgination" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {allDesgination.map((item) => {
+                    return (
+                      <SelectItem value={item.title}>{item.title}</SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="manager"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel htmlFor="desgination">Manager</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a manager" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {allEmployees
+                    // .filter((val) =>
+                    //   !!employeeData?.managerId
+                    //     ? val.id != employeeData?.id
+                    //     : true
+                    // )
+                    .map((item) => {
+                      return (
+                        <SelectItem
+                          value={item.firstName + " " + item.lastName}
+                        >
+                          {item.firstName + " " + item.lastName}
+                        </SelectItem>
+                      );
+                    })}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
         <Button loading={isLoading} type="submit">
           {employeeData?.id ? "Update Employee" : "Add Employee"}
         </Button>
