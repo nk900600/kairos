@@ -287,11 +287,12 @@ class AuthController {
       const otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
-      await fast2smsApiAxios.post("bulkV2", {
-        route: "otp",
-        variables_values: otpValue,
-        numbers: mobileNumber,
-      });
+      // commenting for now
+      // await fast2smsApiAxios.post("bulkV2", {
+      //   route: "otp",
+      //   variables_values: otpValue,
+      //   numbers: mobileNumber,
+      // });
       let otpRecord;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {
@@ -320,7 +321,7 @@ class AuthController {
       // Send the OTP to the user's mobile number (implementation depends on your SMS service)
       // await sendOtpToMobile(mobileNumber, otpValue);
 
-      return { success: true };
+      return { success: true, otpRecord };
     } catch (error) {
       console.log(error);
       return { success: false, message: "Error generating OTP" };

@@ -51,6 +51,15 @@ const Employee = sequelize.define(
     emergencyContactPhone: {
       type: DataTypes.STRING,
     },
+    managerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Employees",
+        key: "id",
+      },
+    },
+
     firmId: {
       type: DataTypes.INTEGER,
       allowNull: false,
