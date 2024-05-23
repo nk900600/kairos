@@ -7,8 +7,10 @@ const {
 } = require("../models/subscription.model.js");
 const { s3 } = require("../utils/aws-obj.js");
 const { mobileNumberRegex, emailRegex } = require("../utils/const.js");
-
+const { Op } = require("sequelize");
+const moment = require("moment");
 const fs = require("fs");
+const { calculatePercentageChange } = require("../utils/percentageCount.js");
 
 class EmployeeController {
   async getAllEmployees(req, res) {
@@ -16,7 +18,7 @@ class EmployeeController {
       const employees = await Employee.findAll({
         include: [Role, Firm, Designation],
         where: { firmId: req.user.firmId },
-      });
+    });
       return res.status(200).json(employees);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -237,6 +239,58 @@ class EmployeeController {
       });
     } catch (error) {
       res.status(404).json({ error: error.message });
+    }
+  }
+
+  async GetEmployeesBetweenDatesRange(req, res) {
+    const { startDate, endDate } = req.query;
+
+    try {
+      // Validate the query parameters
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          error: "Please provide both startDate and endDate query parameters.",
+        });
+      }
+
+      const previousMonthStart = moment()
+        .subtract(1, "month")
+        .startOf("month")
+        .toDate();
+      const previousMonthEnd = moment()
+        .subtract(1, "month")
+        .endOf("month")
+        .toDate();
+
+      // Query the database for average ratings
+      const employees = await Employee.count({
+        where: {
+          firmId: req.user.firmId,
+          createdAt: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+      });
+      const employeesPreviousMonth = await Employee.count({
+        where: {
+          firmId: req.user.firmId,
+          createdAt: {
+            [Op.between]: [previousMonthStart, previousMonthEnd],
+          },
+        },
+      });
+
+      // Calculate the percentage changeconte
+      const percentageChange = calculatePercentageChange(
+        employees,
+        employeesPreviousMonth
+      );
+      return res
+        .status(200)
+        .json({ count: employees, percentage: percentageChange.toFixed(1) });
+    } catch (error) {
+      console.error("Error fetching average ratings:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }

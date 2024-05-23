@@ -6,6 +6,7 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
 router.get("/me", employeeController.getCurrentuserInfo);
+router.get("/get-employee", employeeController.GetEmployeesBetweenDatesRange);
 router.get("/", employeeController.getAllEmployees);
 router.get("/:id", employeeController.getEmployeeById);
 router.post("/", employeeController.createEmployee);

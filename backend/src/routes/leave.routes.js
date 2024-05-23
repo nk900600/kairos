@@ -3,6 +3,7 @@ const router = express.Router();
 const leaveController = require("./../controllers/leave.controller");
 
 router.post("/", leaveController.createLeave);
+router.get("/get-leaves", leaveController.GetLeavesBetweenDatesRange);
 router.get("/", leaveController.getAllLeaves);
 router.get("/:id", leaveController.getLeave);
 router.put("/:id", leaveController.updateLeave);

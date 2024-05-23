@@ -1,5 +1,4 @@
 const { LeaveType } = require("../models/leave.model");
-
 class LeaveTypeController {
   // Create a new LeaveType
   async createLeaveType(req, res) {

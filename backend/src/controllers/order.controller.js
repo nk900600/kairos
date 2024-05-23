@@ -9,7 +9,8 @@ const {
 const { TableSession } = require("../models/tableSession.model");
 const { Table } = require("../models/table.model");
 const { CartItem } = require("../models/cart.model");
-
+const moment = require("moment");
+const { calculatePercentageChange } = require("../utils/percentageCount");
 class OrderController {
   // Create a new order
   async create(req, res) {
@@ -356,9 +357,43 @@ class OrderController {
           ["orderDate", "ASC"], // Order by the orderDate in ascending order
         ],
       });
+
+      const previousMonthStart = moment()
+        .subtract(1, "month")
+        .startOf("month")
+        .toDate();
+      const previousMonthEnd = moment()
+        .subtract(1, "month")
+        .endOf("month")
+        .toDate();
+
+      const ordersPreviousMonth = await Order.findAll({
+        where: {
+          firmId: req.user.firmId,
+          orderDate: {
+            [Op.between]: [previousMonthStart, previousMonthEnd],
+          },
+        },
+        order: [
+          ["orderDate", "ASC"], // Order by the orderDate in ascending order
+        ],
+      });
       // Format the response
 
-      return res.status(200).json(orders);
+      const percentageChange = calculatePercentageChange(
+        orders.length,
+        ordersPreviousMonth.length
+      );
+      const percentageAmountChange = calculatePercentageChange(
+        orders.reduce((acc, val) => acc + val.totalAmount, 0),
+        ordersPreviousMonth.reduce((acc, val) => acc + val.totalAmount, 0)
+      );
+
+      return res.status(200).json({
+        allorders: orders,
+        percentage: percentageChange.toFixed(1),
+        amountPercentage: percentageAmountChange.toFixed(1),
+      });
     } catch (error) {
       console.error("Error fetching average ratings:", error);
       res.status(500).json({ error: "Internal server error" });

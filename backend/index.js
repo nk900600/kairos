@@ -60,12 +60,9 @@ async function init() {
   app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
   app.use("/api/cart-items", authMiddleware, cartRoutes);
 
-  
-
   app.post("/api/subscribe", (req, res) => {
     const subscription = req.body;
     subscriptions.push(subscription);
-    console.log(subscription);
     res.status(201).json({});
   });
 

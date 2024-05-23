@@ -1,6 +1,8 @@
+const { calculatePercentageChange } = require("../utils/percentageCount");
 const { calculateDuration } = require("../utils/util");
 const { Leave, LeaveStatus, LeaveType } = require("./../models/leave.model"); // Path to your Leave model
-
+const moment = require("moment");
+const { Op } = require("sequelize");
 class LeaveController {
   // Create a new leave request
   async createLeave(req, res) {
@@ -114,6 +116,58 @@ class LeaveController {
       return res.status(204).send();
     } catch (error) {
       return res.status(500).json({ message: error.message });
+    }
+  }
+
+  async GetLeavesBetweenDatesRange(req, res) {
+    const { startDate, endDate } = req.query;
+
+    try {
+      // Validate the query parameters
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          error: "Please provide both startDate and endDate query parameters.",
+        });
+      }
+
+      const previousMonthStart = moment()
+        .subtract(1, "month")
+        .startOf("month")
+        .toDate();
+      const previousMonthEnd = moment()
+        .subtract(1, "month")
+        .endOf("month")
+        .toDate();
+
+      // Query the database for average ratings
+      const leaves = await Leave.findAll({
+        where: {
+          firmId: req.user.firmId,
+          createdAt: {
+            [Op.between]: [startDate, endDate],
+          },
+        },
+      });
+      const employeesPreviousMonth = await Leave.count({
+        where: {
+          firmId: req.user.firmId,
+          createdAt: {
+            [Op.between]: [previousMonthStart, previousMonthEnd],
+          },
+        },
+      });
+
+      // Calculate the percentage changeconte
+      const percentageChange = calculatePercentageChange(
+        leaves,
+        employeesPreviousMonth
+      );
+      return res
+        .status(200)
+        .json({ allLeaves: leaves, percentage: percentageChange.toFixed(1) });
+    } catch (error) {
+      console.error("Error fetching average ratings:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }
