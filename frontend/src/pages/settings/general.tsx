@@ -120,6 +120,8 @@ export function GeneralSetting() {
         Number(myAccount.employee.mobileNumber) || undefined
       );
       emailForm.setValue("email", myAccount.employee.email || "");
+
+      setImage(myAccount.employee.userPic);
     }
   }, [myAccount]);
 

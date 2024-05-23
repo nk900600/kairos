@@ -57,10 +57,11 @@ import CalenderComponent from "./calender";
 import { useSwipeable } from "react-swipeable";
 import CreateOrderComponent from "./placeOrder/selectTable";
 import { DashBoardContent } from "./dashboardContent";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { logout } from "../redux/actions";
-
+import { RootState } from "../redux/reducer";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 const allMenuItems = [
   {
     iconSmall: <Home className="h-4 w-4" />,
@@ -118,6 +119,9 @@ export function Dashboard() {
   const handleSheetClick = (e: any) => {
     setOpen(false);
   };
+  const { myAccount }: any = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   let sheetProps: any = {
     open: isOpen,
     onOpenChange: (data: any) => {
@@ -245,8 +249,20 @@ export function Dashboard() {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="-full">
-              <CircleUser className="h-5 w-5" />
+            <Button variant="outline" size="icon">
+              {/* <CircleUser className="h-5 w-5" /> */}
+
+              <Avatar className="h-7 w-7 border ">
+                <AvatarImage
+                  alt="User avatar"
+                  src={myAccount?.employee?.userPic}
+                />
+                <AvatarFallback className="uppercase">
+                  {myAccount?.employee?.firstName[0] +
+                    myAccount?.employee?.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>

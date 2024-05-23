@@ -1,4 +1,10 @@
-import { CalendarClock, CreditCard, DollarSign, Users } from "lucide-react";
+import {
+  CalendarClock,
+  CreditCard,
+  DollarSign,
+  ShoppingBag,
+  Users,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -14,6 +20,12 @@ import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import SalesChart from "./common/chart";
 import PieChartComponent from "./common/pieChart";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/reducer";
+import { useEffect, useState } from "react";
+import axiosInstance from "../redux/axios";
+import { OrderStatuses } from "./chefsPanel";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 const productCategoryData = [
   { name: "Beverages", value: 400 },
@@ -30,13 +42,67 @@ const tableNumberData = [
 ];
 const activeOrder = [1, 2, 3, 4];
 export function DashBoardContent() {
+  const { allEmployees, allDesgination, isAdmin, allOrders, alltables } =
+    useSelector((state: { table: RootState }) => state.table);
+
+  const [employee, setEmployee] = useState<any>(null);
+  const [orders, setOrders] = useState<any>(null);
+  const [leaves, setLeaves] = useState<any>(null);
+
+  useEffect(() => {}, []);
+
+  const handleDateChnage = (from: any, to: any) => {
+    // get employee Data
+    console.log(from, to);
+    axiosInstance
+      .get("employees/get-employee", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        if (!res.data?.percentage?.includes("-")) {
+          res.data.percentage = `+${res.data.percentage}`;
+        }
+        setEmployee(res.data);
+      });
+    axiosInstance
+      .get("orders/get-orders", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        if (!res.data?.percentage?.includes("-")) {
+          res.data.percentage = `+${res.data.percentage}`;
+        }
+        setOrders(res.data);
+      });
+    axiosInstance
+      .get("leaves/get-leaves", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        if (!res.data?.percentage?.includes("-")) {
+          res.data.percentage = `+${res.data.percentage}`;
+        }
+        setLeaves(res.data);
+      });
+  };
+
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+    <main className="flex flex-1 flex-col gap-4 p-2 lg:gap-6 lg:p-6">
       <div className="flex items-center gap-4">
         <h1 className="hidden sm:flex flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
           Dashboard
         </h1>
-        <DatePickerWithRange />
+        <DatePickerWithRange onDateChange={handleDateChnage} />
+        {/* <Button variant={"outline"}>Filter</Button> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -88,9 +154,14 @@ export function DashBoardContent() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-2xl font-bold">
+              {orders?.allorders.reduce(
+                (acc: any, val: any) => acc + val.totalAmount,
+                0
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              {orders?.amountPercentage}% from last month
             </p>
           </CardContent>
         </Card>
@@ -103,9 +174,9 @@ export function DashBoardContent() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">21</div>
+            <div className="text-2xl font-bold">{employee?.count}</div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              {employee?.percentage}% from last month
             </p>
           </CardContent>
         </Card>
@@ -118,21 +189,28 @@ export function DashBoardContent() {
             <CalendarClock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">
+              {
+                leaves?.allLeaves.filter((val: any) => val.status == "Pending")
+                  .length
+              }
+            </div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              {leaves?.percentage}% from last month
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2350</div>
+            <div className="text-2xl font-bold">
+              {orders?.allorders?.length}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              {orders?.percentage}% from last month
             </p>
           </CardContent>
         </Card>
@@ -154,29 +232,79 @@ export function DashBoardContent() {
             <h3 className="font-semibold leading-none tracking-tight">
               Active Orders
             </h3>
-            <p className="text-sm text-muted-foreground">You have 0 orders</p>
+            <p className="text-sm text-muted-foreground">
+              You have{" "}
+              {
+                allOrders.filter(
+                  (val) =>
+                    ![
+                      OrderStatuses.CANCELLED,
+                      OrderStatuses.COMPLETED,
+                    ].includes(val.status)
+                ).length
+              }{" "}
+              Active orders
+            </p>
           </div>
           <CardContent className="grid gap-8">
-            {activeOrder.map((item) => {
-              return (
-                <div className="flex items-center gap-4">
-                  <Avatar className="hidden h-9 w-9 sm:flex">
-                    <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                    <AvatarFallback>OM</AvatarFallback>
-                  </Avatar>
-                  <div className="grid gap-1">
-                    <p className="text-sm font-medium leading-none">
-                      Olivia Martin
-                    </p>
-                    <p className="text-sm text-muted-foreground">Nokin</p>
+            {allOrders
+              .filter(
+                (val) =>
+                  ![OrderStatuses.CANCELLED, OrderStatuses.COMPLETED].includes(
+                    val.status
+                  )
+              )
+              .map((val) => {
+                return (
+                  <div className="flex items-center gap-4">
+                    <Avatar className="hidden h-9 w-9 sm:flex">
+                      <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                      <AvatarFallback>OM</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-1">
+                      <p className="text-sm font-medium leading-none">
+                        {
+                          alltables?.find(
+                            (table: any) =>
+                              table.id == val?.TableSession?.tableId
+                          )?.tableName
+                        }
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {" "}
+                        {
+                          allEmployees?.find(
+                            (contact) => contact.id == val.createdBy
+                          )?.firstName
+                        }{" "}
+                        {
+                          allEmployees?.find(
+                            (contact) => contact.id == val.createdBy
+                          )?.lastName
+                        }
+                      </p>
+                    </div>
+                    <div className="ml-auto font-medium">
+                      {" "}
+                      <Badge variant={"secondary"}> {val.status}</Badge>
+                    </div>
                   </div>
-                  <div className="ml-auto font-medium">
-                    {" "}
-                    <Badge variant={"secondary"}> Preaparing</Badge>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+
+            {!allOrders.filter(
+              (val) =>
+                ![OrderStatuses.CANCELLED, OrderStatuses.COMPLETED].includes(
+                  val.status
+                )
+            ).length && (
+              <EmptyPlaceholder
+                buttonText=""
+                type="orders"
+                title="No Active Orders Available"
+                description=""
+              />
+            )}
           </CardContent>
         </Card>
 

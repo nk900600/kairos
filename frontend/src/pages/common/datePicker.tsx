@@ -3,7 +3,6 @@
 import * as React from "react";
 import { addDays, format, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
 import { useEffect } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
@@ -13,7 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { nullable } from "zod";
+import { DateRangePicker, DateRange } from "react-date-range";
+import { DefinedRange } from "react-date-range";
 
 export function DatePickerWithRange({
   className,
@@ -21,55 +21,91 @@ export function DatePickerWithRange({
   disableDate = [],
   onDateChange,
 }: any) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: dateObj?.from ? dateObj?.from : new Date(2022, 0, 20),
-    to: dateObj?.to ? dateObj?.to : addDays(new Date(2022, 0, 20), 20),
-  });
-
   useEffect(() => {
-    onDateChange && onDateChange(date);
-  }, [date]);
+    if (onDateChange) {
+      onDateChange(
+        format(state[0].startDate, "yyyy-MM-dd"),
+        format(state[0].endDate, "yyyy-MM-dd")
+      );
+    }
+  }, []);
 
+  const [state, setState] = React.useState<any>([
+    {
+      startDate: new Date(),
+      endDate: addDays(new Date(), 7),
+      key: "selection",
+    },
+  ]);
+
+  const handleOpenChnage = (open: any) => {
+    if (!open) {
+      onDateChange(
+        format(state[0].startDate, "yyyy-MM-dd"),
+        format(state[0].endDate, "yyyy-MM-dd")
+      );
+    }
+  };
   return (
-    <div className={cn("grid gap-2", className)}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal w-full",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
+    <>
+      <div className={cn("grid gap-2", className)}>
+        <Popover onOpenChange={handleOpenChnage}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant={"outline"}
+              className={cn(
+                "w-[250px] justify-start text-left font-normal w-full",
+                !state && "text-muted-foreground"
+              )}
+            >
+              {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
+              {state[0]?.startDate ? (
+                state[0]?.endDate ? (
+                  <>
+                    {format(state[0].startDate, "LLL dd, y")} -{" "}
+                    {format(state[0].endDate, "LLL dd, y")}
+                  </>
+                ) : (
+                  format(state[0].startDate, "LLL dd, y")
+                )
               ) : (
-                format(date.from, "LLL dd, y")
-              )
-            ) : (
-              <span>Pick a date</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
-            numberOfMonths={1}
-            min={2}
-            disabled={disableDate}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
+                <span>Pick a date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <DateRange
+              editableDateInputs={true}
+              onChange={(item: any) => setState([item.selection])}
+              moveRangeOnFirstSelection={false}
+              ranges={state}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className={cn("grid gap-2", className)}>
+        <Popover onOpenChange={handleOpenChnage}>
+          <PopoverTrigger asChild>
+            <Button
+              id="date"
+              variant={"outline"}
+              className={cn(
+                "w-[300px] justify-start text-left font-normal w-full",
+                !state && "text-muted-foreground"
+              )}
+            >
+              <span>Date Range</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <DefinedRange
+              onChange={(item: any) => setState([item.selection])}
+              ranges={state}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    </>
   );
 }
