@@ -461,6 +461,7 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
       // Dispatch the addTable action and wait for it to complete
       if (employeeData?.id) {
         data.id = employeeData.id;
+        data.role = employeeData.roleId;
         await dispatch(updateEmployees(data)).unwrap();
       } else {
         await dispatch(addEmployee(data)).unwrap();

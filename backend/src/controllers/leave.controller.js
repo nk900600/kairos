@@ -8,7 +8,8 @@ class LeaveController {
       if (
         !req.body?.startDate ||
         !req.body?.endDate ||
-        !req.body?.LeaveTypeId
+        !req.body?.LeaveTypeId ||
+        !req.body?.managerId
       ) {
         return res.status(400).json({ message: "Missing required fields" });
       }
@@ -28,7 +29,10 @@ class LeaveController {
   // Retrieve all leave requests
   async getAllLeaves(req, res) {
     try {
-      const leaveTypes = await Leave.findAll({ include: LeaveType, where: {firmId : req.user.firmId} });
+      const leaveTypes = await Leave.findAll({
+        include: LeaveType,
+        where: { firmId: req.user.firmId },
+      });
       return res.status(200).json(leaveTypes);
     } catch (error) {
       return res.status(500).json({ message: error.message });

@@ -8,6 +8,7 @@ import {
   CirclePlus,
   CircleUser,
   Filter,
+  NotebookPen,
   Pencil,
   Plus,
   Search,
@@ -117,9 +118,9 @@ import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 
 export default function LeavesComponent() {
   const [addButtonLabel, setAddButtonLabel] = useState("Apply Leave");
-  const { allLeavesTypes, allLeaves , myAccount} = useSelector(
-    (state: { table: RootState }) => state.table
-  );
+  const [tab, setTab] = useState("pending");
+  const { allLeavesTypes, allLeaves, myAccount, isAdmin, allEmployees } =
+    useSelector((state: { table: RootState }) => state.table);
   const dispatch: AppDispatch = useDispatch();
 
   React.useEffect(() => {
@@ -131,12 +132,15 @@ export default function LeavesComponent() {
     switch (e) {
       case "pending":
         setAddButtonLabel("Apply Leave");
+        setTab("pending");
         return;
       case "policy":
         setAddButtonLabel("Add Policy");
+        setTab("policy");
         return;
       default:
         setAddButtonLabel("");
+        setTab("history");
     }
   };
 
@@ -201,14 +205,33 @@ export default function LeavesComponent() {
           All Leaves
         </h1>
         {addButtonLabel && (
-          <Button
-            variant="outline"
-            className=" h-8  gap-2"
-            onClick={handleAddPolicyClick}
-          >
-            <CirclePlus className="h-4 w-4" />
-            <span className="hidden sm:block">{addButtonLabel} </span>
-          </Button>
+          <>
+            {isAdmin && tab == "policy" ? (
+              <Button
+                variant="outline"
+                className=" h-8  gap-2"
+                onClick={handleAddPolicyClick}
+              >
+                <CirclePlus className="h-4 w-4" />
+                <span className="hidden sm:block">{addButtonLabel} </span>
+              </Button>
+            ) : (
+              ""
+            )}
+
+            <>
+              {(tab == "pending" || tab == "history") && (
+                <Button
+                  variant="outline"
+                  className=" h-8  gap-2"
+                  onClick={handleAddPolicyClick}
+                >
+                  <CirclePlus className="h-4 w-4" />
+                  <span className="hidden sm:block">{addButtonLabel} </span>
+                </Button>
+              )}
+            </>
+          </>
         )}
       </div>
       <Tabs
@@ -225,6 +248,11 @@ export default function LeavesComponent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allLeaves
               .filter((leave: any) => leave.status === "Pending")
+              .filter(
+                (val) =>
+                  val.createdBy == myAccount?.employee?.id ||
+                  val.managerId == myAccount?.employee?.id
+              )
               .map((leave) => {
                 return (
                   <>
@@ -250,10 +278,27 @@ export default function LeavesComponent() {
                         </div>
                       </CardHeader>
 
-                      {leave?.reason && (
-                        <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                      <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
+                        <div className="flex items-center">
+                          <UserIcon className="h-3 w-3 mr-1.5" />
+                          <div className="text-sm">
+                            <span className="text-muted-foreground text-xs">
+                              Employee:
+                            </span>{" "}
+                            <span>
+                              {allEmployees.find(
+                                (val) => val.id == leave.createdBy
+                              )?.firstName +
+                                " " +
+                                allEmployees.find(
+                                  (val) => val.id == leave.createdBy
+                                )?.lastName}
+                            </span>
+                          </div>
+                        </div>
+                        {leave?.reason && (
                           <div className="flex items-center">
-                            <UserIcon className="h-3 w-3 mr-1.5" />
+                            <NotebookPen className="h-3 w-3 mr-1.5" />
                             <div className="text-sm">
                               <span className="text-muted-foreground text-xs">
                                 Reason:
@@ -261,45 +306,59 @@ export default function LeavesComponent() {
                               <span>{leave.reason}</span>
                             </div>
                           </div>
-                        </CardContent>
-                      )}
+                        )}
+                      </CardContent>
                       <CardFooter className="flex justify-end   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
-                        <Button
-                          onClick={() => handleLeaveDelete(leave)}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <span className="">Cancel</span>
-                        </Button>
-                        <Button
-                          onClick={() => handleEditClick(leave)}
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <span className="">Edit</span>
-                        </Button>
-                        {!myAccount?.employee.managerId } <Button
-                          onClick={() => handleApproveClick(leave)}
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <span className="">Approve</span>
-                        </Button>
-                        <Button
-                          onClick={() => handleRejectClick(leave)}
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <span className="">Reject</span>
-                        </Button>
+                        {myAccount?.employee?.id == leave.createdBy && (
+                          <>
+                            <Button
+                              onClick={() => handleLeaveDelete(leave)}
+                              variant="outline"
+                              size="sm"
+                              className="gap-2"
+                            >
+                              <span className="">Cancel</span>
+                            </Button>
+                            <Button
+                              onClick={() => handleEditClick(leave)}
+                              size="sm"
+                              className="gap-2"
+                            >
+                              <span className="">Edit</span>
+                            </Button>
+                          </>
+                        )}
+                        {myAccount?.employee?.id == leave.managerId && (
+                          <>
+                            <Button
+                              onClick={() => handleApproveClick(leave)}
+                              size="sm"
+                              className="gap-2"
+                            >
+                              <span className="">Approve</span>
+                            </Button>
+                            <Button
+                              onClick={() => handleRejectClick(leave)}
+                              size="sm"
+                              className="gap-2"
+                            >
+                              <span className="">Reject</span>
+                            </Button>
+                          </>
+                        )}
                       </CardFooter>
                     </Card>
                   </>
                 );
               })}
           </div>
-          {!allLeaves.length && (
+          {!allLeaves
+            .filter((leave: any) => leave.status === "Pending")
+            .filter(
+              (val) =>
+                val.createdBy == myAccount?.employee?.id ||
+                val.managerId == myAccount?.employee?.id
+            ).length && (
             <EmptyPlaceholder
               title="No Leaves Applied yet"
               description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
@@ -312,7 +371,11 @@ export default function LeavesComponent() {
         <TabsContent value="history">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allLeaves
-              .filter((leave) => leave.status != "Pending")
+              .filter(
+                (leave) =>
+                  leave.status != "Pending" &&
+                  leave.createdBy == myAccount?.employee?.id
+              )
               .map((leave) => {
                 return (
                   <>
@@ -365,7 +428,11 @@ export default function LeavesComponent() {
                 );
               })}
           </div>
-          {!allLeaves.length && (
+          {!allLeaves.filter(
+            (val) =>
+              val.status != "Pending" &&
+              val.createdBy == myAccount?.employee?.id
+          ).length && (
             <EmptyPlaceholder
               title="No Leaves history yet"
               description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
@@ -395,18 +462,20 @@ export default function LeavesComponent() {
                         </p>
                       </CardDescription>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleLeaveTypeClick(leave)}
-                        variant="ghost"
-                        size="icon"
-                        className="gap-2"
-                      >
-                        <Pencil className="h-4 w-4 " />
-                      </Button>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleLeaveTypeClick(leave)}
+                          variant="ghost"
+                          size="icon"
+                          className="gap-2"
+                        >
+                          <Pencil className="h-4 w-4 " />
+                        </Button>
 
-                      <AlertDialogDemo leaveType={leave}></AlertDialogDemo>
-                    </div>
+                        <AlertDialogDemo leaveType={leave}></AlertDialogDemo>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -480,7 +549,7 @@ const leaveSchema = z
 
 export const ManageLeave = ({ leave }: any) => {
   const { setOpen }: any = React.useContext(DrawerContext);
-  const { allLeavesTypes } = useSelector(
+  const { allLeavesTypes, myAccount } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
@@ -517,6 +586,7 @@ export const ManageLeave = ({ leave }: any) => {
           startDate: format(dates.startDate, "yyyy-MM-dd"),
           endDate: format(dates.endDate, "yyyy-MM-dd"),
           id: leave?.id,
+          reason: reason,
         };
         await dispatch(updateLeave(payload)).unwrap();
       } else {
@@ -525,6 +595,7 @@ export const ManageLeave = ({ leave }: any) => {
           endDate: format(dates.endDate, "yyyy-MM-dd"),
           reason: reason,
           LeaveTypeId: allLeavesTypes.find((val) => val.name == leaveType)?.id,
+          managerId: myAccount.employee.managerId,
         };
 
         await dispatch(createLeave(payload)).unwrap();
@@ -580,7 +651,6 @@ export const ManageLeave = ({ leave }: any) => {
             </FormItem>
           )}
         />
-        {leave?.id}
 
         {!leave?.id && (
           <FormItem>
