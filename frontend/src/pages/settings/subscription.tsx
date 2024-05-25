@@ -161,7 +161,9 @@ export function Subscription() {
   useEffect(() => {
     setName(myAccount?.employee.Firm?.name);
     setImage(myAccount?.employee.Firm?.image);
-    setAllFeatures(JSON.parse(myAccount?.subscripition.Subscription.features));
+    setAllFeatures(
+      JSON.parse(myAccount?.subscripition?.Subscription?.features)
+    );
   }, [myAccount]);
 
   const onBillingSubmit = async (data: any) => {

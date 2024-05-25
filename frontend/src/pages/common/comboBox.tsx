@@ -39,11 +39,13 @@ export function ComboBoxComponent() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
-  const { myAccount } = useSelector(
+  const { myAccount, myFirms, isAdmin } = useSelector(
     (state: { table: RootState }) => state.table
   );
-  const [position, setPosition] = React.useState("top");
-  React.useEffect(() => {}, []);
+  const [position, setPosition] = React.useState("");
+  React.useEffect(() => {
+    if (myAccount) setPosition(myAccount?.employee?.Firm?.id);
+  }, [myAccount]);
   return (
     <>
       <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -73,23 +75,32 @@ export function ComboBoxComponent() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end">
-          <DropdownMenuLabel>My shops</DropdownMenuLabel>
+          <DropdownMenuLabel>Switch between my shops</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-            <DropdownMenuRadioItem value="top">
-              <div className="flex gap-4 items-center text-primary">
-                <Avatar className="h-7 w-7 border ">
-                  <AvatarImage
-                    alt="User avatar"
-                    src={myAccount?.employee?.Firm?.image}
-                  />
-                </Avatar>
+            {myFirms
+              .filter((val: any) => (isAdmin ? true : position == val.id))
+              .map((firm: any) => {
+                return (
+                  <>
+                    <DropdownMenuRadioItem
+                      value={firm.id}
+                      className={`bg-gray/10 ${
+                        firm.id == position && "bg-muted/90"
+                      }`}
+                    >
+                      <div className="flex gap-4 items-center text-primary">
+                        <Avatar className="h-7 w-7 border ">
+                          <AvatarImage alt="User avatar" src={firm?.image} />
+                        </Avatar>
 
-                {/* </Button> */}
-                <span className=" "> {myAccount?.employee?.Firm.name}</span>
-              </div>
-            </DropdownMenuRadioItem>
+                        <span className=" ">{firm.name}</span>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  </>
+                );
+              })}
           </DropdownMenuRadioGroup>
           {/* {AllDesgination.map((data, i) => {
             return (

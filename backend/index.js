@@ -78,9 +78,9 @@ async function init() {
 
 init();
 
-// let sql = "ALTER TABLE your_table_name\n";
+// let sql = "ALTER TABLE CategoryTypes\n";
 // for (let i = 1; i <= 60; i++) {
-//   sql += `  DROP INDEX \`email_${i}\`${i < 60 ? "," : ""}\n`;
+//   sql += `  DROP INDEX \`title_${i}\`${i < 60 ? "," : ""}\n`;
 // }
 
 // console.log(sql);

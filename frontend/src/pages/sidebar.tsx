@@ -67,6 +67,7 @@ import {
   fetchAllTableSession,
   fetchMyAccount,
   fetchTables,
+  getAllFirmByNumber,
   logout,
 } from "../redux/actions";
 import { useDispatch, useSelector } from "react-redux";
@@ -148,13 +149,20 @@ function Sidebar() {
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     if (isAuthenticted) {
-      dispatch(fetchAllEmployees());
-      dispatch(fetchMyAccount());
-      dispatch(fetchTables());
-      dispatch(fetchAllTableSession());
-      dispatch(fetchAllOrders());
-      dispatch(fetchAllMenus());
-      dispatch(fetchAllMenuCategories());
+      if (hideSidebarOnRoutes.includes(location.pathname)) {
+        navigate("/dashboard");
+      }
+      dispatch(fetchMyAccount())
+        .unwrap()
+        .then(() => {
+          dispatch(fetchAllEmployees());
+          dispatch(fetchTables());
+          dispatch(fetchAllTableSession());
+          dispatch(fetchAllOrders());
+          dispatch(fetchAllMenus());
+          dispatch(fetchAllMenuCategories());
+          dispatch(getAllFirmByNumber());
+        });
     } else {
       if (!localStorage.getItem("token")) navigate("/login");
     }
@@ -282,12 +290,11 @@ function Sidebar() {
         </div>
       </div>
 
-      {/* <Router basename="/"> */}
-      <Routes>
-        <Route path="/dashboard" Component={Dashboard} />
-      </Routes>
-      {!["/dashboard"].includes(location.pathname) && (
-        <ScrollArea className=" max-h-screen">
+      <ScrollArea className=" max-h-screen">
+        <Routes>
+          <Route path="/dashboard" Component={Dashboard} />
+        </Routes>
+        {!["/dashboard"].includes(location.pathname) && (
           <main className="flex flex-1 flex-col gap-4 p-2 md:p-6 md:gap-6 lg:gap-6 lg:p-6 ">
             <Routes>
               <Route path="/tables" element={<TableComponent />} />
@@ -310,9 +317,8 @@ function Sidebar() {
               <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
           </main>
-        </ScrollArea>
-      )}
-      {/* </Router> */}
+        )}
+      </ScrollArea>
     </div>
   );
 }

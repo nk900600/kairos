@@ -581,6 +581,22 @@ export const updateFirm = createAsyncThunk(
     }
   }
 );
+export const getAllFirmByNumber = createAsyncThunk(
+  "tables/getAllFirmByNumber",
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const state: any = getState();
+      const number = state.table?.myAccount.employee.Firm.mobileNumber;
+      let respopnse = await axios.get(
+        `${BASE_URL}/firms?mobileNumber=${number}`
+      );
+      return respopnse.data; // return the id to identify which table was deleted
+    } catch (error: any) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
+    }
+  }
+);
 
 export const deleteFirm = createAsyncThunk(
   "tables/deleteFirm",

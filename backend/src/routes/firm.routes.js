@@ -5,6 +5,7 @@ const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
 router.get("/:id", firmController.getFirmById);
+router.get("/", firmController.getAllFirmsByMobile);
 router.put("/:id", firmController.updateFirm);
 router.delete("/:id", firmController.deleteFirm);
 router.put("/:id/image", upload.single("file"), firmController.uploadImage);

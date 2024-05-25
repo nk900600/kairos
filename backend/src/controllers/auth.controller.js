@@ -12,6 +12,10 @@ const TOKEN_EXPIRY = "365d";
 const TOKEN_REFRESH_EXPIRY = "365d";
 const FASt2SMSTOKEN = process.env.FASt2SMSTOKEN;
 const axios = require("axios");
+const {
+  FirmSubscription,
+  Subscription,
+} = require("../models/subscription.model");
 
 // Create an instance of axios with a base URL and default headers
 const fast2smsApiAxios = axios.create({
@@ -259,14 +263,13 @@ class AuthController {
       // Check for cooldown period
       if (existingOtpRecord) {
         const now = new Date();
-        if (existingOtpRecord.otpExpiresAt && existingOtpRecord.otpExpiresAt <= now) {
+        if (
+          existingOtpRecord.otpExpiresAt &&
+          existingOtpRecord.otpExpiresAt <= now
+        ) {
           await existingOtpRecord.destroy();
-          existingOtpRecord = null
-        }
-
-        
-
-       else if (
+          existingOtpRecord = null;
+        } else if (
           existingOtpRecord.cooldownUntil &&
           existingOtpRecord.cooldownUntil > now
         ) {
@@ -279,7 +282,7 @@ class AuthController {
         }
 
         // Set the cooldown period to 10 minutes from now
-       else if (existingOtpRecord.failedOtpCount >= 3) {
+        else if (existingOtpRecord.failedOtpCount >= 3) {
           await existingOtpRecord.update({
             cooldownUntil: new Date(Date.now() + 10 * 60 * 1000),
             failedOtpCount: 0,
@@ -369,6 +372,50 @@ class AuthController {
       const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
       await RefreshToken.destroy({ where: { employeeId: decoded.user.id } });
       res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ error: "Error logging out" });
+    }
+  }
+  async generateSwitchFirmToken(req, res) {
+    try {
+      const refreshToken = req.headers["x-refresh-token"];
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      await RefreshToken.destroy({ where: { employeeId: decoded.user.id } });
+
+      if (!req.query?.firmId || !req.query?.userId) {
+        return res.status(400).json({ error: "Firm is required" });
+      }
+
+      const { firmId } = req.query;
+
+      const firm = await Firm.findOne({
+        where: { id: firmId },
+      });
+      if (!firm) {
+        return res.status(400).json({ error: "Firm not found" });
+      }
+      const user = await Employee.findOne({
+        where: { id: decoded.user.id },
+      });
+      const newAccessToken = this.generateToken({ dataValues: user });
+      const newRefreshToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
+        expiresIn: TOKEN_REFRESH_EXPIRY,
+      });
+
+      // Store the new refresh token in the database
+      await RefreshToken.update(
+        {
+          token: newRefreshToken,
+          userId: user.id,
+          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days expiry
+        },
+        { where: { token: refreshToken } }
+      );
+
+      return res.json({
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
     } catch (error) {
       res.status(500).json({ error: "Error logging out" });
     }

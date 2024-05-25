@@ -35,6 +35,7 @@ import {
   fetchDesgination,
   fetchMyAccount,
   fetchTables,
+  getAllFirmByNumber,
   login,
   logout,
   updateEmployees,
@@ -57,6 +58,7 @@ import { getRandomGradient } from "../util/colorGradient";
 export interface RootState {
   alltables: TableType[];
   myAccount: any;
+  myFirms: any;
   isAuthenticted: boolean;
   allEmployees: any[];
   allLeavesTypes: any[];
@@ -74,6 +76,7 @@ export interface RootState {
 
 const initialState: RootState = {
   alltables: [],
+  myFirms: [],
   allEmployees: [],
   isAuthenticted: false,
   myAccount: {},
@@ -592,7 +595,13 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount.employee.Firm.image = action.payload.url;
         }
-      );
+      )
+      .addCase(
+        getAllFirmByNumber.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myFirms = action.payload;
+        }
+      )
   },
 });
 

@@ -26,6 +26,25 @@ class FirmController {
       res.status(500).send("Error updating firm");
     }
   }
+  async getAllFirmsByMobile(req, res) {
+    try {
+      const { mobileNumber } = req.query;
+
+      if (!mobileNumber) {
+        return res.status(400).json({ error: "Mobile number is required" });
+      }
+      const firms = await Firm.findAll({
+        where: {
+          mobileNumber: mobileNumber,
+        },
+      });
+
+      res.status(200).json(firms);
+    } catch (error) {
+      console.error("Error fetching firms:", error);
+      res.status(500).json({ error: "An error occurred while fetching firms" });
+    }
+  }
 
   async updateFirm(req, res) {
     try {
@@ -53,13 +72,65 @@ class FirmController {
 
   //TODO: need to remove all rows and data associated with this firm
   async deleteFirm(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
       const firmId = req.params.id;
-      await sequelize.query('CALL DeleteFirmData(:firmId)', {
-        replacements: { firmId }
+      await Leave.destroy({ where: { firmId: firmId } }, { transaction });
+      await LeaveType.destroy({ where: { firmId: firmId } }, { transaction });
+      await MenuItem.destroy({ where: { firmId: firmId } }, { transaction });
+      await Category.destroy({ where: { firmId: firmId } }, { transaction });
+      await Order.destroy({ where: { firmId: firmId } }, { transaction });
+      await FirmSubscription.destroy(
+        { where: { FirmId: firmId } },
+        { transaction }
+      );
+      await Table.destroy({ where: { firmId: firmId } }, { transaction });
+      await TableSession.destroy(
+        { where: { firmId: firmId } },
+        { transaction }
+      );
+
+      const employees = await Employee.findAll({
+        where: {
+          firmId: firmId,
+        },
+        attributes: ["id"], // Only select the ID attribute
+        transaction,
       });
+
+      const employeeIds = employees.map((employee) => employee.id);
+
+      await RefreshToken.destroy({
+        where: {
+          employeeId: {
+            [Op.in]: employeeIds,
+          },
+        },
+        transaction,
+      });
+
+      await Employee.destroy({
+        where: {
+          id: {
+            [Op.in]: employeeIds,
+          },
+        },
+        transaction,
+      });
+
+      await Firm.destroy({
+        where: {
+          id: {
+            [Op.in]: [firmId],
+          },
+        },
+        transaction,
+      });
+      await transaction.commit();
       res.send("Firm deleted successfully");
     } catch (error) {
+      transaction.rollback();
       console.error(error);
       res.status(500).send("Error deleting firm");
     }

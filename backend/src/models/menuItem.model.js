@@ -154,6 +154,16 @@ const Category = sequelize.define("CategoryType", {
       key: "id",
     },
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 });
 
 CustomizationChoice.belongsTo(Customization), { foreignKey: "customizationId" };
@@ -163,4 +173,5 @@ Customization.belongsTo(MenuItem, {
   foreignKey: "menuItemId",
   allowNull: false,
 });
+// Category.sync({ alter: true });
 module.exports = { MenuItem, Customization, CustomizationChoice, Category };

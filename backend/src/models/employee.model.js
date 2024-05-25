@@ -18,7 +18,6 @@ const Employee = sequelize.define(
       type: DataTypes.STRING(750),
     },
     mobileNumber: {
-      unique: true,
       type: DataTypes.STRING,
     },
     email: {
@@ -114,6 +113,12 @@ const Employee = sequelize.define(
     timestamps: true,
     // paranoid: true,
     deletedAt: "removedAt",
+    indexes: [
+      {
+        unique: true,
+        fields: ["firmId", "mobileNumber"],
+      },
+    ],
   }
 );
 
