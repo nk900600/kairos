@@ -18,6 +18,7 @@ import {
   createTableSession,
   deleteAllCartItemFromTableSession,
   deleteEmployees,
+  deleteFirm,
   deleteItemToCart,
   deleteLeave,
   deleteMenu,
@@ -531,9 +532,21 @@ const counterSlice = createSlice({
       .addCase(
         logout.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
+          state.alltables = [];
+          state.allEmployees = [];
           state.isAuthenticted = false;
-          // @ts-ignore
-          window.location = "/login";
+          state.myAccount = {};
+          state.allLeavesTypes = [];
+          state.allCartData = [];
+          state.allLeaves = [];
+          state.allTableSessions = [];
+          state.allDesgination = [];
+          state.allMenu = [];
+          state.allMenuCategories = [];
+          state.allOrders = [];
+          state.isLoading = false;
+          state.error = null;
+          state.isAdmin = false;
         }
       )
       .addCase(
@@ -552,6 +565,26 @@ const counterSlice = createSlice({
         updateFirm.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount.employee.Firm = action.payload;
+        }
+      )
+      .addCase(
+        deleteFirm.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.alltables = [];
+          state.allEmployees = [];
+          state.isAuthenticted = false;
+          state.myAccount = {};
+          state.allLeavesTypes = [];
+          state.allCartData = [];
+          state.allLeaves = [];
+          state.allTableSessions = [];
+          state.allDesgination = [];
+          state.allMenu = [];
+          state.allMenuCategories = [];
+          state.allOrders = [];
+          state.isLoading = false;
+          state.error = null;
+          state.isAdmin = false;
         }
       )
       .addCase(

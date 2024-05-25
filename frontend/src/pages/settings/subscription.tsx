@@ -48,12 +48,23 @@ import {
 } from "../../components/ui/form";
 import { AppDispatch } from "../../redux/store";
 import {
+  deleteFirm,
   updateEmployees,
   updateFirm,
   updateFirmImage,
 } from "../../redux/actions";
 import axiosInstance from "../../redux/axios";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../components/ui/alert-dialog";
 // const stateEnum = z.enum([
 
 // ]);
@@ -185,6 +196,16 @@ export function Subscription() {
         ).unwrap();
         setImageLoader(false);
       } catch (e) {}
+    }
+  };
+
+  const handleFirmDelete = async () => {
+    setLoading(true);
+    try {
+      await dispatch(deleteFirm()).unwrap();
+      setLoading(false);
+    } catch (e: any) {
+      setLoading(false);
     }
   };
 
@@ -439,7 +460,33 @@ export function Subscription() {
             </CardHeader>
 
             <CardFooter className="border-t px-6 py-4 bg-red-100">
-              <Button variant="destructive">Delete Account</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" loading={isLoading}>
+                    Delete Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our system.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive/90 text-destructive-foreground hover:bg-destructive/80"
+                      onClick={handleFirmDelete}
+                    >
+                      Delete Account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardFooter>
           </Card>
         </div>

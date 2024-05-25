@@ -581,6 +581,22 @@ export const updateFirm = createAsyncThunk(
     }
   }
 );
+
+export const deleteFirm = createAsyncThunk(
+  "tables/deleteFirm",
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const state: any = getState();
+      const id = state.table?.myAccount.employee.Firm.id;
+      await axios.delete(`${BASE_URL}/firms/${id}`);
+      localStorage.clear();
+      return id; // return the id to identify which table was deleted
+    } catch (error: any) {
+      toast.error("Something went wrong while deleting, please try again");
+      return rejectWithValue("Something went wrong while adding new firm ");
+    }
+  }
+);
 export const updateFirmImage = createAsyncThunk(
   "tables/updateFirmImage",
   async (payload: any, { rejectWithValue }) => {
