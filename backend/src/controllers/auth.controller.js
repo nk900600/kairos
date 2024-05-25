@@ -16,6 +16,7 @@ const {
   FirmSubscription,
   Subscription,
 } = require("../models/subscription.model");
+const { EmailService } = require("../utils/send-email");
 
 // Create an instance of axios with a base URL and default headers
 const fast2smsApiAxios = axios.create({
@@ -88,6 +89,23 @@ class AuthController {
       }
 
       transaction.commit();
+
+      const mailOnj = {
+        from: '"Sender Name" <your-email@example.com>', // Sender address
+        to: "recipient@example.com", // List of recipients
+        subject: "Hello", // Subject line
+        text: "Hello world?", // Plain text body
+        html: "<b>Hello world?</b>", // HTML body
+      }
+      EmailService.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+        console.log("Message sent: %s", info.messageId);
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      });
+
+      
       return res.status(201).json(response);
     } catch (error) {
       console.error("Error while signup:", error);
