@@ -229,7 +229,9 @@ export function Subscription() {
           {/* <Separator /> */}
           <CardContent>
             <div></div>
-            <span className="text-4xl font-bold">₹299</span>
+            <span className="text-4xl font-bold">
+              {myAccount?.subscripition?.Subscription?.monthlyPrice}
+            </span>
             <span className="text-gray-500 dark:text-gray-400">/month</span>
             <div className="flex items-baseline  gap-2">
               <ul className="mt-4 space-y-2 text-left">
