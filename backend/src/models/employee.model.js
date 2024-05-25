@@ -112,7 +112,7 @@ const Employee = sequelize.define(
   },
   {
     timestamps: true,
-    paranoid: true,
+    // paranoid: true,
     deletedAt: "removedAt",
   }
 );

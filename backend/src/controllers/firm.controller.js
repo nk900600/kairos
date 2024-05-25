@@ -1,7 +1,17 @@
+const { Op } = require("sequelize");
+const sequelize = require("../db/db.js");
+const { Employee } = require("../models/employee.model.js");
 const { Firm } = require("../models/firm.model.js");
+const { Leave, LeaveType } = require("../models/leave.model.js");
+const { MenuItem, Category } = require("../models/menuItem.model.js");
+const { Order } = require("../models/order.model.js");
+const { FirmSubscription } = require("../models/subscription.model.js");
+const { Table } = require("../models/table.model.js");
+const { TableSession } = require("../models/tableSession.model.js");
 const { s3 } = require("../utils/aws-obj.js");
 const { mobileNumberRegex } = require("../utils/const.js");
 const fs = require("fs");
+const RefreshToken = require("../models/refreshTokens.model.js");
 class FirmController {
   async getFirmById(req, res) {
     try {
@@ -45,14 +55,12 @@ class FirmController {
   async deleteFirm(req, res) {
     try {
       const firmId = req.params.id;
-      const firm = await Firm.findByPk(firmId);
-      if (!firm) {
-        return res.status(404).send("Firm not found");
-      }
-      await firm.destroy({ userId: req.user.id });
+      await sequelize.query('CALL DeleteFirmData(:firmId)', {
+        replacements: { firmId }
+      });
       res.send("Firm deleted successfully");
     } catch (error) {
-      console.error("Error deleting firm:", error);
+      console.error(error);
       res.status(500).send("Error deleting firm");
     }
   }

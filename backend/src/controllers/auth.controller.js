@@ -251,16 +251,24 @@ class AuthController {
         region,
       } = otpDetails;
 
-      const existingOtpRecord = await Auth.findOne({
+      let existingOtpRecord = await Auth.findOne({
         where: { mobileNumber: mobileNumber, otpType },
         order: [["createdAt", "DESC"]],
       });
 
       // Check for cooldown period
       if (existingOtpRecord) {
-        if (
+        const now = new Date();
+        if (existingOtpRecord.otpExpiresAt && existingOtpRecord.otpExpiresAt <= now) {
+          await existingOtpRecord.destroy();
+          existingOtpRecord = null
+        }
+
+        
+
+       else if (
           existingOtpRecord.cooldownUntil &&
-          existingOtpRecord.cooldownUntil > new Date()
+          existingOtpRecord.cooldownUntil > now
         ) {
           // existingOtpRecord.otpValue = null;
           existingOtpRecord.save();
@@ -271,9 +279,9 @@ class AuthController {
         }
 
         // Set the cooldown period to 10 minutes from now
-        if (existingOtpRecord.failedOtpCount >= 3) {
+       else if (existingOtpRecord.failedOtpCount >= 3) {
           await existingOtpRecord.update({
-            cooldownUntil: new Date(Date.now() + 1 * 60 * 1000),
+            cooldownUntil: new Date(Date.now() + 10 * 60 * 1000),
             failedOtpCount: 0,
           });
           return {

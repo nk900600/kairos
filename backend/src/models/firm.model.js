@@ -32,7 +32,6 @@ const Firm = sequelize.define(
   },
   {
     timestamps: true,
-    paranoid: true,
     deletedAt: "removedAt",
     indexes: [
       {
