@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   BrowserRouter as Router,
@@ -46,6 +46,8 @@ import {
   ShoppingCart,
   Sun,
   Users,
+  LogOut,
+  Settings,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import SelectItemsComponent from "../pages/placeOrder/selectItems";
@@ -65,9 +67,21 @@ import {
   fetchAllTableSession,
   fetchMyAccount,
   fetchTables,
+  logout,
 } from "../redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/reducer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { ComboBoxComponent } from "./common/comboBox";
 
 const allMenuItems = [
   {
@@ -116,10 +130,10 @@ const allMenuItemsCompany = [
     link: "/leaves",
   },
   {
-    iconSmall: <CalendarDays className="h-4 w-4" />,
-    iconbig: <CalendarDays className="h-5 w-5" />,
-    label: "Calender",
-    link: "/calender",
+    iconSmall: <Settings className="h-4 w-4" />,
+    iconbig: <Settings className="h-5 w-5" />,
+    label: "Settings",
+    link: "/settings",
   },
 ];
 
@@ -127,9 +141,10 @@ function Sidebar() {
   const location = useLocation();
   const hideSidebarOnRoutes = ["/login", "/signup"];
   const showSidebar = !hideSidebarOnRoutes.includes(location.pathname);
-  const { isAuthenticted } = useSelector(
+  const { isAuthenticted, myAccount } = useSelector(
     (state: { table: RootState }) => state.table
   );
+  const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
     if (isAuthenticted) {
@@ -140,6 +155,8 @@ function Sidebar() {
       dispatch(fetchAllOrders());
       dispatch(fetchAllMenus());
       dispatch(fetchAllMenuCategories());
+    } else {
+      if (!localStorage.getItem("token")) navigate("/login");
     }
   }, [isAuthenticted]);
   useEffect(() => {
@@ -156,15 +173,23 @@ function Sidebar() {
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <div className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
-              <span className="">Acme Inc</span>
+              <img
+                alt="TSB"
+                className="h-6 w-6"
+                height="00"
+                src="./logo.svg"
+                width="300"
+              />
+              <span className="text-muted-foreground">/</span>
+              {/* <span className="">Shop Busniess</span> */}
+              <ComboBoxComponent />
             </div>
             {/* <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
               <Bell className="h-4 w-4" />
               <span className="sr-only">Toggle notifications</span>
             </Button> */}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 justify-between">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <p className="text-xs text-muted-foreground   py-2 ">
                 My Business
@@ -208,6 +233,36 @@ function Sidebar() {
               })}
             </nav>
           </div>
+
+          <div className="flex  w-full justify-between px-5 mt-max items-center flex h-14 items-center border-t px-4 lg:h-[60px] lg:px-6">
+            {/* <CircleUser className="h-5 w-5" /> */}
+
+            <div className="flex gap-4 items-center text-primary">
+              <Avatar className="h-8 w-8 border ">
+                <AvatarImage
+                  alt="User avatar"
+                  src={myAccount?.employee?.userPic}
+                />
+                <AvatarFallback className="uppercase">
+                  {myAccount?.employee?.firstName[0] +
+                    myAccount?.employee?.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+
+              {/* </Button> */}
+              <span className=" ">
+                {" "}
+                {myAccount?.employee?.firstName +
+                  " " +
+                  myAccount?.employee?.lastName}
+              </span>
+            </div>
+
+            <LogOut
+              className="h-5 w-5 text-muted-foreground cursor-pointer"
+              onClick={() => dispatch(logout())}
+            />
+          </div>
           {/* <div className="mt-auto p-4">
             <Card x-chunk="dashboard-02-chunk-0">
               <CardHeader className="p-2 pt-0 md:p-4">
@@ -232,28 +287,30 @@ function Sidebar() {
         <Route path="/dashboard" Component={Dashboard} />
       </Routes>
       {!["/dashboard"].includes(location.pathname) && (
-        <main className="flex flex-1 flex-col gap-4 p-2 lg:gap-6 lg:p-6">
-          <Routes>
-            <Route path="/tables" element={<TableComponent />} />
-            <Route path="/menus" element={<MenusComponent />} />
-            <Route
-              path="/menus/:id/customization"
-              Component={CustomizationPage}
-            />
-            <Route path="/orders" Component={OrdersComponent} />
-            <Route path="/employees" Component={ContactsComponent} />
-            <Route path="/leaves" Component={LeavesComponent} />
-            <Route path="/calender" Component={CalenderComponent} />
-            <Route path="/place-order" Component={SelectTableComponent} />
-            <Route
-              path="/place-order/table/:tableId"
-              element={<SelectItemsComponent />}
-            />
-            <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
-            <Route path="/settings" Component={MainSettings} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-          </Routes>
-        </main>
+        <ScrollArea className=" max-h-screen">
+          <main className="flex flex-1 flex-col gap-4 p-2 md:p-6 md:gap-6 lg:gap-6 lg:p-6 ">
+            <Routes>
+              <Route path="/tables" element={<TableComponent />} />
+              <Route path="/menus" element={<MenusComponent />} />
+              <Route
+                path="/menus/:id/customization"
+                Component={CustomizationPage}
+              />
+              <Route path="/orders" Component={OrdersComponent} />
+              <Route path="/employees" Component={ContactsComponent} />
+              <Route path="/leaves" Component={LeavesComponent} />
+              <Route path="/calender" Component={CalenderComponent} />
+              <Route path="/place-order" Component={SelectTableComponent} />
+              <Route
+                path="/place-order/table/:tableId"
+                element={<SelectItemsComponent />}
+              />
+              <Route path="/chef-panel" Component={ChefsPanelComponent} />{" "}
+              <Route path="/settings" Component={MainSettings} />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </main>
+        </ScrollArea>
       )}
       {/* </Router> */}
     </div>

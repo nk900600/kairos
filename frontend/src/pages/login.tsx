@@ -39,6 +39,7 @@ import axiosInstance from "../redux/axios";
 import { AppDispatch } from "../redux/store";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import TickerQuotes from "./common/quotesPage";
 const loginSchema = z.object({
   mobileNumber: z
     .number()
@@ -107,8 +108,15 @@ export default function Login() {
         <div className="mx-auto grid px-2 w-[350px] gap-6">
           {currentStep == 1 && (
             <>
-              <div className="grid gap-2 text-center">
-                <h1 className="text-3xl font-bold">Log in to ShopBusiness</h1>
+              <div className="grid gap-2 text-left">
+                <img
+                  alt="TSB"
+                  className="h-10 w-10"
+                  height="00"
+                  src="./logo.svg"
+                  width="300"
+                />
+                <h1 className="text-3xl font-bold">Log in</h1>
                 <p className="text-balance text-muted-foreground">
                   Enter your detail below
                 </p>
@@ -130,7 +138,7 @@ export default function Login() {
                           <Input
                             id="mobileNumber"
                             type="number"
-                            placeholder="1234567890"
+                            placeholder="Please enter your mobile number"
                             {...field}
                             onChange={(e: any) =>
                               field.onChange(Number(e.target.value))
@@ -150,7 +158,7 @@ export default function Login() {
                 </form>
               </Form>
 
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-4 text-left text-sm">
                 Don&apos;t have an account?{" "}
                 <NavLink to="/signup" className="underline">
                   Sign up
@@ -170,7 +178,8 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="hidden bg-muted lg:block">
+      <div className="hidden bg-black lg:block">
+        <TickerQuotes />
         {/* <Image
           src="/placeholder.svg"
           alt="Image"

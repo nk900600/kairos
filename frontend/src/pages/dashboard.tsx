@@ -62,6 +62,7 @@ import { AppDispatch } from "../redux/store";
 import { logout } from "../redux/actions";
 import { RootState } from "../redux/reducer";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { ComboBoxComponent } from "./common/comboBox";
 const allMenuItems = [
   {
     iconSmall: <Home className="h-4 w-4" />,
@@ -107,12 +108,12 @@ const allMenuItemsCompany = [
     label: "Leaves",
     link: "/leaves",
   },
-  {
-    iconSmall: <CalendarDays className="h-4 w-4" />,
-    iconbig: <CalendarDays className="h-5 w-5" />,
-    label: "Calender",
-    link: "/calender",
-  },
+  // {
+  //   iconSmall: <CalendarDays className="h-4 w-4" />,
+  //   iconbig: <CalendarDays className="h-5 w-5" />,
+  //   label: "Calender",
+  //   link: "/calender",
+  // },
 ];
 export function Dashboard() {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
@@ -142,15 +143,11 @@ export function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col">
-      <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+    <div className="flex flex-col md:p-4  lg:p-0 ">
+      <header className="flex h-14 block md:hidden items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px]">
         <Sheet {...sheetProps}>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden"
-            >
+            <Button variant="ghost" size="icon" className="shrink-0 md:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
@@ -162,8 +159,15 @@ export function Dashboard() {
           >
             <nav className="grid gap-2 text-lg font-medium">
               <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-                <Package2 className="h-6 w-6" />
-                <span className="">Acme Inc</span>
+                <img
+                  alt="TSB"
+                  className="h-8 w-8"
+                  height="00"
+                  src="./logo.svg"
+                  width="300"
+                />
+
+                <span className="">The Shop Business</span>
               </div>
               <p className="text-sm text-muted-foreground   py-2 ">
                 My Business
@@ -216,17 +220,25 @@ export function Dashboard() {
         </Sheet>
         <div className="w-full flex-1">
           <form>
-            <div className="relative hidden md:flex">
+            {/* <div className="relative hidden md:flex">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Search products..."
                 className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
               />
-            </div>
+            </div> */}
             <div className="flex items-center gap-2  justify-center text-lg font-semibold md:hidden ">
-              <Package2 className="h-6 w-6" />
-              <span>Acme Inc</span>
+              <img
+                alt="TSB"
+                className="h-6 w-6"
+                height="00"
+                src="./logo.svg"
+                width="300"
+              />
+              <span className="text-muted-foreground">/</span>
+              {/* <span>TSB</span> */}
+              <ComboBoxComponent />
             </div>
             {/* <p className="text-sm text-muted-foreground   py-2 ">
                 My Business
@@ -234,25 +246,18 @@ export function Dashboard() {
           </form>
         </div>
 
-        <NavLink to={"/place-order"}>
-          <Button
-            variant={"default"}
-            className="ml-auto h-8 gap-2 hidden md:flex "
-          >
-            <Plus className="h-4 w-4" />
-            <span>New Order</span>
-          </Button>
-        </NavLink>
-        <Button variant="outline" size="icon" className="">
+        {/* <Button variant="ghost" size="icon" className="h-8 w-8 border">
           <Bell className="h-4 w-4" />
           <span className="sr-only">Toggle notifications</span>
-        </Button>
+        </Button> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button
+              variant={"ghost"}
+              className="block md:hidden flex gap-2 p-0"
+            >
               {/* <CircleUser className="h-5 w-5" /> */}
-
-              <Avatar className="h-7 w-7 border ">
+              <Avatar className="h-8 w-8 border ">
                 <AvatarImage
                   alt="User avatar"
                   src={myAccount?.employee?.userPic}
@@ -263,7 +268,12 @@ export function Dashboard() {
                 </AvatarFallback>
               </Avatar>
 
-              <span className="sr-only">Toggle user menu</span>
+              {/* </Button> */}
+              <span className="  sr-only  sm:block">
+                {" "}
+                {myAccount?.employee?.firstName[0] +
+                  myAccount?.employee?.lastName[0]}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

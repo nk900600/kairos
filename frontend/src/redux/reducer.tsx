@@ -51,6 +51,7 @@ import {
 } from "./actions";
 import { toast } from "sonner";
 import { RoleEnum } from "../util/role";
+import { getRandomGradient } from "../util/colorGradient";
 
 export interface RootState {
   alltables: TableType[];
@@ -150,6 +151,9 @@ const counterSlice = createSlice({
         fetchMyAccount.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount = action.payload;
+          if (!state.myAccount.employee?.Firm.image) {
+            state.myAccount.employee.Firm.image = getRandomGradient();
+          }
           state.isAdmin = action.payload.employee.Role.name == RoleEnum.ADMIN;
         }
       )

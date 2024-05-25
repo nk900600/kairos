@@ -2,6 +2,7 @@ import {
   CalendarClock,
   CreditCard,
   DollarSign,
+  Plus,
   ShoppingBag,
   Users,
 } from "lucide-react";
@@ -26,23 +27,10 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../redux/axios";
 import { OrderStatuses } from "./chefsPanel";
 import { EmptyPlaceholder } from "./common/emptyPlaceholder";
+import { NavLink } from "react-router-dom";
 
-const productCategoryData = [
-  { name: "Beverages", value: 400 },
-  { name: "Snacks", value: 300 },
-  { name: "Main Course", value: 300 },
-  { name: "Desserts", value: 200 },
-];
-
-const tableNumberData = [
-  { name: "Table 1", value: 500 },
-  { name: "Table 2", value: 300 },
-  { name: "Table 3", value: 200 },
-  { name: "Table 4", value: 100 },
-];
-const activeOrder = [1, 2, 3, 4];
 export function DashBoardContent() {
-  const { allEmployees, allDesgination, isAdmin, allOrders, alltables } =
+  const { allEmployees, myAccount, isAdmin, allOrders, alltables } =
     useSelector((state: { table: RootState }) => state.table);
 
   const [employee, setEmployee] = useState<any>(null);
@@ -98,56 +86,27 @@ export function DashBoardContent() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-2 lg:gap-6 lg:p-6">
       <div className="flex items-center gap-4">
-        <h1 className="hidden sm:flex flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
-          Dashboard
+        <h1 className="flex flex-1  whitespace-nowrap text-2xl font-semibold tracking-tight ">
+          Welcome back,
+          <span className="font-bold ml-2 underline underline-offset-4">
+            {myAccount?.employee?.firstName}
+          </span>
         </h1>
+        <NavLink to={"/place-order"}>
+          <Button
+            variant={"default"}
+            className="ml-auto h-8 gap-2 hidden md:flex "
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Order</span>
+          </Button>
+        </NavLink>
+      </div>
+      <div className="flex gap-4 justify-start md:justify-end items-center">
         <DatePickerWithRange onDateChange={handleDateChnage} />
-        {/* <Button variant={"outline"}>Filter</Button> */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        {/* <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>This Week</CardDescription>
-            <CardTitle className="text-4xl">$1,329</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-muted-foreground">
-              +25% from last week
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Progress value={25} aria-label="25% increase" />
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>This Week</CardDescription>
-            <CardTitle className="text-4xl">$1,329</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs text-muted-foreground">
-              +25% from last week
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Progress value={25} aria-label="25% increase" />
-          </CardFooter>
-        </Card>
-
-        <Card className="sm:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle>Your Orders</CardTitle>
-            <CardDescription className="max-w-lg text-balance leading-relaxed">
-              Introducing Our Dynamic Orders Dashboard for Seamless Management
-              and Insightful Analysis.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button>Create New Order</Button>
-          </CardFooter>
-        </Card> */}
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
@@ -307,36 +266,7 @@ export function DashBoardContent() {
             )}
           </CardContent>
         </Card>
-
-        {/* <Card className="sm:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle>Your Orders</CardTitle>
-            <CardDescription className="max-w-lg text-balance leading-relaxed">
-              Introducing Our Dynamic Orders Dashboard for Seamless Management
-              and Insightful Analysis.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button>Create New Order</Button>
-          </CardFooter>
-        </Card> */}
       </div>
-      {/* <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            Revenue Breakdown
-          </CardTitle>
-          <CreditCard className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <PieChartComponent
-          data={productCategoryData}
-          title="Revenue by Product Category"
-        />
-        <PieChartComponent
-          data={tableNumberData}
-          title="Revenue by Table Number"
-        />
-      </Card> */}
     </main>
   );
 }

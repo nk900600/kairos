@@ -44,6 +44,7 @@ import {
 import { useQuery } from "../util/query";
 import axiosInstance from "../redux/axios";
 import { toast } from "sonner";
+import TickerQuotes from "./common/quotesPage";
 
 const signUpschema = z.object({
   firstName: z
@@ -150,10 +151,15 @@ export default function SignUp() {
         <div className="mx-auto px-2 grid w-[350px] gap-6">
           {currentStep == 1 && (
             <>
-              <div className="grid gap-2 text-center">
-                <h1 className="text-3xl font-bold">
-                  Create your ShopBusiness Account
-                </h1>
+              <div className="grid gap-2 text-left">
+                <img
+                  alt="TSB"
+                  className="h-10 w-10"
+                  height="00"
+                  src="./logo.svg"
+                  width="300"
+                />
+                <h1 className="text-3xl font-bold">Create your Account</h1>
                 <p className="text-balance text-muted-foreground">
                   Enter your information to create an account
                 </p>
@@ -274,11 +280,20 @@ export default function SignUp() {
                   </Button>
                 </form>
               </Form>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <NavLink to="/login" className="underline">
-                  Sign in
-                </NavLink>
+
+              <div>
+                <div className="mt-4 text-left text-sm">
+                  Already have an account?{" "}
+                  <NavLink to="/login" className="underline">
+                    Sign in
+                  </NavLink>
+                </div>
+                <div className="mt-1 text-left text-sm">
+                  Take me to?{" "}
+                  <NavLink to="/login" className="underline">
+                    Home page
+                  </NavLink>
+                </div>
               </div>
             </>
           )}
@@ -292,7 +307,8 @@ export default function SignUp() {
         </div>
       </div>
 
-      <div className="hidden bg-muted lg:block">
+      <div className="hidden bg-black lg:block">
+        <TickerQuotes />
         {/* <Image
             src="/placeholder.svg"
             alt="Image"
