@@ -180,7 +180,7 @@ export default function SignUp() {
                           <FormControl>
                             <Input
                               id="first-name"
-                              placeholder="Lee"
+                              placeholder="Rakesh"
                               {...field}
                             />
                           </FormControl>
@@ -197,7 +197,7 @@ export default function SignUp() {
                           <FormControl>
                             <Input
                               id="last-name"
-                              placeholder="Robinson"
+                              placeholder="Jhunjhunwala"
                               {...field}
                             />
                           </FormControl>
@@ -225,7 +225,7 @@ export default function SignUp() {
                           <Input
                             id="mobileNumber"
                             type="number"
-                            placeholder="1234567890"
+                            placeholder="Enter a vaild mobile number"
                             {...field}
                             onChange={(e: any) =>
                               field.onChange(Number(e.target.value))
@@ -248,7 +248,7 @@ export default function SignUp() {
                         <FormControl>
                           <Input
                             id="email"
-                            placeholder="m@example.com"
+                            placeholder="dummy@example.com"
                             {...field}
                           />
                         </FormControl>
@@ -267,7 +267,7 @@ export default function SignUp() {
                         <FormControl>
                           <Input
                             id="resturant"
-                            placeholder="my dukaan"
+                            placeholder="My shop name"
                             {...field}
                           />
                         </FormControl>

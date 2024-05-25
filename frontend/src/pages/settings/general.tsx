@@ -233,7 +233,7 @@ export function GeneralSetting() {
   };
 
   return (
-    <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
+    <main className="flex-1 grid min-h-[400px] gap-4 md:gap-8">
       {myAccount?.employee && (
         <div className="grid grid-cols-1 items-start">
           <div className="grid gap-4">
