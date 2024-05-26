@@ -40,6 +40,7 @@ import { AppDispatch } from "../redux/store";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import TickerQuotes from "./common/quotesPage";
+import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 const loginSchema = z.object({
   mobileNumber: z
     .number()
@@ -61,7 +62,8 @@ export default function Login() {
     try {
       await generateOtp();
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
     setCurrentStep(2);
@@ -78,7 +80,8 @@ export default function Login() {
     try {
       await generateOtp();
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
   };
@@ -96,7 +99,6 @@ export default function Login() {
       setIsLoading(false);
       navigate("/dashboard");
     } catch (e: any) {
-      toast.error(e);
       setIsLoading(false);
       return;
     }
@@ -145,9 +147,6 @@ export default function Login() {
                             }
                           />
                         </FormControl>
-                        {fieldState.error && (
-                          <FormMessage>{fieldState.error.message}</FormMessage>
-                        )}
                       </FormItem>
                     )}
                   />
@@ -178,8 +177,21 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="hidden bg-black lg:block">
-        <TickerQuotes />
+      <div className="hidden bg-black lg:flex  text-gray-100">
+        {/* <TickerQuotes /> */}
+
+        <EmptyPlaceholder
+          type="login"
+          buttonText=""
+          title="Transform Your Business: Speed, Efficiency, Productivity"
+          description="Unlock the full potential of your shop with our cutting-edge
+          management solution. Transform your
+          operations and take your business to the next level with our intuitive
+          and powerful shop management solution"
+          className="pb-0"
+        >
+          {" "}
+        </EmptyPlaceholder>
         {/* <Image
           src="/placeholder.svg"
           alt="Image"

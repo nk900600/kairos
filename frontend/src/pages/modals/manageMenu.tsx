@@ -111,8 +111,6 @@ export function ManageMenu({ menu }: any) {
       setOpen(false);
       setIsLoading(false);
     } catch (error) {
-      console.error("Failed to add table:", error);
-
       setIsLoading(false);
     }
   };

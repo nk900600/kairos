@@ -177,7 +177,8 @@ export function GeneralSetting() {
       await generateOtp();
       setIsOtp(true);
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
   };
@@ -188,7 +189,8 @@ export function GeneralSetting() {
       // await generateOtp();
       setIsOtpEmil(true);
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
   };
@@ -211,7 +213,8 @@ export function GeneralSetting() {
       setLoading(false);
       setIsOtp(false);
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
   };
@@ -227,7 +230,8 @@ export function GeneralSetting() {
       setLoading(false);
       setIsOtpEmil(false);
     } catch (e: any) {
-      toast.error(e.response.data.message);
+      if (e?.response) toast.error(e.response.data.message);
+      else toast.error("Something went wrong");
       return;
     }
   };

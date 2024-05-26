@@ -576,27 +576,33 @@ export const CustomizationPresentComp = ({
     e.preventDefault();
     e.stopPropagation();
     let localCartData = JSON.parse(JSON.stringify(cartData));
-    if (cartItem.quantity == 1) {
-      localCartData[index].quantity = 0;
-      localCartData = localCartData.filter((val: any) => val.id != cartItem.id);
-      setCartData(localCartData);
-      dispatch(deleteItemToCart(cartItem.id));
-    } else {
-      let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
-      dispatch(updateItemToCart(payload)).unwrap();
-      localCartData[index].quantity = cartItem.quantity - 1;
-      setCartData(localCartData);
-    }
+    try {
+      if (cartItem.quantity == 1) {
+        localCartData[index].quantity = 0;
+        localCartData = localCartData.filter(
+          (val: any) => val.id != cartItem.id
+        );
+        setCartData(localCartData);
+        dispatch(deleteItemToCart(cartItem.id));
+      } else {
+        let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
+        dispatch(updateItemToCart(payload)).unwrap();
+        localCartData[index].quantity = cartItem.quantity - 1;
+        setCartData(localCartData);
+      }
+    } catch (e) {}
   };
 
   const handleAddClick = (e: any, cartItem: any, index: any) => {
     e.preventDefault();
     e.stopPropagation();
-    let localCartData = JSON.parse(JSON.stringify(cartData));
-    const payload = { quantity: cartItem.quantity + 1, id: cartItem.id };
-    dispatch(updateItemToCart(payload)).unwrap();
-    localCartData[index].quantity = cartItem.quantity + 1;
-    setCartData(localCartData);
+    try {
+      let localCartData = JSON.parse(JSON.stringify(cartData));
+      const payload = { quantity: cartItem.quantity + 1, id: cartItem.id };
+      dispatch(updateItemToCart(payload)).unwrap();
+      localCartData[index].quantity = cartItem.quantity + 1;
+      setCartData(localCartData);
+    } catch (e) {}
   };
 
   const {
@@ -820,7 +826,9 @@ export const CustomizationComponent = ({
         customizationsToAdd: customizationsToAdd,
         customizationsToRemove: customizationsToRemove,
       };
-      await dispatch(updateItemToCart(payload)).unwrap();
+      try {
+        await dispatch(updateItemToCart(payload)).unwrap();
+      } catch (e) {}
       setOpen(false);
     } else {
       let payload = {

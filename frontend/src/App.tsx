@@ -11,7 +11,7 @@ import {
 import SignUp from "./pages/signUp";
 import Login from "./pages/login";
 import Sidebar from "./pages/sidebar";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import { DrawerProvider } from "./context/drawerContext";
 import { DrawerDialogComponent } from "./common/drawerDialog";
 import axiosInstance from "./redux/axios";
@@ -47,7 +47,11 @@ export function App() {
       ),
     });
 
-    await axiosInstance.post("/subscribe", JSON.stringify(subscription));
+    try {
+      await axiosInstance.post("/subscribe", JSON.stringify(subscription));
+    } catch (e: any) {
+      toast.error("Somthing went wrong while subscribing ");
+    }
   };
 
   const urlBase64ToUint8Array = (base64String: any) => {

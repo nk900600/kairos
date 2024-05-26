@@ -50,9 +50,9 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     // return;
-    const originalRequest = error.config;
+    const originalRequest = error?.config;
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error?.response?.status === 401 && !originalRequest?._retry) {
       if (originalRequest.url === "/auth/token") {
         localStorage.clear();
         // @ts-ignore

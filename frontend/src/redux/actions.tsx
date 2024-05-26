@@ -20,6 +20,7 @@ export const fetchTables: any = createAsyncThunk<any>(
       const response = await axios.get(`${BASE_URL}/tables`);
       return response.data;
     } catch (error) {
+      toast.error("Something went wrong fethcing all tables");
       return rejectWithValue("Failed to fetch tables");
     }
   }
@@ -32,6 +33,7 @@ export const updateTable = createAsyncThunk(
       const response = await axios.put(`${BASE_URL}/tables/${table.id}`, table);
       return table;
     } catch (error) {
+      toast.error("Something went wrong while updating table");
       return rejectWithValue("Failed to update table");
     }
   }
@@ -43,7 +45,7 @@ export const addTable = createAsyncThunk(
       const response = await axios.post(`${BASE_URL}/tables`, table);
       return response.data;
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error("Something went wrong while adding, please try again");
       return rejectWithValue("Failed to Add table");
     }
   }
@@ -96,6 +98,7 @@ export const fetchAllEmployees = createAsyncThunk(
       let response = await axios.get(`${BASE_URL}/employees`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while fetching all employees");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -111,6 +114,7 @@ export const updateEmployees = createAsyncThunk(
       );
       return payload; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while updating employees");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -146,6 +150,7 @@ export const fetchMyAccount = createAsyncThunk(
       let response = await axios.get(`${BASE_URL}/employees/me`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while fetching your data");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -160,6 +165,7 @@ export const fetchAllOrders = createAsyncThunk(
       let response = await axios.get(`${BASE_URL}/orders`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while fetching all orders");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -172,7 +178,9 @@ export const createOrder = createAsyncThunk(
       const response = await axios.post(`${BASE_URL}/orders/`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error(
+        "Something went wrong while creating order, please try again"
+      );
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -346,6 +354,7 @@ export const fetchAllMenuCategories = createAsyncThunk(
       let response = await axios.get(`${BASE_URL}/menus/categories`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while fetching all menu categories");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -362,6 +371,7 @@ export const fetchAllMenus = createAsyncThunk(
       let response = await axios.get(`${BASE_URL}/menus`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
+      toast.error("Something went wrong while fetching all orders");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -388,7 +398,7 @@ export const updateMenu = createAsyncThunk(
       );
       return payload; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error("Something went wrong while updating, please try again");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -430,7 +440,7 @@ export const updateMenuCustomization = createAsyncThunk(
       );
       return payload; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error("Something went wrong while updating, please try again");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -448,7 +458,7 @@ export const createMenuCustomization = createAsyncThunk(
       return { menuId: payload.menuId, data: data.data }; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
-        "Something went wrong while creating table session, please try again"
+        "Something went wrong while creating menu customizations, please try again"
       );
       return rejectWithValue(
         "Something went wrong while creating table session, please try again"
@@ -484,7 +494,9 @@ export const fetchAllTableSession = createAsyncThunk(
       const response = await axios.get(`${BASE_URL}/tables-session/`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error(
+        "Something went wrong while fetching all table sessions, please try again"
+      );
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -527,7 +539,7 @@ export const updateItemToCart = createAsyncThunk(
       );
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error("Something went wrong while updating, please try again");
       return rejectWithValue("Failed to delete table");
     }
   }
@@ -561,7 +573,9 @@ export const createNewFirm = createAsyncThunk(
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
-      toast.error("Something went wrong while adding, please try again");
+      toast.error(
+        "Something went wrong while creating your firm, please try again"
+      );
       return rejectWithValue("Something went wrong while adding new firm ");
     }
   }
@@ -576,7 +590,7 @@ export const updateFirm = createAsyncThunk(
       );
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
-      toast.error("Something went wrong while adding, please try again");
+      toast.error("Something went wrong while updating, please try again");
       return rejectWithValue("Something went wrong while adding new firm ");
     }
   }
@@ -592,7 +606,9 @@ export const getAllFirmByNumber = createAsyncThunk(
       );
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
-      toast.error("Something went wrong while adding, please try again");
+      toast.error(
+        "Something went wrong while fetching all your firms, please try again"
+      );
       return rejectWithValue("Something went wrong while adding new firm ");
     }
   }
@@ -628,7 +644,7 @@ export const updateFirmImage = createAsyncThunk(
       );
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
-      toast.error("Something went wrong while adding, please try again");
+      toast.error("Something went wrong while updating, please try again");
       return rejectWithValue("Something went wrong while adding new firm ");
     }
   }
@@ -655,9 +671,8 @@ export const login = createAsyncThunk(
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
-      toast.error("Something went wrong while adding, please try again");
-      throw new Error(error);
-      // return rejectWithValue("Failed to delete table");
+      toast.error("Something went wrong while logging in, please try again");
+      return rejectWithValue("Failed to delete table");
     }
   }
 );
@@ -717,7 +732,9 @@ export const createSubcriptionTrial = createAsyncThunk(
       );
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
-      toast.error("Something wnet wrong while adding, please try again");
+      toast.error(
+        "Something wnet wrong while creating subscrption, please try again"
+      );
       return rejectWithValue("Failed to delete table");
     }
   }

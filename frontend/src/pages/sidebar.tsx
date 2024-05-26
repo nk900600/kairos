@@ -152,17 +152,19 @@ function Sidebar() {
       if (hideSidebarOnRoutes.includes(location.pathname)) {
         navigate("/dashboard");
       }
-      dispatch(fetchMyAccount())
-        .unwrap()
-        .then(() => {
-          dispatch(fetchAllEmployees());
-          dispatch(fetchTables());
-          dispatch(fetchAllTableSession());
-          dispatch(fetchAllOrders());
-          dispatch(fetchAllMenus());
-          dispatch(fetchAllMenuCategories());
-          dispatch(getAllFirmByNumber());
-        });
+      try {
+        dispatch(fetchMyAccount())
+          .unwrap()
+          .then(() => {
+            dispatch(fetchAllEmployees());
+            dispatch(fetchTables());
+            dispatch(fetchAllTableSession());
+            dispatch(fetchAllOrders());
+            dispatch(fetchAllMenus());
+            dispatch(fetchAllMenuCategories());
+            dispatch(getAllFirmByNumber());
+          });
+      } catch (e) {}
     } else {
       if (!localStorage.getItem("token")) navigate("/login");
     }

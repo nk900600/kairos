@@ -108,8 +108,6 @@ export default function ManageCustomization({ menuId, choice }: any) {
       setOpen(false);
       setIsLoading(false);
     } catch (error) {
-      console.error("Failed to add table:", error);
-
       setIsLoading(false);
     }
   };

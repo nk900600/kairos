@@ -72,17 +72,21 @@ export function CurrentOrderContentComponent({
 
   const handleMinusClick = (cartItem: any, index: any) => {
     let localCartData = JSON.parse(JSON.stringify(cartData));
-    if (cartItem.quantity == 1) {
-      localCartData[index].quantity = 0;
-      localCartData = localCartData.filter((val: any) => val.id != cartItem.id);
-      setCartData(localCartData);
-      dispatch(deleteItemToCart(cartItem.id));
-    } else {
-      let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
-      dispatch(updateItemToCart(payload)).unwrap();
-      localCartData[index].quantity = cartItem.quantity - 1;
-      setCartData(localCartData);
-    }
+    try {
+      if (cartItem.quantity == 1) {
+        localCartData[index].quantity = 0;
+        localCartData = localCartData.filter(
+          (val: any) => val.id != cartItem.id
+        );
+        setCartData(localCartData);
+        dispatch(deleteItemToCart(cartItem.id));
+      } else {
+        let payload = { quantity: cartItem.quantity - 1, id: cartItem.id };
+        dispatch(updateItemToCart(payload)).unwrap();
+        localCartData[index].quantity = cartItem.quantity - 1;
+        setCartData(localCartData);
+      }
+    } catch (e) {}
   };
 
   const handleAddClick = (cartItem: any, index: any) => {
@@ -108,8 +112,12 @@ export function CurrentOrderContentComponent({
         ),
       })),
     };
-    await dispatch(createOrder(payload)).unwrap();
-    await dispatch(deleteAllCartItemFromTableSession(tableSessionId)).unwrap();
+    try {
+      await dispatch(createOrder(payload)).unwrap();
+      await dispatch(
+        deleteAllCartItemFromTableSession(tableSessionId)
+      ).unwrap();
+    } catch (e) {}
     setIsLoading(false);
     onCloseClick();
   };

@@ -12,6 +12,7 @@ const imageMapper: any = {
   currentOrder: "../..//Empty.gif",
   orders: "../../order_food.gif",
   chefs: "../../Chef.gif",
+  login: "../../Waiters-bro(1).svg",
   leaves: "../../Trip.gif",
 };
 export const EmptyPlaceholder = ({
@@ -20,6 +21,7 @@ export const EmptyPlaceholder = ({
   description = "Get started by adding your first customization",
   buttonText = "Add customization",
   onButtonClick = () => {},
+  children: any = <></>,
 }: any) => {
   return (
     <div className="flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12">
@@ -34,7 +36,9 @@ export const EmptyPlaceholder = ({
       )}
       <div className="space-y-2 text-center">
         <h3 className="text-2xl font-bold">{title}</h3>
-        <p className="text-gray-500 dark:text-gray-400">{description}</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          {description}
+        </p>
         {buttonText && (
           <Button onClick={onButtonClick} className="mt-4">
             {buttonText}

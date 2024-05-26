@@ -136,8 +136,6 @@ const TableStatus = Object.freeze({
   MAINTENANCE: "Maintenance",
 });
 
-
-
 export default function TableComponent() {
   const {
     open,
@@ -878,13 +876,16 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
 
   const handleSettleBill = async () => {
     setLoading(true);
-    await dispatch(
-      updateTableStatus({
-        id: tableSessionObj.tableId,
-        status: TableStatus.AVAILABLE,
-      })
-    ).unwrap();
-    setLoading(false);
+    try {
+      await dispatch(
+        updateTableStatus({
+          id: tableSessionObj.tableId,
+          status: TableStatus.AVAILABLE,
+        })
+      ).unwrap();
+    } catch (e) {
+      setLoading(false);
+    }
     onClose();
   };
   return (

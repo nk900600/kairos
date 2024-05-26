@@ -63,6 +63,7 @@ import { logout } from "../redux/actions";
 import { RootState } from "../redux/reducer";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { ComboBoxComponent } from "./common/comboBox";
+import { toast } from "sonner";
 const allMenuItems = [
   {
     iconSmall: <Home className="h-4 w-4" />,
@@ -139,7 +140,9 @@ export function Dashboard() {
   const dispatch: AppDispatch = useDispatch();
 
   const handleLoginROute = async () => {
-    await dispatch(logout()).unwrap();
+    try {
+      await dispatch(logout()).unwrap();
+    } catch (e) {}
   };
 
   return (
