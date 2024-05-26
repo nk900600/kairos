@@ -235,9 +235,6 @@ export default function SignUp() {
                             }
                           />
                         </FormControl>
-                        {fieldState.error && (
-                          <FormMessage>{fieldState.error.message}</FormMessage>
-                        )}
                       </FormItem>
                     )}
                   />
