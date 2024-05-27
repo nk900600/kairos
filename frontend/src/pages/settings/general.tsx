@@ -262,15 +262,19 @@ export function GeneralSetting() {
                     />
                     <label htmlFor="fileInput" className="cursor-pointer">
                       <Avatar className="h-20 w-20 border ">
-                        <AvatarImage alt="User avatar" src={image} />
-                        <AvatarFallback className="uppercase">
-                          {imageLoader ? (
-                            <Loader2 className=" h-4 w-4 animate-spin" />
-                          ) : (
-                            myAccount?.employee?.firstName[0] +
-                            myAccount?.employee?.lastName[0]
-                          )}
-                        </AvatarFallback>
+                        {imageLoader ? (
+                          <Loader2 className=" h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <AvatarImage alt="User avatar" src={image} />
+                            <AvatarFallback
+                              className="uppercase"
+                              style={{
+                                background: myAccount?.employee?.userPic,
+                              }}
+                            ></AvatarFallback>
+                          </>
+                        )}
                       </Avatar>
                     </label>
                   </div>

@@ -17,6 +17,10 @@ const {
   Subscription,
 } = require("../models/subscription.model");
 const { EmailService } = require("../utils/send-email");
+const {
+  welcomeBody,
+} = require("../utils/emailTemplate/welcomeMessageTemplate");
+const { getRandomGradient } = require("../utils/colorGradient");
 
 // Create an instance of axios with a base URL and default headers
 const fast2smsApiAxios = axios.create({
@@ -90,22 +94,27 @@ class AuthController {
 
       transaction.commit();
 
-      const mailOnj = {
-        from: '"Sender Name" <your-email@example.com>', // Sender address
-        to: "recipient@example.com", // List of recipients
-        subject: "Hello", // Subject line
+      // Setup email data
+      const mailOptions = {
+        from: '"Nikhil Kumar" <nikhil@theshopbusiness.com>', // Sender address
+        to: "nk90600@gmail.com", // List of recipients
+        subject: "Thanks for Signing Up to TheShopBusiness", // Subject line
         text: "Hello world?", // Plain text body
-        html: "<b>Hello world?</b>", // HTML body
+        html: welcomeBody(
+          response.employee.firstName + " " + response.employee.lastName
+        ), // HTML body
+      };
+      try {
+        EmailService.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log(error);
+          }
+          console.log("Message sent: %s", info.messageId);
+        });
+      } catch (e) {
+        console.log("Email was not send");
       }
-      EmailService.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error);
-        }
-        console.log("Message sent: %s", info.messageId);
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-      });
 
-      
       return res.status(201).json(response);
     } catch (error) {
       console.error("Error while signup:", error);
@@ -158,6 +167,7 @@ class AuthController {
           type: firmType,
           mobileNumber,
           email,
+          image: getRandomGradient(),
         },
         { transaction }
       );
@@ -170,6 +180,7 @@ class AuthController {
           lastName: lastName,
           roleId: adminRole.id,
           firmId: firm.id,
+          userPic: getRandomGradient(),
         },
         { transaction }
       );

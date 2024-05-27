@@ -62,8 +62,11 @@ export function ComboBoxComponent() {
                   alt="User avatar"
                   src={myAccount?.employee?.Firm?.image}
                 />
-                <AvatarFallback className="uppercase ">
-                  {myAccount?.employee?.Firm.name}
+                <AvatarFallback
+                  className="uppercase "
+                  style={{ background: myAccount?.employee?.Firm?.image }}
+                >
+                  {/* {myAccount?.employee?.Firm.name} */}
                 </AvatarFallback>
               </Avatar>
 
