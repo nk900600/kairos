@@ -2,10 +2,10 @@ version: '3.8'
 
 services:
   node-app:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: backend-node-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: backend-node-app
     # platform: linux/amd64  # Specify the platform
     container_name: node-dev
     working_dir: /usr/src/app
