@@ -37,9 +37,25 @@ async function init() {
   const app = express();
   const port = 4200;
 
+  const allowedOrigins = [
+    "https://app.theshopbusiness.com",
+    "http://app.theshopbusiness.com",
+    "http://localhost:4200",
+  ];
+
   app.use(
     cors({
-      origin: "http://app.theshopbusiness.com", // Replace with the URL of your front-end app
+      origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        } else {
+          const msg =
+            "The CORS policy for this site does not allow access from the specified origin.";
+          return callback(new Error(msg), false);
+        }
+      }, // Replace with the URL of your front-end app
     })
   );
 
