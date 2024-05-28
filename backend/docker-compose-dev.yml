@@ -48,3 +48,6 @@ services:
 
 volumes:
   db-data:
+
+
+  # sudo docker-compose --env-file ./env/.env.dev -f docker-compose-dev.yml up -d

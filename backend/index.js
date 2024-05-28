@@ -39,7 +39,7 @@ async function init() {
 
   app.use(
     cors({
-      origin: "http://localhost:3000", // Replace with the URL of your front-end app
+      origin: "http://app.theshopbusiness.com", // Replace with the URL of your front-end app
     })
   );
 
