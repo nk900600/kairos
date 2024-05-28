@@ -328,11 +328,11 @@ class AuthController {
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
       // commenting for now
-      // await fast2smsApiAxios.post("bulkV2", {
-      //   route: "otp",
-      //   variables_values: otpValue,
-      //   numbers: mobileNumber,
-      // });
+      await fast2smsApiAxios.post("bulkV2", {
+        route: "otp",
+        variables_values: otpValue,
+        numbers: mobileNumber,
+      });
       let otpRecord;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {
