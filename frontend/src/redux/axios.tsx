@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const DEV_URL = "https://localhost:4200/api";
-const TEST_URL = "http://api.theshopbusiness.com/api";
+const TEST_URL = "https://api.theshopbusiness.com/api";
 // Create an instance of axios
 const axiosInstance = axios.create({
   baseURL: TEST_URL, // your API base URL
