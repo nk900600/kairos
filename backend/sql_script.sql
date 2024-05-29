@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON mydatabase.* TO 'user'@'%' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;
