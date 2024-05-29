@@ -13,19 +13,19 @@ services:
       - ./:/usr/src/app
       - /usr/src/app/node_modules  # Ensures node_modules is not overwritten by the host
     environment:
-      - MYSQL_HOST=db
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DB}
-      - YOUR_PRIVATE_VAPID_KEY=${YOUR_PRIVATE_VAPID_KEY}
-      - YOUR_PUBLIC_VAPID_KEY=${YOUR_PUBLIC_VAPID_KEY}
-      - FASt2SMSTOKEN=${FASt2SMSTOKEN}
-      - YOUR_BUCKET_REGION=${YOUR_BUCKET_REGION}
-      - YOUR_SECRET_ACCESS_KEY=${YOUR_SECRET_ACCESS_KEY}
-      - YOUR_ACCESS_KEY_ID=${YOUR_ACCESS_KEY_ID}
-      - JWT_SECRET=${JWT_SECRET}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
+      - MYSQL_HOST: mysql-dev
+      - MYSQL_USER: ${MYSQL_USER}
+      - MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_DB: ${MYSQL_DB}
+      - YOUR_PRIVATE_VAPID_KEY: ${YOUR_PRIVATE_VAPID_KEY}
+      - YOUR_PUBLIC_VAPID_KEY: ${YOUR_PUBLIC_VAPID_KEY}
+      - FASt2SMSTOKEN: ${FASt2SMSTOKEN}
+      - YOUR_BUCKET_REGION: ${YOUR_BUCKET_REGION}
+      - YOUR_SECRET_ACCESS_KEY: ${YOUR_SECRET_ACCESS_KEY}
+      - YOUR_ACCESS_KEY_ID: ${YOUR_ACCESS_KEY_ID}
+      - JWT_SECRET: ${JWT_SECRET}
+      - EMAIL_USER: ${EMAIL_USER}
+      - EMAIL_PASS: ${EMAIL_PASS}
     depends_on:
       - db
     ports:
@@ -45,6 +45,7 @@ services:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
+      - ./sql_script.sql:/docker-entrypoint-initdb.d/init.sql
 
 
   nginx:
