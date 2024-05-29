@@ -1,12 +1,11 @@
 // tableThunks.js
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { TableType } from "./types/tables";
-import axios from "./axios";
 import { toast } from "sonner";
 import { dateConvertor } from "../util/date";
 import { ResponsiveContainer } from "recharts";
+import axios from "./axios";
 
-export const BASE_URL = "http://localhost:4200/api";
 
 export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
@@ -17,7 +16,7 @@ export const fetchTables: any = createAsyncThunk<any>(
         return rejectWithValue("alltables already loaded"); // or simply return a resolved promise without fetching
       }
 
-      const response = await axios.get(`${BASE_URL}/tables`);
+      const response = await axios.get(`tables`);
       return response.data;
     } catch (error) {
       toast.error("Something went wrong fethcing all tables");
@@ -30,7 +29,7 @@ export const updateTable = createAsyncThunk(
   "tables/update",
   async (table: TableType, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${BASE_URL}/tables/${table.id}`, table);
+      const response = await axios.put(`tables/${table.id}`, table);
       return table;
     } catch (error) {
       toast.error("Something went wrong while updating table");
@@ -42,7 +41,7 @@ export const addTable = createAsyncThunk(
   "tables/add",
   async (table: TableType, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/tables`, table);
+      const response = await axios.post(`tables`, table);
       return response.data;
     } catch (error) {
       toast.error("Something went wrong while adding, please try again");
@@ -55,7 +54,7 @@ export const deleteTable = createAsyncThunk(
   "tables/delete",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/tables/${id}`);
+      await axios.delete(`tables/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -67,7 +66,7 @@ export const updateTableStatus = createAsyncThunk(
   "tables/updateStatus",
   async (payload: any, { rejectWithValue }) => {
     try {
-      await axios.post(`${BASE_URL}/tables/${payload.id}/update-status`, {
+      await axios.post(`tables/${payload.id}/update-status`, {
         status: payload.status,
       });
       return payload; // return the id to identify which table was deleted
@@ -81,7 +80,7 @@ export const fetchDesgination = createAsyncThunk(
   "tables/fetchDesgination",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/designations`);
+      let response = await axios.get(`designations`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -95,7 +94,7 @@ export const fetchAllEmployees = createAsyncThunk(
   "tables/fetchAllEmployees",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/employees`);
+      let response = await axios.get(`employees`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching all employees");
@@ -109,7 +108,7 @@ export const updateEmployees = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.put(
-        `${BASE_URL}/employees/${payload.id}`,
+        `employees/${payload.id}`,
         payload
       );
       return payload; // return the id to identify which table was deleted
@@ -123,7 +122,7 @@ export const deleteEmployees = createAsyncThunk(
   "tables/deleteEmployees",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/employees/${id}`);
+      await axios.delete(`employees/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -135,7 +134,7 @@ export const addEmployee = createAsyncThunk(
   "tables/addEmployee",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.post(`${BASE_URL}/employees`, payload);
+      let response = await axios.post(`employees`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -147,7 +146,7 @@ export const fetchMyAccount = createAsyncThunk(
   "tables/fetchMyAccount",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/employees/me`);
+      let response = await axios.get(`employees/me`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching your data");
@@ -162,7 +161,7 @@ export const fetchAllOrders = createAsyncThunk(
   "tables/fetchAllOrders",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/orders`);
+      let response = await axios.get(`orders`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching all orders");
@@ -175,7 +174,7 @@ export const createOrder = createAsyncThunk(
   "tables/createOrder",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/orders/`, payload);
+      const response = await axios.post(`orders/`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
@@ -189,7 +188,7 @@ export const updateOrderStatus = createAsyncThunk(
   "tables/updateOrderStatus",
   async (payload: any, { rejectWithValue }) => {
     try {
-      await axios.post(`${BASE_URL}/orders/${payload.id}`, {
+      await axios.post(`orders/${payload.id}`, {
         status: payload.status,
       });
       return payload; // return the id to identify which table was deleted
@@ -203,7 +202,7 @@ export const updateOrderItemStatus = createAsyncThunk(
   "tables/updateOrderItemStatus",
   async (payload: any, { rejectWithValue }) => {
     try {
-      await axios.put(`${BASE_URL}/orders/order-items/${payload.id}`, {
+      await axios.put(`orders/order-items/${payload.id}`, {
         isCompleted: payload.isCompleted,
       });
       return payload; // return the id to identify which table was deleted
@@ -219,7 +218,7 @@ export const fetchAllLeaveTypes = createAsyncThunk(
   "tables/fetchAllLeaveTypes",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/leave-types`);
+      let response = await axios.get(`leave-types`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -230,7 +229,7 @@ export const createAllLeaveTypes = createAsyncThunk(
   "tables/createAllLeaveTypes",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.post(`${BASE_URL}/leave-types`, payload);
+      let response = await axios.post(`leave-types`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -242,7 +241,7 @@ export const UpdateLeaveTypes = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.put(
-        `${BASE_URL}/leave-types/${payload.id}`,
+        `leave-types/${payload.id}`,
         payload
       );
       return response.data; // return the id to identify which table was deleted
@@ -255,7 +254,7 @@ export const DeleteLeaveTypes = createAsyncThunk(
   "tables/DeleteLeaveTypes",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/leave-types/${id}`);
+      await axios.delete(`leave-types/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -269,7 +268,7 @@ export const fetchAllLeaves = createAsyncThunk(
   "tables/fetchAllLeave",
   async (_, { rejectWithValue }) => {
     try {
-      let response = await axios.get(`${BASE_URL}/leaves`);
+      let response = await axios.get(`leaves`);
       response.data.forEach((data: any) => {
         data.startDate = dateConvertor(data.startDate);
         data.endDate = dateConvertor(data.endDate);
@@ -284,7 +283,7 @@ export const createLeave = createAsyncThunk(
   "tables/createLeave",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.post(`${BASE_URL}/leaves`, payload);
+      let response = await axios.post(`leaves`, payload);
       response.data.startDate = dateConvertor(response.data.startDate);
       response.data.endDate = dateConvertor(response.data.endDate);
       return response.data; // return the id to identify which table was deleted
@@ -300,7 +299,7 @@ export const updateLeave = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.put(
-        `${BASE_URL}/leaves/${payload.id}`,
+        `leaves/${payload.id}`,
         payload
       );
       response.data.startDate = dateConvertor(response.data.startDate);
@@ -315,7 +314,7 @@ export const deleteLeave = createAsyncThunk(
   "tables/deleteLeave",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/leaves/${id}`);
+      await axios.delete(`leaves/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -327,7 +326,7 @@ export const updateLeaveStatus = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.put(
-        `${BASE_URL}/leaves/${payload.id}/status`,
+        `leaves/${payload.id}/status`,
         {
           status: payload.status,
         }
@@ -351,7 +350,7 @@ export const fetchAllMenuCategories = createAsyncThunk(
       if (state.table.allMenuCategories.length > 0) {
         return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
       }
-      let response = await axios.get(`${BASE_URL}/menus/categories`);
+      let response = await axios.get(`menus/categories`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching all menu categories");
@@ -368,7 +367,7 @@ export const fetchAllMenus = createAsyncThunk(
         return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
       }
 
-      let response = await axios.get(`${BASE_URL}/menus`);
+      let response = await axios.get(`menus`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching all orders");
@@ -380,7 +379,7 @@ export const createMenu = createAsyncThunk(
   "tables/createMenu",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.post(`${BASE_URL}/menus`, payload);
+      let response = await axios.post(`menus`, payload);
       return response.data.menuItem; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -393,7 +392,7 @@ export const updateMenu = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.patch(
-        `${BASE_URL}/menus/${payload.id}`,
+        `menus/${payload.id}`,
         payload
       );
       return payload; // return the id to identify which table was deleted
@@ -407,7 +406,7 @@ export const deleteMenu = createAsyncThunk(
   "tables/deleteMenu",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/menus/${id}`);
+      await axios.delete(`menus/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -420,7 +419,7 @@ export const deleteMenuCustomization = createAsyncThunk(
   async (ids: any, { rejectWithValue }) => {
     try {
       await axios.delete(
-        `${BASE_URL}/menus/${ids.menuId}/customization/${ids.customizationId}`
+        `menus/${ids.menuId}/customization/${ids.customizationId}`
       );
       return ids; // return the id to identify which table was deleted
     } catch (error) {
@@ -435,7 +434,7 @@ export const updateMenuCustomization = createAsyncThunk(
     try {
       payload["maxMultiSelect"] = payload.maxChoices;
       await axios.patch(
-        `${BASE_URL}/menus/${payload.menuId}/customization/${payload.customizationId}`,
+        `menus/${payload.menuId}/customization/${payload.customizationId}`,
         payload
       );
       return payload; // return the id to identify which table was deleted
@@ -450,7 +449,7 @@ export const createMenuCustomization = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       const data = await axios.post(
-        `${BASE_URL}/menus/${payload.menuId}/customization/`,
+        `menus/${payload.menuId}/customization/`,
         {
           customizations: [payload],
         }
@@ -472,7 +471,7 @@ export const createTableSession = createAsyncThunk(
   "tables/createTableSession",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/tables-session/`, payload);
+      const response = await axios.post(`tables-session/`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
@@ -491,7 +490,7 @@ export const fetchAllTableSession = createAsyncThunk(
         return rejectWithValue("allTableSessions already loaded"); // or simply return a resolved promise without fetching
       }
 
-      const response = await axios.get(`${BASE_URL}/tables-session/`);
+      const response = await axios.get(`tables-session/`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
@@ -508,7 +507,7 @@ export const fetchAllCartData = createAsyncThunk(
   async (tableSessionId: any, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/cart-items/${tableSessionId}`
+        `cart-items/${tableSessionId}`
       );
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -521,7 +520,7 @@ export const addItemToCart = createAsyncThunk(
   "tables/addItemToCart",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/cart-items/`, payload);
+      const response = await axios.post(`cart-items/`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -534,7 +533,7 @@ export const updateItemToCart = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `${BASE_URL}/cart-items/${payload.id}`,
+        `cart-items/${payload.id}`,
         payload
       );
       return response.data; // return the id to identify which table was deleted
@@ -548,7 +547,7 @@ export const deleteItemToCart = createAsyncThunk(
   "tables/deleteItemToCart",
   async (id: any, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/cart-items/${id}`);
+      await axios.delete(`cart-items/${id}`);
       return id; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -568,7 +567,7 @@ export const createNewFirm = createAsyncThunk(
   "tables/createNewFirm",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let respopnse = await axios.post(`${BASE_URL}/auth/signup`, payload);
+      let respopnse = await axios.post(`auth/signup`, payload);
       localStorage.setItem("token", respopnse.data.token);
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
@@ -585,7 +584,7 @@ export const updateFirm = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let respopnse = await axios.put(
-        `${BASE_URL}/firms/${payload.id}`,
+        `firms/${payload.id}`,
         payload
       );
       return respopnse.data; // return the id to identify which table was deleted
@@ -602,7 +601,7 @@ export const getAllFirmByNumber = createAsyncThunk(
       const state: any = getState();
       const number = state.table?.myAccount.employee.Firm.mobileNumber;
       let respopnse = await axios.get(
-        `${BASE_URL}/firms?mobileNumber=${number}`
+        `firms?mobileNumber=${number}`
       );
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
@@ -620,7 +619,7 @@ export const deleteFirm = createAsyncThunk(
     try {
       const state: any = getState();
       const id = state.table?.myAccount.employee.Firm.id;
-      await axios.delete(`${BASE_URL}/firms/${id}`);
+      await axios.delete(`firms/${id}`);
       localStorage.clear();
       return id; // return the id to identify which table was deleted
     } catch (error: any) {
@@ -634,7 +633,7 @@ export const updateFirmImage = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let respopnse = await axios.put(
-        `${BASE_URL}/firms/${payload.id}/image`,
+        `firms/${payload.id}/image`,
         payload.payload,
         {
           headers: {
@@ -666,7 +665,7 @@ export const login = createAsyncThunk(
   "tables/login",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let respopnse = await axios.post(`${BASE_URL}/auth/login`, payload);
+      let respopnse = await axios.post(`auth/login`, payload);
       localStorage.setItem("token", respopnse.data.token);
       localStorage.setItem("refreshtoken", respopnse.data.refreshToken);
       return respopnse.data; // return the id to identify which table was deleted
@@ -680,7 +679,7 @@ export const logout = createAsyncThunk(
   "tables/logout",
   async (_, { rejectWithValue }) => {
     try {
-      let respopnse = await axios.post(`${BASE_URL}/auth/logout`);
+      let respopnse = await axios.post(`auth/logout`);
       localStorage.clear();
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -695,7 +694,7 @@ export const generateOtp = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let respopnse = await axios.post(
-        `${BASE_URL}/auth/generate-otp`,
+        `auth/generate-otp`,
         payload
       );
       return respopnse.data; // return the id to identify which table was deleted
@@ -712,7 +711,7 @@ export const createSubcription = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/firm-subscriptions`,
+        `firm-subscriptions`,
         payload
       );
       return response.data; // return the id to identify which table was deleted
@@ -727,7 +726,7 @@ export const createSubcriptionTrial = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/firm-subscriptions/trail`,
+        `firm-subscriptions/trail`,
         payload
       );
       return response.data; // return the id to identify which table was deleted
