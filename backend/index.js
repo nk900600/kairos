@@ -59,7 +59,7 @@ async function init() {
       credentials: true,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
       allowedHeaders:
-        "Origin,X-Requested-With,Content-Type,Accept,Authorization, Access-Control-Allow-Origin",
+        "Origin,X-Requested-With,Content-Type,Accept,Authorization, Access-Control-Allow-Origin,x-refresh-token",
     })
   );
 
