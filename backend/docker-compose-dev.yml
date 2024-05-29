@@ -13,7 +13,7 @@ services:
       - ./:/usr/src/app
       - /usr/src/app/node_modules  # Ensures node_modules is not overwritten by the host
     environment:
-      - MYSQL_HOST: db
+      - MYSQL_HOST: ${MYSQL_HOST}
       - MYSQL_USER: ${MYSQL_USER}
       - MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       - MYSQL_DB: ${MYSQL_DB}
