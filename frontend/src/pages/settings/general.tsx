@@ -28,7 +28,7 @@ import {
   InputOTPSlot,
 } from "../../components/ui/input-otp";
 import { AppDispatch } from "../../redux/store";
-import { BASE_URL, updateEmployees } from "../../redux/actions";
+import { updateEmployees } from "../../redux/actions";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -196,7 +196,7 @@ export function GeneralSetting() {
   };
 
   const generateOtp = async () => {
-    await axiosInstance.post(`${BASE_URL}/auth/generate-otp`, {
+    await axiosInstance.post(`auth/generate-otp`, {
       mobileNumber: mobileForm.getValues().mobileNumber,
       otpType: "setting",
     });

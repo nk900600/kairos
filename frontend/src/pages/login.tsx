@@ -34,7 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import { BASE_URL, login } from "../redux/actions";
+import {  login } from "../redux/actions";
 import axiosInstance from "../redux/axios";
 import { AppDispatch } from "../redux/store";
 import { useDispatch } from "react-redux";
@@ -70,7 +70,7 @@ export default function Login() {
   };
 
   const generateOtp = async () => {
-    await axiosInstance.post(`${BASE_URL}/auth/generate-otp`, {
+    await axiosInstance.post(`auth/generate-otp`, {
       mobileNumber: form.getValues().mobileNumber,
       otpType: "login",
     });

@@ -107,10 +107,7 @@ export const updateEmployees = createAsyncThunk(
   "tables/updateEmployees",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.put(
-        `employees/${payload.id}`,
-        payload
-      );
+      let response = await axios.put(`employees/${payload.id}`, payload);
       return payload; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while updating employees");
@@ -240,10 +237,7 @@ export const UpdateLeaveTypes = createAsyncThunk(
   "tables/UpdateLeaveTypes",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.put(
-        `leave-types/${payload.id}`,
-        payload
-      );
+      let response = await axios.put(`leave-types/${payload.id}`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       return rejectWithValue("Failed to delete table");
@@ -298,10 +292,7 @@ export const updateLeave = createAsyncThunk(
   "tables/updateLeave",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.put(
-        `leaves/${payload.id}`,
-        payload
-      );
+      let response = await axios.put(`leaves/${payload.id}`, payload);
       response.data.startDate = dateConvertor(response.data.startDate);
       response.data.endDate = dateConvertor(response.data.endDate);
       return response.data; // return the id to identify which table was deleted
@@ -325,12 +316,9 @@ export const updateLeaveStatus = createAsyncThunk(
   "tables/updateLeaveStatus",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.put(
-        `leaves/${payload.id}/status`,
-        {
-          status: payload.status,
-        }
-      );
+      let response = await axios.put(`leaves/${payload.id}/status`, {
+        status: payload.status,
+      });
       response.data.startDate = dateConvertor(response.data.startDate);
       response.data.endDate = dateConvertor(response.data.endDate);
       return response.data;
@@ -391,10 +379,7 @@ export const updateMenu = createAsyncThunk(
   "tables/updateMenu",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let response = await axios.patch(
-        `menus/${payload.id}`,
-        payload
-      );
+      let response = await axios.patch(`menus/${payload.id}`, payload);
       return payload; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while updating, please try again");
@@ -448,12 +433,9 @@ export const createMenuCustomization = createAsyncThunk(
   "tables/createMenuCustomization",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const data = await axios.post(
-        `menus/${payload.menuId}/customization/`,
-        {
-          customizations: [payload],
-        }
-      );
+      const data = await axios.post(`menus/${payload.menuId}/customization/`, {
+        customizations: [payload],
+      });
       return { menuId: payload.menuId, data: data.data }; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
@@ -506,9 +488,7 @@ export const fetchAllCartData = createAsyncThunk(
   "tables/fetchAllCartData",
   async (tableSessionId: any, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `cart-items/${tableSessionId}`
-      );
+      const response = await axios.get(`cart-items/${tableSessionId}`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -532,10 +512,7 @@ export const updateItemToCart = createAsyncThunk(
   "tables/updateItemToCart",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
-        `cart-items/${payload.id}`,
-        payload
-      );
+      const response = await axios.put(`cart-items/${payload.id}`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while updating, please try again");
@@ -583,10 +560,7 @@ export const updateFirm = createAsyncThunk(
   "tables/updateFirm",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let respopnse = await axios.put(
-        `firms/${payload.id}`,
-        payload
-      );
+      let respopnse = await axios.put(`firms/${payload.id}`, payload);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
       toast.error("Something went wrong while updating, please try again");
@@ -600,9 +574,7 @@ export const getAllFirmByNumber = createAsyncThunk(
     try {
       const state: any = getState();
       const number = state.table?.myAccount.employee.Firm.mobileNumber;
-      let respopnse = await axios.get(
-        `firms?mobileNumber=${number}`
-      );
+      let respopnse = await axios.get(`firms?mobileNumber=${number}`);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error: any) {
       toast.error(
@@ -693,10 +665,7 @@ export const generateOtp = createAsyncThunk(
   "tables/generateOtp",
   async (payload: any, { rejectWithValue }) => {
     try {
-      let respopnse = await axios.post(
-        `auth/generate-otp`,
-        payload
-      );
+      let respopnse = await axios.post(`auth/generate-otp`, payload);
       return respopnse.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -710,10 +679,7 @@ export const createSubcription = createAsyncThunk(
   "tables/createSubcription",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `firm-subscriptions`,
-        payload
-      );
+      const response = await axios.post(`firm-subscriptions`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
@@ -725,10 +691,7 @@ export const createSubcriptionTrial = createAsyncThunk(
   "tables/createSubcriptionTrial",
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `firm-subscriptions/trail`,
-        payload
-      );
+      const response = await axios.post(`firm-subscriptions/trail`, payload);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(

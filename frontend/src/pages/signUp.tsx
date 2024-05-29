@@ -36,7 +36,6 @@ import {
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import {
-  BASE_URL,
   createNewFirm,
   createSubcription,
   createSubcriptionTrial,
@@ -115,7 +114,7 @@ export default function SignUp() {
   };
 
   const generateOtp = async () => {
-    await axiosInstance.post(`${BASE_URL}/auth/generate-otp`, {
+    await axiosInstance.post(`auth/generate-otp`, {
       mobileNumber: form.getValues().mobileNumber,
       otpType: "signup",
     });

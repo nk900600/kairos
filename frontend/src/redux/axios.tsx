@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const DEV_URL = "http://localhost:4200/api";
-const TEST_URL = "https://api.theshopbusiness.com/api";
+const BASE_URL = "http://localhost:4200/api";
+// export const BASE_URL = "https://api.theshopbusiness.com/api";
 // Create an instance of axios
 const axiosInstance = axios.create({
-  baseURL: TEST_URL, // your API base URL
+  baseURL: BASE_URL, // your API base URL
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",

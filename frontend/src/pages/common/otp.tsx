@@ -7,7 +7,6 @@ import {
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { BASE_URL } from "../../redux/actions";
 import axios from "axios";
 export function OtpComponent({
   goBack,
