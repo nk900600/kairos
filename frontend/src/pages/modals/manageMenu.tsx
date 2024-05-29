@@ -297,7 +297,9 @@ export function ManageMenu({ menu }: any) {
           />
         </div>
 
-        <Button type="submit">Submit</Button>
+        <Button loading={isLoading} type="submit">
+          Submit
+        </Button>
       </form>
     </Form>
   );

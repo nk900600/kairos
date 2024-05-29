@@ -62,7 +62,7 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 import { Separator } from "../components/ui/separator";
-import { Children, useContext, useEffect, useState } from "react";
+import { Children, useContext, useEffect, useRef, useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { useSwipeable } from "react-swipeable";
 import { CurrentOrderContentComponent } from "./placeOrder/currentOrder";
@@ -185,6 +185,8 @@ export default function MenusComponent({ canPlaceOrder = false }) {
 
   const { tableId } = useParams();
 
+  const menuRefs: any = useRef({});
+
   useEffect(() => {
     // if (!allCartData.length) {
     let id = allTableSessions?.find(
@@ -196,8 +198,12 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     }
     // }
   }, [allTableSessions]);
+  const scrollToCategory = (id: any) => {
+    menuRefs.current[id].scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleOpenMenu = (w: any) => {
+    console.log(w);
     setMenuOpen(w);
   };
   const handleOpenOrder = (w: any) => {
@@ -206,6 +212,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
 
   const categoriesProps = {
     handleOpenMenu,
+    scrollToCategory,
     isMenuOpen,
   };
   const currentOrdersProps = {
@@ -324,6 +331,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
             if (!validMenu.length) return <></>;
             return (
               <Accordion
+                ref={(el) => (menuRefs.current[category.id] = el)}
                 defaultValue={allMenuCategories.map((val) => val.title)}
                 type="multiple"
                 className="w-full"
@@ -445,9 +453,27 @@ export default function MenusComponent({ canPlaceOrder = false }) {
   );
 }
 
-export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
+export function ShowAllCategories({
+  handleOpenMenu,
+  scrollToCategory,
+  isMenuOpen,
+}: any) {
+  const { allMenu, allMenuCategories, allTableSessions, allCartData } =
+    useSelector((state: { table: RootState }) => state.table);
+  const [open, setOpen] = useState(false);
+
+  const handlechange = (e: any) => {
+    setOpen(e);
+    handleOpenMenu(e);
+  };
+
+  const labelClick = (id: any) => {
+    setOpen(false);
+    handleOpenMenu(false);
+    scrollToCategory(id);
+  };
   return (
-    <Popover onOpenChange={handleOpenMenu}>
+    <Popover onOpenChange={handlechange} open={open}>
       <PopoverTrigger asChild>
         <div className="fixed bottom-4 right-4">
           <Button variant={"default"} size="icon" className="rounded-full">
@@ -459,28 +485,22 @@ export function ShowAllCategories({ handleOpenMenu, isMenuOpen }: any) {
           </Button>
         </div>
       </PopoverTrigger>
+
       <PopoverContent className="w-60 right-10" align="end" side="top">
-        <div className="flex flex-col gap-5">
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
-          <div className="flex h-4">
-            <Label className="w-full">Accept terms and conditions</Label>
-            <Label>2</Label>
-          </div>
+        <div className="flex flex-col max-h-[80vh] w-full overflow-y-auto gap-5 ">
+          {allMenuCategories.map((item) => {
+            return (
+              <>
+                <Label
+                  className="w-full cursor-pointer"
+                  key={item.id}
+                  onClick={() => labelClick(item.id)}
+                >
+                  {item.title}
+                </Label>
+              </>
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>

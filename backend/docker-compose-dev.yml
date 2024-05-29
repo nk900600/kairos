@@ -69,3 +69,4 @@ volumes:
 
   # sudo docker-compose --env-file ./env/.env.dev -f docker-compose-dev.yml up -d
   # sudo docker run -it --rm   -v $(pwd)/certs:/etc/letsencrypt   -v $(pwd)/certs-data:/data/letsencrypt   certbot/certbot certonly   --webroot   -w /data/letsencrypt   --email nikhil@theshopbusiness.com   -d api.theshopbusiness.com   --agree-tos   --no-eff-email -v
+  # ssh -i LightsailDefaultKey-us-east-1\(3\).pem ubuntu@44.214.135.221  

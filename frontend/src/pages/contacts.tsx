@@ -316,13 +316,12 @@ export default function ContactsComponent() {
             return (
               <div className="flex items-center gap-4  ">
                 <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage
-                    src="https://avatar.iran.liara.run/public"
-                    alt="Avatar"
-                  />
-                  <AvatarFallback>
-                    {employee.firstName} {employee.lastName}
-                  </AvatarFallback>
+                  <AvatarImage src={employee?.userPic} alt="Avatar" />
+                  <AvatarFallback
+                    style={{
+                      background: employee?.userPic,
+                    }}
+                  ></AvatarFallback>
                 </Avatar>
                 <div className="grid gap-1">
                   <p className="text-sm font-medium leading-none">

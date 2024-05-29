@@ -161,9 +161,10 @@ export function Subscription() {
   useEffect(() => {
     setName(myAccount?.employee.Firm?.name);
     setImage(myAccount?.employee.Firm?.image);
-    setAllFeatures(
-      JSON.parse(myAccount?.subscripition?.Subscription?.features)
-    );
+    if (myAccount?.subscripition)
+      setAllFeatures(
+        JSON.parse(myAccount?.subscripition?.Subscription?.features)
+      );
   }, [myAccount]);
 
   const onBillingSubmit = async (data: any) => {
@@ -215,46 +216,48 @@ export function Subscription() {
     // <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
     //   <div className="grid grid-cols-1 items-start">
     <main className="flex-1 grid min-h-[400px] gap-4 md:gap-8">
-      <div key="1" className="grid gap-4 grid-col-1">
-        <Card>
-          <CardHeader className="">
-            <CardTitle className="text-lg flex gap-4">
-              <div>Basic Plan</div>
-              {myAccount?.subscripition?.trialEndDate && <Badge>Trail</Badge>}
-            </CardTitle>
-            <CardDescription>
-              {myAccount?.subscripition?.Subscription?.additionalNotes}
-            </CardDescription>
-          </CardHeader>
-          {/* <Separator /> */}
-          <CardContent>
-            <div></div>
-            <span className="text-4xl font-bold">
-              {myAccount?.subscripition?.Subscription?.monthlyPrice}
-            </span>
-            <span className="text-gray-500 dark:text-gray-400">/month</span>
-            <div className="flex items-baseline  gap-2">
-              <ul className="mt-4 space-y-2 text-left">
-                {allFeatures.map((val: any) => {
-                  return (
-                    <li className="flex items-center gap-2 text-sm">
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                      {val}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>{" "}
-            <div></div>
-          </CardContent>
-          <CardFooter className="border-t px-6 py-4 flex gap-4 ">
-            <Button disabled>Upgrade Plan</Button>
-            {!myAccount?.subscripition?.trialEndDate && (
-              <Button variant={"link"}>Need to Cancel?</Button>
-            )}
-          </CardFooter>
-        </Card>
-      </div>
+      {myAccount?.subscripition && (
+        <div key="1" className="grid gap-4 grid-col-1">
+          <Card>
+            <CardHeader className="">
+              <CardTitle className="text-lg flex gap-4">
+                <div>Basic Plan</div>
+                {myAccount?.subscripition?.trialEndDate && <Badge>Trail</Badge>}
+              </CardTitle>
+              <CardDescription>
+                {myAccount?.subscripition?.Subscription?.additionalNotes}
+              </CardDescription>
+            </CardHeader>
+            {/* <Separator /> */}
+            <CardContent>
+              <div></div>
+              <span className="text-4xl font-bold">
+                {myAccount?.subscripition?.Subscription?.monthlyPrice}
+              </span>
+              <span className="text-gray-500 dark:text-gray-400">/month</span>
+              <div className="flex items-baseline  gap-2">
+                <ul className="mt-4 space-y-2 text-left">
+                  {allFeatures.map((val: any) => {
+                    return (
+                      <li className="flex items-center gap-2 text-sm">
+                        <CheckIcon className="h-4 w-4 text-green-500" />
+                        {val}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>{" "}
+              <div></div>
+            </CardContent>
+            <CardFooter className="border-t px-6 py-4 flex gap-4 ">
+              <Button disabled>Upgrade Plan</Button>
+              {!myAccount?.subscripition?.trialEndDate && (
+                <Button variant={"link"}>Need to Cancel?</Button>
+              )}
+            </CardFooter>
+          </Card>
+        </div>
+      )}
       <div className="grid grid-cols-1 items-start">
         <div className="grid gap-4">
           <Card>
@@ -278,16 +281,19 @@ export function Subscription() {
                   />
                   <label htmlFor="fileInput" className="cursor-pointer">
                     <Avatar className="h-20 w-20 border ">
-                      <AvatarImage alt="User avatar" src={image} />
-                      <AvatarFallback className="uppercase">
-                        {imageLoader ? (
-                          <Loader2 className=" h-4 w-4 animate-spin" />
-                        ) : !!name ? (
-                          name[0] + name[1]
-                        ) : (
-                          ""
-                        )}
-                      </AvatarFallback>
+                      {imageLoader ? (
+                        <Loader2 className=" h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <AvatarImage alt="User avatar" src={image} />
+                          <AvatarFallback
+                            className="uppercase"
+                            style={{
+                              background: myAccount?.employee?.Firm?.image,
+                            }}
+                          ></AvatarFallback>
+                        </>
+                      )}
                     </Avatar>
                   </label>
                 </div>

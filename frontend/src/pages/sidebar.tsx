@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -48,6 +48,7 @@ import {
   Users,
   LogOut,
   Settings,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import SelectItemsComponent from "../pages/placeOrder/selectItems";
@@ -145,6 +146,9 @@ function Sidebar() {
   const { isAuthenticted, myAccount } = useSelector(
     (state: { table: RootState }) => state.table
   );
+
+  const [loader, setLoading] = useState(false);
+  const [globalError, setGlobalError] = useState("");
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
@@ -153,20 +157,33 @@ function Sidebar() {
         navigate("/dashboard");
       }
       try {
+        setLoading(true);
         dispatch(fetchMyAccount())
           .unwrap()
           .then(() => {
-            dispatch(fetchAllEmployees());
-            dispatch(fetchTables());
-            dispatch(fetchAllTableSession());
-            dispatch(fetchAllOrders());
-            dispatch(fetchAllMenus());
-            dispatch(fetchAllMenuCategories());
-            dispatch(getAllFirmByNumber());
+            Promise.all([
+              dispatch(fetchAllEmployees()).unwrap(),
+              dispatch(fetchTables()).unwrap(),
+              dispatch(fetchAllTableSession()).unwrap(),
+              dispatch(fetchAllOrders()).unwrap(),
+              dispatch(fetchAllMenus()).unwrap(),
+              dispatch(fetchAllMenuCategories()).unwrap(),
+              dispatch(getAllFirmByNumber()).unwrap(),
+            ])
+              .then(() => {
+                setLoading(false); // Hide the loader
+              })
+              .catch((error) => {
+                console.error("Error fetching data: ", error);
+                setLoading(false); // Hide the loader in case of error
+              });
           });
       } catch (e) {}
     } else {
-      if (!localStorage.getItem("token")) navigate("/login");
+      if (!localStorage.getItem("token")) {
+        if (hideSidebarOnRoutes.includes(location.pathname)) {
+        } else navigate("/login");
+      }
     }
   }, [isAuthenticted]);
   useEffect(() => {
@@ -175,6 +192,14 @@ function Sidebar() {
 
   if (!isAuthenticted) {
     return null;
+  }
+
+  if (loader) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className=" h-15 w-15 animate-spin flex align-center" />
+      </div>
+    );
   }
 
   return (
