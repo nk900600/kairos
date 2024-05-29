@@ -40,7 +40,7 @@ async function init() {
   const allowedOrigins = [
     "https://app.theshopbusiness.com",
     "http://app.theshopbusiness.com",
-    "http://localhost:4200",
+    "http://localhost:3000",
   ];
 
   app.use(
