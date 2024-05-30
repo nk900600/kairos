@@ -34,7 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
-import {  login } from "../redux/actions";
+import { login } from "../redux/actions";
 import axiosInstance from "../redux/axios";
 import { AppDispatch } from "../redux/store";
 import { useDispatch } from "react-redux";
@@ -77,11 +77,14 @@ export default function Login() {
   };
 
   const handleTryAgain = async () => {
+    setIsLoading(true);
     try {
       await generateOtp();
+      setIsLoading(false);
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
       else toast.error("Something went wrong");
+      setIsLoading(false);
       return;
     }
   };
@@ -151,7 +154,7 @@ export default function Login() {
                     )}
                   />
 
-                  <Button className="w-full" type="submit">
+                  <Button loading={isLoading} className="w-full" type="submit">
                     Send OTP
                   </Button>
                 </form>

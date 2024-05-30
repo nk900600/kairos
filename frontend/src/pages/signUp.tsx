@@ -93,11 +93,14 @@ export default function SignUp() {
   });
 
   const onSubmit = async (data: any) => {
+    setIsLoading(true);
     try {
       await generateOtp();
+      setIsLoading(false);
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
       else toast.error("Something went wrong");
+      setIsLoading(false);
       return;
     }
     setCurrentStep(2);
@@ -135,9 +138,6 @@ export default function SignUp() {
     };
     try {
       await dispatch(createNewFirm(payload)).unwrap();
-      await dispatch(
-        createSubcriptionTrial({ billingCycle: "monthly", SubscriptionId: "1" })
-      ).unwrap();
       setIsLoading(false);
       navigate("/dashboard");
     } catch (e: any) {

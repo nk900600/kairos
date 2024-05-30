@@ -185,6 +185,27 @@ class AuthController {
         { transaction }
       );
 
+      const subscription = await Subscription.findOne(
+        { where: { id: "1" } },
+        {}
+      );
+
+      const currentDate = new Date(); // Get the current date
+      const futureDate = new Date(currentDate); // Create a new Date object based on the current date
+      futureDate.setDate(futureDate.getDate() + subscription.trialPeriod);
+
+      await FirmSubscription.create(
+        {
+          billingCycle: "monthly",
+          SubscriptionId: "1",
+          trialStartDate: new Date(),
+          trialEndDate: futureDate,
+          nextBillingDate: futureDate,
+          FirmId: firm.id,
+        },
+        { transaction }
+      );
+
       const refreshToken = jwt.sign(
         { user: employee },
         process.env.JWT_SECRET,
@@ -387,6 +408,8 @@ class AuthController {
       if (otpRecord.otpValue !== otpValue) {
         throw new Error("Invalid OTP");
       }
+
+      await otpRecord.destroy();
 
       return true; // OTP verification successful
     } catch (error) {
