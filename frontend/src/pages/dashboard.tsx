@@ -295,7 +295,7 @@ export function Dashboard() {
       </header>
       <DashBoardContent />
 
-      <nav className="fixed bottom-0 inset-x-0 flex items-center justify-center h-14 bg-muted border-t border-gray-200/40 border-gray-200 dark:bg-gray-950/50 dark:border-gray-950 dark:border-gray-950/40 md:hidden">
+      {/* <nav className="fixed bottom-0 inset-x-0 flex items-center justify-center h-14 bg-muted border-t border-gray-200/40 border-gray-200 dark:bg-gray-950/50 dark:border-gray-950 dark:border-gray-950/40 md:hidden">
         <div className="flex-1 flex flex-col items-center justify-center text-xs transition-colors text-gray-500 peer-allowed dark:text-gray-400">
           <NavLink
             className={({ isActive }) =>
@@ -338,7 +338,7 @@ export function Dashboard() {
             My Tables
           </NavLink>
         </div>
-      </nav>
+      </nav> */}
     </div>
   );
 }

@@ -93,10 +93,7 @@ export function DashBoardContent() {
           </span>
         </h1>
         <NavLink to={"/place-order"}>
-          <Button
-            variant={"default"}
-            className="ml-auto h-8 gap-2 hidden md:flex "
-          >
+          <Button variant={"default"} className="ml-auto h-8 gap-2 flex ">
             <Plus className="h-4 w-4" />
             <span>New Order</span>
           </Button>
