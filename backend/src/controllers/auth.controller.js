@@ -96,10 +96,9 @@ class AuthController {
 
       // Setup email data
       const mailOptions = {
-        from: '"Nikhil Kumar" <nikhil@theshopbusiness.com>', // Sender address
-        to: "nk90600@gmail.com", // List of recipients
+        from: '"The Shop Business Inc" <nikhil@theshopbusiness.com>', // Sender address
+        to: response.employee.email, // List of recipients
         subject: "Thanks for Signing Up to TheShopBusiness", // Subject line
-        text: "Hello world?", // Plain text body
         html: welcomeBody(
           response.employee.firstName + " " + response.employee.lastName
         ), // HTML body
@@ -244,7 +243,9 @@ class AuthController {
       }
 
       const user = await Employee.findOne({
-        where: { mobileNumber: otpDetails.mobileNumber },
+        where: {
+          mobileNumber: otpDetails.mobileNumber,
+        },
       });
 
       if (otpDetails.otpType == "setting") {
@@ -257,11 +258,11 @@ class AuthController {
         if (!user && otpDetails.otpType !== "signup") {
           return res.status(400).json({ message: "user not found" });
         }
-        if (user && otpDetails.otpType == "signup") {
-          return res
-            .status(400)
-            .json({ message: "User is already registered, please login" });
-        }
+        // if (user && otpDetails.otpType == "signup") {
+        //   return res
+        //     .status(400)
+        //     .json({ message: "User is already registered, please login" });
+        // }
       }
 
       otpDetails.ipAddress = otpDetails?.ipAddress || req.ip;

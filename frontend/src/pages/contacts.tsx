@@ -233,6 +233,7 @@ export default function ContactsComponent() {
     setTitle("Add Employee");
     setDescription("Create new profile here. Click save when you're done");
     setComponent("manageEmployee");
+    setCompProps({ employeeData: {} });
   };
   return (
     <>
@@ -328,11 +329,11 @@ export default function ContactsComponent() {
                     {employee.firstName} {employee.lastName}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {employee?.Designation
-                      ? employee?.Designation?.title
-                      : allDesgination?.find(
-                          (val) => val.id == employee?.designationId
-                        )?.title}
+                    {
+                      allDesgination?.find(
+                        (val) => val.id == employee?.designationId
+                      )?.title
+                    }
                   </p>
                 </div>
                 {isAdmin && (
@@ -439,6 +440,8 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
             .firstName +
           " " +
           allEmployees.find((val) => val.id == employeeData?.managerId).lastName
+        : employeeData?.Role?.name == "Admin"
+        ? employeeData?.firstName + " " + employeeData?.lastName
         : "",
     },
   });
@@ -555,39 +558,45 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="manager"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="desgination">Manager</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a manager" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {allEmployees
-                    // .filter((val) =>
-                    //   !!employeeData?.managerId
-                    //     ? val.id != employeeData?.id
-                    //     : true
-                    // )
-                    .map((item) => {
-                      return (
-                        <SelectItem
-                          value={item.firstName + " " + item.lastName}
-                        >
-                          {item.firstName + " " + item.lastName}
-                        </SelectItem>
-                      );
-                    })}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+
+        {employeeData?.Role?.name !== "Admin" && (
+          <FormField
+            control={form.control}
+            name="manager"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel htmlFor="desgination">Manager</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a manager" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {allEmployees
+                      // .filter((val) =>
+                      //   !!employeeData?.managerId
+                      //     ? val.id != employeeData?.id
+                      //     : true
+                      // )
+                      .map((item) => {
+                        return (
+                          <SelectItem
+                            value={item.firstName + " " + item.lastName}
+                          >
+                            {item.firstName + " " + item.lastName}
+                          </SelectItem>
+                        );
+                      })}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button loading={isLoading} type="submit">
           {employeeData?.id ? "Update Employee" : "Add Employee"}

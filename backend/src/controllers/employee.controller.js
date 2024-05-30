@@ -18,7 +18,7 @@ class EmployeeController {
       const employees = await Employee.findAll({
         include: [Role, Firm, Designation],
         where: { firmId: req.user.firmId },
-    });
+      });
       return res.status(200).json(employees);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -75,24 +75,14 @@ class EmployeeController {
         return res.status(400).json({ message: "Invalid email format" });
       }
 
-      const user = await Employee.findOne(
-        {
-          where: { mobileNumber: req.body.mobileNumber },
-          paranoid: false, // Include soft-deleted records
-        },
-        { transaction }
-      );
-      // Restore the user
-      if (user && user.removedAt) {
-        await user.restore({ transaction });
-        await user.update(
-          {
-            removedBy: null,
-          },
-          { transaction }
-        );
-        await transaction.commit();
-        return res.json(user);
+      const user = await Employee.findOne({
+        where: { mobileNumber: req.body.mobileNumber },
+      });
+      // // Restore the user
+      if (user) {
+        return res
+          .status(400)
+          .json({ message: "User is already registered with different Shop" });
       }
 
       const employee = await Employee.create(

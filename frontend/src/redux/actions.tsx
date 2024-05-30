@@ -6,7 +6,6 @@ import { dateConvertor } from "../util/date";
 import { ResponsiveContainer } from "recharts";
 import axios from "./axios";
 
-
 export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
   async (_, { getState, rejectWithValue }) => {
@@ -108,7 +107,7 @@ export const updateEmployees = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.put(`employees/${payload.id}`, payload);
-      return payload; // return the id to identify which table was deleted
+      return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while updating employees");
       return rejectWithValue("Failed to delete table");

@@ -85,11 +85,11 @@ class FirmController {
         { where: { FirmId: firmId } },
         { transaction }
       );
-      await Table.destroy({ where: { firmId: firmId } }, { transaction });
       await TableSession.destroy(
         { where: { firmId: firmId } },
         { transaction }
       );
+      await Table.destroy({ where: { firmId: firmId } }, { transaction });
 
       const employees = await Employee.findAll({
         where: {

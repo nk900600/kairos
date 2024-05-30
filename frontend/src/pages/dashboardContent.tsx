@@ -183,7 +183,7 @@ export function DashBoardContent() {
             <SalesChart />
           </CardContent>
         </Card>
-        <Card className="sm:col-span-3">
+        <Card className=" col-span-1 sm:col-span-3">
           <div className="flex flex-col space-y-1.5 p-6">
             <h3 className="font-semibold leading-none tracking-tight">
               Active Orders
