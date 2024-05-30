@@ -7,13 +7,19 @@ import { Button } from "../../components/ui/button";
 // import Hamburger from "/Hamburger.gif";
 
 const imageMapper: any = {
-  customization: "../../Hamburger.gif",
-  table: "../../closed_stores.gif",
-  currentOrder: "../..//Empty.gif",
-  orders: "../../order_food.gif",
-  chefs: "../../Chef.gif",
+  customization:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/Hamburger.gif",
+  table:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/closed_stores.gif",
+  currentOrder:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/Empty.gif",
+  orders:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/order_food.gif",
+  chefs:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/Chef.gif",
   login: "../../Waiters-bro(1).svg",
-  leaves: "../../Trip.gif",
+  leaves:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/Trip.gif",
 };
 export const EmptyPlaceholder = ({
   type,
@@ -36,9 +42,7 @@ export const EmptyPlaceholder = ({
       )}
       <div className="space-y-2 text-center">
         <h3 className="text-2xl font-bold">{title}</h3>
-        <p className="text-gray-500 dark:text-gray-400">
-          {description}
-        </p>
+        <p className="text-gray-500 dark:text-gray-400">{description}</p>
         {buttonText && (
           <Button onClick={onButtonClick} className="mt-4">
             {buttonText}
