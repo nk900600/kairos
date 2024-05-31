@@ -21,6 +21,7 @@ const {
   welcomeBody,
 } = require("../utils/emailTemplate/welcomeMessageTemplate");
 const { getRandomGradient } = require("../utils/colorGradient");
+const { emailOtpTemplate } = require("../utils/emailTemplate/emailOtpTemplate");
 
 // Create an instance of axios with a base URL and default headers
 const fast2smsApiAxios = axios.create({
@@ -235,16 +236,39 @@ class AuthController {
     try {
       const otpDetails = req.body;
 
+      // Validate the request body
+      if (
+        // !otpDetails?.mobileNumber ||
+        // !otpDetails?.email ||
+        !otpDetails.otpType
+      ) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
       // Validate the mobile number
-      if (!mobileNumberRegex.test(otpDetails.mobileNumber)) {
+      if (
+        otpDetails?.mobileNumber &&
+        !mobileNumberRegex.test(otpDetails?.mobileNumber)
+      ) {
         return res
           .status(400)
           .json({ message: "Invalid mobile number format" });
       }
+      if (otpDetails?.email && !emailRegex.test(otpDetails?.email)) {
+        return res.status(400).json({ message: "Invalid Email format" });
+      }
 
+      const isEmail = !!otpDetails?.email;
+      if (isEmail) {
+        otpDetails.mobileNumber = 0;
+      } else {
+        otpDetails.email = "";
+      }
       const user = await Employee.findOne({
         where: {
-          mobileNumber: otpDetails.mobileNumber,
+          [isEmail ? "email" : "mobileNumber"]: isEmail
+            ? otpDetails.email
+            : otpDetails.mobileNumber,
         },
       });
 
@@ -271,11 +295,6 @@ class AuthController {
         otpDetails?.deviceInfo || req.headers["user-agent"]; // Example: using User-Agent header
       const geo = geoip.lookup(otpDetails.ipAddress);
       otpDetails.region = otpDetails?.region || (geo ? geo.city : "Unknown");
-
-      // Validate the request body
-      if (!otpDetails.mobileNumber || !otpDetails.otpType) {
-        return res.status(400).json({ message: "Missing required fields" });
-      }
 
       const result = await this.generateOtpHelper(otpDetails);
 
@@ -304,10 +323,14 @@ class AuthController {
         ipAddress,
         deviceInfo,
         region,
+        email,
       } = otpDetails;
 
       let existingOtpRecord = await Auth.findOne({
-        where: { mobileNumber: mobileNumber, otpType },
+        where: {
+          [email ? "email" : "mobileNumber"]: email ? email : mobileNumber,
+          otpType,
+        },
         order: [["createdAt", "DESC"]],
       });
 
@@ -349,12 +372,31 @@ class AuthController {
       const otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
-      // commenting for now
-      await fast2smsApiAxios.post("bulkV2", {
-        route: "otp",
-        variables_values: otpValue,
-        numbers: mobileNumber,
-      });
+      if (email) {
+        const mailOptions = {
+          from: '"The Shop Business Inc" <nikhil@theshopbusiness.com>', // Sender address
+          to: email, // List of recipients
+          subject: "OTP for updating email", // Subject line
+          html: emailOtpTemplate(otpValue), // HTML body
+        };
+        try {
+          EmailService.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log(error);
+            }
+            console.log("Message sent: %s", info.messageId);
+          });
+        } catch (e) {
+          console.log("Email was not send");
+        }
+      } else {
+        // commenting for now
+        await fast2smsApiAxios.post("bulkV2", {
+          route: "otp",
+          variables_values: otpValue,
+          numbers: mobileNumber,
+        });
+      }
       let otpRecord;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {
@@ -367,7 +409,7 @@ class AuthController {
         });
       } else {
         otpRecord = await Auth.create({
-          mobileNumber: mobileNumber,
+          ...(email ? { email } : { mobileNumber }),
           countryCode,
           otpType,
           otpValue,

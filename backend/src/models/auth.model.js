@@ -13,10 +13,10 @@ const Auth = sequelize.define(
   {
     mobileNumber: {
       type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        is: /^[0-9]{10}$/, // Example regex for a 10-digit mobile number
-      },
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     countryCode: {
       type: DataTypes.STRING,
@@ -47,5 +47,5 @@ const Auth = sequelize.define(
     ],
   }
 );
-// Auth.sync({});
+// Auth.sync({ alter: true });
 module.exports = { Auth };

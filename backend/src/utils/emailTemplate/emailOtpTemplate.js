@@ -1,9 +1,9 @@
-const welcomeBody = (userName) => {
+const emailOtpTemplate = (otp) => {
   return `
     
-
-
-<!DOCTYPE html>
+    
+    
+    <!DOCTYPE html>
 <html lang="en">
 	<body id="kt_body" class="app-blank">
 		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
@@ -20,7 +20,7 @@ const welcomeBody = (userName) => {
 											<div style="text-align:center; margin:0 15px 34px 15px">
 												<!--begin:Logo-->
 												<div style="margin-bottom: 0px">
-												<a href="https://app.theshopbusiness.com" rel="noopener" target="_blank">
+													<a href="https://app.theshopbusiness.com" rel="noopener" target="_blank">
 														<img alt="TheShopBusiness" src="https://kairos-public-images.s3.eu-north-1.amazonaws.com/testgmn(2)(1)(1).png" style="height: 35px" /> 
 													</a>
                                                     
@@ -29,15 +29,16 @@ const welcomeBody = (userName) => {
 												<!--end:Logo-->
 												<!--begin:Media-->
 												<div style="margin-bottom: 15px">
-													<img alt="Logo" src="https://kairos-public-images.s3.eu-north-1.amazonaws.com/email/icon-positive-vote-1.png" />
+													<img alt="Logo" src="https://kairos-public-images.s3.eu-north-1.amazonaws.com/email/icon-positive-vote-2.png" />
 												</div>
 												<!--end:Media-->
 												<!--begin:Text-->
 												<div style="font-size: 14px; font-weight: 500; margin-bottom: 27px; font-family:Arial,Helvetica,sans-serif;">
-													<p style="margin-bottom:9px; color:#181C32; font-size: 22px; font-weight:700">Hey ${userName}, thanks for signing up!</p>
-													<p style="margin-bottom:2px; color:#7E8299">We are thrilled to welcome you </p>
-													<p style="margin-bottom:2px; color:#7E8299">With our powerful features, you can now manage your shop with greater ease and efficiency.</p>
-													<p style="margin-bottom:2px; color:#7E8299">We're excited to have you on board.</p>
+													<p style="margin-bottom:9px; color:#181C32; font-size: 22px; font-weight:700">${otp}</p>
+													<p style="margin-bottom:2px; color:#7E8299">Your OTP is valid for 10 minutes. A email updatation requires further verification. To complete the process, enter the verification code. </p>
+                                                    
+                                             
+													
 												</div>
 												<!--end:Text-->
 												<!--begin:Action-->
@@ -49,7 +50,7 @@ const welcomeBody = (userName) => {
 									</tr>
 									<tr style="display: flex; justify-content: center; margin:0 60px 35px 60px">
 										<td align="start" valign="start" style="padding-bottom: 10px;">
-											<p style="color:#181C32; font-size: 18px; font-weight: 600; margin-bottom:13px">What’s next?</p>
+											<p style="color:#181C32; font-size: 18px; font-weight: 600; margin-bottom:13px">What to learn?</p>
 											<!--begin::Wrapper-->
 											<div style="background: #F9F9F9; border-radius: 12px; padding:35px 30px">
 												<!--begin::Item-->
@@ -65,7 +66,7 @@ const welcomeBody = (userName) => {
 														<!--begin::Content-->
 														<div>
 															<!--begin::Title-->
-															<a href="https://app.theshopbusiness.com/menus"  target="_blank"style="color:#181C32; font-size: 14px; font-weight: 600;font-family:Arial,Helvetica,sans-serif">Add Menu</a>
+															<a href="https://app.theshopbusiness.com/menus"  target="_blank" style="color:#181C32; font-size: 14px; font-weight: 600;font-family:Arial,Helvetica,sans-serif">Add Menu</a>
 															<!--end::Title-->
 															<!--begin::Desc-->
 															<p style="color:#5E6278; font-size: 13px; font-weight: 500; padding-top:3px; margin:0;font-family:Arial,Helvetica,sans-serif">Create and manage your restaurant's menu with ease. Add, edit, or remove items, and organize them into categories for better customer experience.</p>
@@ -92,7 +93,7 @@ const welcomeBody = (userName) => {
 														<!--begin::Content-->
 														<div>
 															<!--begin::Title-->
-														    <a href="https://app.theshopbusiness.com/tables" target="_blank" style="color:#181C32; font-size: 14px; font-weight: 600;font-family:Arial,Helvetica,sans-serif">Add Table</a>
+															<a href="https://app.theshopbusiness.com/tables" target="_blank" style="color:#181C32; font-size: 14px; font-weight: 600;font-family:Arial,Helvetica,sans-serif">Add Table</a>
 															<!--end::Title-->
 															<!--begin::Desc-->
 															<p style="color:#5E6278; font-size: 13px; font-weight: 500; padding-top:3px; margin:0;font-family:Arial,Helvetica,sans-serif">Efficiently manage your restaurant's table orders and arrangements. Keep track of table statuses, and optimize seating for maximum efficiency</p>
@@ -165,8 +166,9 @@ const welcomeBody = (userName) => {
 				</div>
 	</body>
 </html>
-    
     `;
 };
 
-module.exports = { welcomeBody };
+
+
+module.exports = {emailOtpTemplate}

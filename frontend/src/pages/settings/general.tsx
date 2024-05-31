@@ -83,7 +83,7 @@ const emailSchema = z.object({
 export function GeneralSetting() {
   const [image, setImage] = useState("");
   const [isOtp, setIsOtp] = useState(false);
-  const [isOtpEmail, setIsOtpEmil] = useState(false);
+  const [isOtpEmail, setIsOtpEmail] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [imageLoader, setImageLoader] = useState(false);
   const { myAccount }: any = useSelector(
@@ -183,11 +183,9 @@ export function GeneralSetting() {
     }
   };
   const getEmailOtp = async (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
     try {
-      // await generateOtp();
-      setIsOtpEmil(true);
+      await generateEmailOtp();
+      setIsOtpEmail(true);
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
       else toast.error("Something went wrong");
@@ -198,6 +196,17 @@ export function GeneralSetting() {
   const generateOtp = async () => {
     await axiosInstance.post(`auth/generate-otp`, {
       mobileNumber: mobileForm.getValues().mobileNumber,
+      otpType: "setting",
+    });
+  };
+
+  const generateEmailOtp = async () => {
+    // await axiosInstance.post(`employee/${myAccount?.employee.id}/otp`, {
+    //   email: emailForm.getValues().email,
+    // });
+
+    await axiosInstance.post(`auth/generate-otp`, {
+      email: emailForm.getValues().email,
       otpType: "setting",
     });
   };
@@ -228,7 +237,7 @@ export function GeneralSetting() {
         })
       ).unwrap();
       setLoading(false);
-      setIsOtpEmil(false);
+      setIsOtpEmail(false);
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
       else toast.error("Something went wrong");
@@ -421,7 +430,11 @@ export function GeneralSetting() {
             </Card>
             <Card>
               <Form {...emailForm}>
-                <form onSubmit={emailForm.handleSubmit(handleSaveEmail)}>
+                <form
+                  onSubmit={emailForm.handleSubmit(
+                    !isOtpEmail ? getEmailOtp : handleSaveEmail
+                  )}
+                >
                   <CardHeader>
                     <CardTitle className="text-lg">Email</CardTitle>
                     <CardDescription>
@@ -429,26 +442,26 @@ export function GeneralSetting() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* {!isOtpEmail && ( */}
-                    <FormField
-                      control={emailForm.control}
-                      name="email"
-                      render={({ field, fieldState }) => (
-                        <FormItem>
-                          <FormLabel htmlFor="email">Email</FormLabel>
+                    {!isOtpEmail && (
+                      <FormField
+                        control={emailForm.control}
+                        name="email"
+                        render={({ field, fieldState }) => (
+                          <FormItem>
+                            <FormLabel htmlFor="email">Email</FormLabel>
 
-                          <FormControl>
-                            <Input
-                              id="email"
-                              placeholder="m@example.com"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    {/* )} */}
-                    {/* {isOtpEmail && (
+                            <FormControl>
+                              <Input
+                                id="email"
+                                placeholder="m@example.com"
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    {isOtpEmail && (
                       <form className="mt-2">
                         <Label htmlFor="name" className="mb-2">
                           OTP Confirmation
@@ -468,26 +481,24 @@ export function GeneralSetting() {
                           <Button
                             variant={"link"}
                             className=" text-xs"
-                            type="submit"
+                            onClick={(e) => getOtp(e)}
                           >
-                            Resend SMS
+                            Resend Email
                           </Button>
                         </p>
                       </form>
-                    )} */}
+                    )}
                   </CardContent>
                   <CardFooter className="border-t px-6 py-4">
-                    {/* {!isOtpEmail && ( */}
-                    <Button type="submit">Save</Button>
-                    {/* )} */}
-                    {/* {isOtpEmail && (
+                    {!isOtpEmail && <Button type="submit">Verify</Button>}
+                    {isOtpEmail && (
                       <div className="gap-2 flex">
                         <Button type="submit">Save</Button>
-                        <Button onClick={() => setIsOtpEmil(false)}>
+                        <Button onClick={() => setIsOtpEmail(false)}>
                           Cancel
                         </Button>
                       </div>
-                    )} */}
+                    )}
                   </CardFooter>
                 </form>
               </Form>
