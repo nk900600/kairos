@@ -8,11 +8,7 @@ import { GoBackButton } from "../common/goBackButton";
 import { BreadcrumbComponent } from "../common/breadCrumbs";
 import { AppDispatch } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  createTableSession,
-  fetchAllTableSession,
-  fetchTables,
-} from "../../redux/actions";
+import { createTableSession } from "../../redux/actions";
 import { RootState } from "../../redux/reducer";
 import { EmptyPlaceholder } from "../common/emptyPlaceholder";
 

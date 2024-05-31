@@ -68,7 +68,6 @@ import {
   addTable,
   createTableSession,
   deleteTable,
-  fetchAllTableSession,
   fetchTables,
   updateTable,
   updateTableStatus,

@@ -70,6 +70,7 @@ import {
   fetchTables,
   getAllFirmByNumber,
   logout,
+  updateLoader,
 } from "../redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/reducer";
@@ -143,11 +144,10 @@ function Sidebar() {
   const location = useLocation();
   const hideSidebarOnRoutes = ["/login", "/signup"];
   const showSidebar = !hideSidebarOnRoutes.includes(location.pathname);
-  const { isAuthenticted, myAccount } = useSelector(
+  const { isAuthenticted, myAccount, isLoading } = useSelector(
     (state: { table: RootState }) => state.table
   );
 
-  const [loader, setLoading] = useState(false);
   const [globalError, setGlobalError] = useState("");
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
@@ -157,7 +157,7 @@ function Sidebar() {
         navigate("/dashboard");
       }
       try {
-        setLoading(true);
+        dispatch(updateLoader(true)).unwrap();
         dispatch(fetchMyAccount())
           .unwrap()
           .then(() => {
@@ -171,11 +171,11 @@ function Sidebar() {
               dispatch(getAllFirmByNumber()).unwrap(),
             ])
               .then(() => {
-                setLoading(false); // Hide the loader
+                dispatch(updateLoader(false));
               })
               .catch((error) => {
                 console.error("Error fetching data: ", error);
-                setLoading(false); // Hide the loader in case of error
+                dispatch(updateLoader(false));
               });
           });
       } catch (e) {}
@@ -194,7 +194,7 @@ function Sidebar() {
     return null;
   }
 
-  if (loader) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className=" h-15 w-15 animate-spin flex align-center" />

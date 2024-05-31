@@ -10,11 +10,6 @@ export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const state: any = getState();
-      if (state.table.alltables.length > 0) {
-        return rejectWithValue("alltables already loaded"); // or simply return a resolved promise without fetching
-      }
-
       const response = await axios.get(`tables`);
       return response.data;
     } catch (error) {
@@ -333,10 +328,6 @@ export const fetchAllMenuCategories = createAsyncThunk(
   "tables/fetchAllMenuCategories",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const state: any = getState();
-      if (state.table.allMenuCategories.length > 0) {
-        return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
-      }
       let response = await axios.get(`menus/categories`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -349,11 +340,6 @@ export const fetchAllMenus = createAsyncThunk(
   "tables/fetchAllMenus",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const state: any = getState();
-      if (state.table.allMenu.length > 0) {
-        return rejectWithValue("Menus already loaded"); // or simply return a resolved promise without fetching
-      }
-
       let response = await axios.get(`menus`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -466,11 +452,6 @@ export const fetchAllTableSession = createAsyncThunk(
   "tables/fetchAllTableSession",
   async (_, { rejectWithValue, getState }) => {
     try {
-      const state: any = getState();
-      if (state.table.allTableSessions.length > 0) {
-        return rejectWithValue("allTableSessions already loaded"); // or simply return a resolved promise without fetching
-      }
-
       const response = await axios.get(`tables-session/`);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
@@ -694,9 +675,33 @@ export const createSubcriptionTrial = createAsyncThunk(
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
-        "Something wnet wrong while creating subscrption, please try again"
+        "Something went wrong while creating subscrption, please try again"
       );
       return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+
+export const updateLoader = createAsyncThunk(
+  "tables/updateLoader",
+  async (state: boolean, { rejectWithValue, getState }: any) => {
+    return state;
+  }
+);
+export const getNewToken = createAsyncThunk(
+  "tables/getNewToken",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`auth/token`, { firmId: id });
+      await localStorage.setItem("token", response.data.accessToken);
+      await localStorage.setItem("refreshtoken", response.data.refreshToken);
+
+      console.log(response.data);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while switching firm, please try again"
+      );
     }
   }
 );

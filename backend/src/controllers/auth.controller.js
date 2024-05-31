@@ -531,28 +531,37 @@ class AuthController {
       if (!refreshToken) {
         return res.status(401).json({ error: "Refresh token is missing" });
       }
+      if (!req.body?.firmId) {
+        return res.status(400).json({ error: "Firm Id is missing" });
+      }
 
       const { user } = jwt.verify(refreshToken, process.env.JWT_SECRET);
-
-      const storedToken = await RefreshToken.findOne({
-        where: { token: refreshToken },
+      const employeeData = await Employee.findOne({
+        where: { mobileNumber: user.mobileNumber, firmId: req.body.firmId },
       });
-      if (!storedToken || storedToken.expiryDate < new Date()) {
-        await RefreshToken.destroy({ where: { token: refreshToken } });
-        throw new Error("Invalid or expired refresh token");
+
+      console.log(employeeData, "employeeData");
+      if (!employeeData) {
+        return res
+          .status(400)
+          .json({ error: "Current user does not associate with choosen firm" });
       }
 
       // Generate new tokens
-      const newAccessToken = this.generateToken({ dataValues: user });
-      const newRefreshToken = jwt.sign({ user: user }, process.env.JWT_SECRET, {
-        expiresIn: TOKEN_REFRESH_EXPIRY,
-      });
+      const newAccessToken = this.generateToken({ dataValues: employeeData });
+      const newRefreshToken = jwt.sign(
+        { user: employeeData },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: TOKEN_REFRESH_EXPIRY,
+        }
+      );
 
       // Store the new refresh token in the database
       await RefreshToken.update(
         {
           token: newRefreshToken,
-          userId: user.id,
+          userId: employeeData.id,
           expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days expiry
         },
         { where: { token: refreshToken } }

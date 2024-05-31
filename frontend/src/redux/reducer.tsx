@@ -44,6 +44,7 @@ import {
   updateItemToCart,
   updateLeave,
   updateLeaveStatus,
+  updateLoader,
   updateMenu,
   updateMenuCustomization,
   updateOrderItemStatus,
@@ -158,7 +159,8 @@ const counterSlice = createSlice({
           // if (!state.myAccount.employee?.Firm.image) {
           //   state.myAccount.employee.Firm.image = getRandomGradient();
           // }
-          state.isAdmin = action.payload.employee.Role.name == RoleEnum.ADMIN;
+          state.isAdmin =
+            action.payload?.employee?.Role?.name == RoleEnum.ADMIN;
         }
       )
       .addCase(
@@ -601,7 +603,14 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<any>) => {
           state.myFirms = action.payload;
         }
-      );
+      )
+      .addCase(
+        updateLoader.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.isLoading = action.payload;
+        }
+      )
+    
   },
 });
 
