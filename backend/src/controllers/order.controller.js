@@ -11,6 +11,7 @@ const { Table } = require("../models/table.model");
 const { CartItem } = require("../models/cart.model");
 const moment = require("moment");
 const { calculatePercentageChange } = require("../utils/percentageCount");
+// const { sendPushNotification } = require("../utils/web-notification");
 class OrderController {
   // Create a new order
   async create(req, res) {
@@ -99,6 +100,9 @@ class OrderController {
           },
         ],
       });
+
+      // sendPushNotification("New Order placed", req.user.firmId, );
+      // sendPushNotification("New Order placed", req.user.firmId, "Chef");
 
       return res.status(201).json(createdOrder);
     } catch (error) {

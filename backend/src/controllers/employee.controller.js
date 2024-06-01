@@ -11,6 +11,7 @@ const { Op } = require("sequelize");
 const moment = require("moment");
 const fs = require("fs");
 const { calculatePercentageChange } = require("../utils/percentageCount.js");
+const { getRandomGradient } = require("../utils/colorGradient.js");
 
 class EmployeeController {
   async getAllEmployees(req, res) {
@@ -91,6 +92,7 @@ class EmployeeController {
           roleId: req.body.role,
           firmId: req.user.firmId,
           designationId: req.body.designation,
+          userPic: getRandomGradient(),
         },
         { userId: req.user.id, transaction }
       );

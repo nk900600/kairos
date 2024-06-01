@@ -16,7 +16,7 @@ const {
 const initializeSubsription = require("./src/utils/create-subscription");
 const authMiddleware = require("./src/middleware/auth.middleware");
 const authController = require("./src/controllers/auth.controller");
-const { subscriptions } = require("./src/utils/web-notification");
+const { WebSubscription } = require("./src/models/websubscriptions");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -41,6 +41,8 @@ async function init() {
     "https://app.theshopbusiness.com",
     "http://app.theshopbusiness.com",
     "http://localhost:3000",
+    "http://192.168.43.209:3000",
+    "*",
   ];
 
   app.use(
@@ -80,10 +82,33 @@ async function init() {
   app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
   app.use("/api/cart-items", authMiddleware, cartRoutes);
 
-  app.post("/api/subscribe", (req, res) => {
+  app.post("/api/subscribe", async (req, res) => {
     const subscription = req.body;
-    subscriptions.push(subscription);
-    res.status(201).json({});
+    try {
+      const existingSubscription = await WebSubscription.findOne({
+        where: { endpoint: subscription.endpoint },
+      });
+
+      if (existingSubscription) {
+        // Update existing subscription
+        await existingSubscription.update({
+          keys: subscription.keys,
+          firmId: subscription.firmId,
+          designationId: subscription.designationId,
+        });
+      } else {
+        // Create new subscription
+        await WebSubscription.create({
+          endpoint: subscription.endpoint,
+          keys: subscription.keys,
+          firmId: subscription.firmId,
+          designationId: subscription.designationId,
+        });
+      }
+      res.status(201).json({});
+    } catch (e) {
+      res.status(400).json({ error: "Something went wrong" + e });
+    }
   });
 
   app.listen(port, () => {
