@@ -71,6 +71,7 @@ import {
   getAllFirmByNumber,
   logout,
   updateLoader,
+  updateWebPushSub,
 } from "../redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/reducer";
@@ -171,6 +172,7 @@ function Sidebar() {
               dispatch(getAllFirmByNumber()).unwrap(),
             ])
               .then(() => {
+                dispatch(updateWebPushSub());
                 dispatch(updateLoader(false));
               })
               .catch((error) => {

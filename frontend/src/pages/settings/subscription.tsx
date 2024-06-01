@@ -326,7 +326,7 @@ export function Subscription() {
                     enter it here.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 gap-4 w-1/2">
+                <CardContent className="grid grid-cols-1 gap-4 w-full sm:w-1/2">
                   <FormField
                     control={form.control}
                     name="address"

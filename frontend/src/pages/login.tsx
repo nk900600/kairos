@@ -83,7 +83,7 @@ export default function Login() {
       setIsLoading(false);
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
-      else toast.error("Something went wrong");
+      else toast.error(e);
       setIsLoading(false);
       return;
     }

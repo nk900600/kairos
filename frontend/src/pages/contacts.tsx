@@ -316,7 +316,7 @@ export default function ContactsComponent() {
           {allEmployeesCopy.map((employee) => {
             return (
               <div className="flex items-center gap-4  ">
-                <Avatar className="hidden h-9 w-9 sm:flex">
+                <Avatar className=" h-9 w-9 flex">
                   <AvatarImage src={employee?.userPic} alt="Avatar" />
                   <AvatarFallback
                     style={{

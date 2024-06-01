@@ -265,10 +265,10 @@ export function Dashboard() {
                   alt="User avatar"
                   src={myAccount?.employee?.userPic}
                 />
-                <AvatarFallback className="uppercase">
-                  {myAccount?.employee?.firstName[0] +
-                    myAccount?.employee?.lastName[0]}
-                </AvatarFallback>
+                <AvatarFallback
+                  className="uppercase "
+                  style={{ background: myAccount?.employee?.userPic }}
+                ></AvatarFallback>
               </Avatar>
 
               {/* </Button> */}

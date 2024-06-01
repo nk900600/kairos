@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { dateConvertor } from "../util/date";
 import { ResponsiveContainer } from "recharts";
 import axios from "./axios";
+import { vapidKeys } from "../const/allConsts";
+import { urlBase64ToUint8Array } from "../util/urlBase64ToUint8Array";
 
 export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
@@ -696,12 +698,55 @@ export const getNewToken = createAsyncThunk(
       await localStorage.setItem("token", response.data.accessToken);
       await localStorage.setItem("refreshtoken", response.data.refreshToken);
 
-      console.log(response.data);
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error(
         "Something went wrong while switching firm, please try again"
       );
+    }
+  }
+);
+export const updateWebPushSub = createAsyncThunk(
+  "tables/updateWebPushSub",
+  async (_, { rejectWithValue, getState }) => {
+    if ("serviceWorker" in navigator) {
+      // window.addEventListener("load", function () {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then((registration) => {
+          console.log(
+            "Service Worker registered with scope:",
+            registration.scope
+          );
+
+          Notification.requestPermission().then(async (permission) => {
+            if (permission === "granted") {
+              await new Notification("Hellow workds");
+              let subscription: any = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidKeys),
+              });
+              const state: any = getState();
+              const firmId = state.table?.myAccount.employee.Firm.id;
+              const desginationId =
+                state.table?.myAccount.employee.Designation.id;
+              subscription = JSON.parse(JSON.stringify(subscription));
+              subscription.firmId = firmId;
+              subscription.designationId = desginationId;
+
+              try {
+                await axios.post("/subscribe", subscription);
+                new Notification("Hellow workds");
+              } catch (e: any) {
+                toast.error("Somthing went wrong while subscribing ");
+              }
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
+      // });
     }
   }
 );
