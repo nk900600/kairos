@@ -13,7 +13,7 @@ const subscriptionPlans = [
       "Dashboard Overview",
       "Leave Management",
       "Menu/Service Menu Management",
-      "Basic Analytics",
+      "Basic Analytics"
     ]`,
     isActive: true,
     discountPercentage: 0,
