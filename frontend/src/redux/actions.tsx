@@ -721,7 +721,6 @@ export const updateWebPushSub = createAsyncThunk(
 
           Notification.requestPermission().then(async (permission) => {
             if (permission === "granted") {
-              await new Notification("Hellow workds");
               let subscription: any = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(vapidKeys),
@@ -736,7 +735,6 @@ export const updateWebPushSub = createAsyncThunk(
 
               try {
                 await axios.post("/subscribe", subscription);
-                new Notification("Hellow workds");
               } catch (e: any) {
                 toast.error("Somthing went wrong while subscribing ");
               }

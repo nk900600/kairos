@@ -1,6 +1,5 @@
-const bcrypt = require("bcrypt");
 const { Auth } = require("../models/auth.model");
-const { Role, Employee } = require("../models/employee.model");
+const { Role, Employee, Designation } = require("../models/employee.model");
 const { Firm } = require("../models/firm.model");
 const jwt = require("jsonwebtoken");
 const geoip = require("geoip-lite");
@@ -160,6 +159,10 @@ class AuthController {
       const { mobileNumber, email, firstName, lastName, firmType, firmName } =
         body;
       let adminRole = await Role.findOne({ where: { name: "Admin" } });
+      const designation = await Designation.findOne(
+        { where: { title: "Restaurant Manager" } },
+        {}
+      );
       // Create the firm
       const firm = await Firm.create(
         {
@@ -181,6 +184,7 @@ class AuthController {
           roleId: adminRole.id,
           firmId: firm.id,
           userPic: getRandomGradient(),
+          designationId: designation.id,
         },
         { transaction }
       );

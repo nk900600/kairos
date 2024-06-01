@@ -18,13 +18,11 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: data.body,
-    icon: "https://via.placeholder.com/128",
-    badge: "https://via.placeholder.com/128",
+    icon: "https://kairos-public-images.s3.eu-north-1.amazonaws.com/testgmn(2)(1)(1).png",
     data: {
       url: "https://via.placeholder.com/128",
     },
   };
-  console.log("Push data:", options);
   event.waitUntil(
     self.registration
       .showNotification(data.title, options)
