@@ -2,10 +2,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-export function GoBackButton() {
+export function GoBackButton({ link = "/dashboard" }: any) {
   const navigate = useNavigate();
   const goBack = () => {
-    navigate(-1); // Go back to the previous page
+    navigate(link);
   };
 
   return (
