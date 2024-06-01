@@ -209,8 +209,16 @@ const counterSlice = createSlice({
       )
       .addCase(
         createOrder.fulfilled,
-        (state: RootState, action: PayloadAction<TableType[]>) => {
+        (state: RootState, action: PayloadAction<any>) => {
           state.allOrders.push(action.payload);
+          state.allTableSessions.forEach((val) => {
+            if (
+              val.status == "Active" &&
+              val.id == action.payload.tableSessionId
+            ) {
+              val.orderCount += 1;
+            }
+          });
         }
       )
       .addCase(
@@ -224,19 +232,6 @@ const counterSlice = createSlice({
               ...state.allOrders[index],
               status: action.payload.status,
             };
-          }
-
-          if (action.payload.status == "Completed") {
-            let tableSessionIndex = state.allTableSessions.findIndex(
-              (session) => session.id == state.allOrders[index].tableSessionId
-            );
-            if (tableSessionIndex !== -1) {
-              state.allTableSessions[tableSessionIndex] = {
-                ...state.allTableSessions[tableSessionIndex],
-                orderCount:
-                  state.allTableSessions[tableSessionIndex].orderCount + 1,
-              };
-            }
           }
         }
       )
@@ -609,8 +604,7 @@ const counterSlice = createSlice({
         (state: RootState, action: PayloadAction<any>) => {
           state.isLoading = action.payload;
         }
-      )
-    
+      );
   },
 });
 

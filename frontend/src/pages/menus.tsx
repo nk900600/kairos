@@ -189,9 +189,9 @@ export default function MenusComponent({ canPlaceOrder = false }) {
 
   useEffect(() => {
     // if (!allCartData.length) {
-    let id = allTableSessions?.find(
-      (session) => session.tableId == tableId
-    )?.id;
+    let id = allTableSessions
+      ?.filter((val) => val.status == "Active")
+      .find((session) => session.tableId == tableId)?.id;
     if (id) {
       setTableSessionId(id);
       dispatch(fetchAllCartData(id));

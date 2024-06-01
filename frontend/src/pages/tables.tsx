@@ -155,6 +155,7 @@ export default function TableComponent() {
   const [tabValue, setTableValue] = useState("available");
   const [openMenu, setOpenMenu] = useState(false);
   const [currentTable, setCurrentTable] = useState<any>();
+  const [currentTableSession, setCurrentTableSession] = useState<any>();
 
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
@@ -180,6 +181,11 @@ export default function TableComponent() {
     let mytables = query.get("mytables");
     if (mytables) setTableValue("occupied");
   }, [dispatch]);
+  useEffect(() => {
+    setCurrentTableSession(
+      allTableSessions?.filter((val) => val.status == "Active")
+    );
+  }, [allTableSessions]);
 
   const handleEditClick = (table: any) => {
     setOpen(true);
@@ -454,14 +460,15 @@ export default function TableComponent() {
                           </span>
                           {"  "}
                           <span>
-                            {allTableSessions?.find(
-                              (session) => session.tableId == table.id
+                            {currentTableSession?.find(
+                              (session: any) => session.tableId == table.id
                             )?.startTime && (
                               <LiveTimer
                                 key={table.id}
                                 initialDate={
-                                  allTableSessions?.find(
-                                    (session) => session.tableId == table.id
+                                  currentTableSession?.find(
+                                    (session: any) =>
+                                      session.tableId == table.id
                                   )?.startTime
                                 }
                               />
@@ -478,8 +485,8 @@ export default function TableComponent() {
                           {"  "}
                           <span>
                             {
-                              allTableSessions?.find(
-                                (session) => session.tableId == table.id
+                              currentTableSession?.find(
+                                (session: any) => session.tableId == table.id
                               )?.orderCount
                             }
                           </span>
@@ -487,8 +494,8 @@ export default function TableComponent() {
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-center   p-4  gap-2 lg:p-6 md:p-6  lg:pt-0  md:pt-0  pt-0">
-                      {allTableSessions?.find(
-                        (session) => session.tableId == table.id
+                      {currentTableSession?.find(
+                        (session: any) => session.tableId == table.id
                       )?.orderCount != 0 ? (
                         <>
                           {" "}
@@ -654,8 +661,8 @@ export default function TableComponent() {
         <SheetTrigger asChild></SheetTrigger>
         <SheetContent className="w-full" {...handlers}>
           <ClosetabPanel
-            tableSessionObj={allTableSessions?.find(
-              (session) => session.tableId == currentTable?.id
+            tableSessionObj={currentTableSession?.find(
+              (session: any) => session.tableId == currentTable?.id
             )}
             onClose={() => setOpenPanel(false)}
           ></ClosetabPanel>
@@ -859,7 +866,7 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
   const [totalAmount, setTotalAmount] = useState<any>(0);
   const [currentPayment, setCurrentPayment] = useState<any>("cash");
   const [loading, setLoading] = useState<any>(false);
-  const { alltables, allOrders, allEmployees, allTableSessions } = useSelector(
+  const { alltables, allOrders, allEmployees } = useSelector(
     (state: { table: RootState }) => state.table
   );
   const dispatch: AppDispatch = useDispatch();
@@ -930,9 +937,11 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
                           <Badge variant={"destructive"}>{"Canceled"}</Badge>
                         )}{" "}
                         {(orderData.status == OrderStatuses.CONFIRMED ||
-                          orderData.status == OrderStatuses.PREPARING) && (
+                          orderData.status == OrderStatuses.PREPARING ||
+                          orderData.status ==
+                            OrderStatuses.READY_FOR_PICKUP) && (
                           // <span className="flex h-2 w-2 rounded-full bg-green-600"></span>
-                          <Badge variant={"default"}>{"Ongoing"}</Badge>
+                          <Badge variant={"default"}>{orderData.status}</Badge>
                         )}{" "}
                         {/* </span> */}
                       </span>
@@ -1004,14 +1013,15 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
             .filter(
               (val) =>
                 val.status == OrderStatuses.PREPARING ||
-                val.status == OrderStatuses.CONFIRMED
+                val.status == OrderStatuses.CONFIRMED ||
+                val.status == OrderStatuses.READY_FOR_PICKUP
             ).length ? (
             <div className="bg-blue-100 p-4 rounded-md dark:bg-gray-800">
               <div className="space-y-2">
                 <p className="text-gray-500 dark:text-gray-400">
-                  We can’t close the bill right now because your order is still
-                  being made. Once everything is ready, we can settle up. Thanks
-                  for waiting!
+                  We can’t close the bill right now because some of your orders
+                  are being prepared, confirmed, or are ready to be served. Once
+                  everything is ready, we can settle up. Thanks for waiting!
                 </p>
               </div>
             </div>

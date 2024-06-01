@@ -4,6 +4,7 @@ const { Table } = require("../models/table.model.js");
 const {
   TableSession,
   SessionStatus,
+  PaymentStatus,
 } = require("../models/tableSession.model.js");
 const { webPush, subscriptions } = require("../utils/web-notification.js");
 
@@ -152,7 +153,7 @@ class TableController {
 
       if (req.body?.status == TableStatus.AVAILABLE) {
         await TableSession.update(
-          { status: SessionStatus.CLOSE },
+          { status: SessionStatus.CLOSE, paymentStatus: PaymentStatus.PAID },
           {
             where: { tableId: req.params.id, status: SessionStatus.ACTIVE },
             transaction,
