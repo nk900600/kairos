@@ -94,7 +94,7 @@ export const CustomizationPage = () => {
         ]}
       />
       <div className="flex items-center gap-4">
-        <GoBackButton />
+        <GoBackButton link={"/menus"} />
         <h1 className="flex-1 whitespace-nowrap text-lg sm:text-2xl  font-semibold  ">
           <p className="truncate w-[200px] sm:w-full">{currentMenu?.name}</p>
         </h1>
