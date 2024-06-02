@@ -128,7 +128,7 @@ export function CurrentOrderContentComponent({
         <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center gap-3">
             {/* <PackageIcon className="h-7 w-7" /> */}
-            <span className="sr-only">Acme Inc</span>
+            <span className="sr-only">The shop busniess inc</span>
             <h1 className="font-semibold text-base">My Cart</h1>
           </SheetTitle>
           <Separator className="my-2" />

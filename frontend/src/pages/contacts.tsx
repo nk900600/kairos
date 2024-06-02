@@ -84,6 +84,14 @@ import {
 import { toast } from "sonner";
 import { RoleEnum } from "../util/role";
 import { EmptyPlaceholder } from "./common/emptyPlaceholder";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../components/ui/sheet";
+import { Separator } from "../components/ui/separator";
 
 const AllDesgination = [
   {
@@ -221,7 +229,9 @@ export default function ContactsComponent() {
     setAllEmployeesCopy(newData);
   };
 
-  const handleEditClick = (employee: any) => {
+  const handleEditClick = (e: any, employee: any) => {
+    e.preventDefault();
+    e.stopPropagation();
     setOpen(true);
     setTitle("Edit Employee");
     setDescription("Edit your profile here. Click save when you're done");
@@ -315,41 +325,53 @@ export default function ContactsComponent() {
         <CardContent className="grid gap-8">
           {allEmployeesCopy.map((employee) => {
             return (
-              <div className="flex items-center gap-4  ">
-                <Avatar className=" h-9 w-9 flex">
-                  <AvatarImage src={employee?.userPic} alt="Avatar" />
-                  <AvatarFallback
-                    style={{
-                      background: employee?.userPic,
-                    }}
-                  ></AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    {employee.firstName} {employee.lastName}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {
-                      allDesgination?.find(
-                        (val) => val.id == employee?.designationId
-                      )?.title
-                    }
-                  </p>
-                </div>
-                {isAdmin && (
-                  <div className="ml-auto font-medium gap-4">
-                    <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
-                      <div
-                        onClick={() => handleEditClick(employee)}
-                        className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </div>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <div className="flex items-center gap-4 cursor-pointer ">
+                    {/* <Button variant={"ghost"}> */}
+                    <Avatar className=" h-9 w-9 flex">
+                      <AvatarImage src={employee?.userPic} alt="Avatar" />
+                      <AvatarFallback
+                        style={{
+                          background: employee?.userPic,
+                        }}
+                      ></AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-1">
+                      <p className="text-sm font-medium leading-none">
+                        {employee.firstName} {employee.lastName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {
+                          allDesgination?.find(
+                            (val) => val.id == employee?.designationId
+                          )?.title
+                        }
+                      </p>
                     </div>
-                    <AlertDialogDemo employeeId={employee.id}></AlertDialogDemo>
+                    {isAdmin && (
+                      <div className="ml-auto font-medium gap-4">
+                        <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
+                          <div
+                            onClick={(e: any) => handleEditClick(e, employee)}
+                            className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </div>
+                        </div>
+                        <AlertDialogDemo
+                          employeeId={employee.id}
+                        ></AlertDialogDemo>
+                      </div>
+                    )}
+                    {/* </Button> */}
                   </div>
-                )}
-              </div>
+                </SheetTrigger>
+                <SheetContent className="w-full">
+                  <ViewContact employee={employee}></ViewContact>
+                </SheetContent>
+              </Sheet>
+              // </div>
             );
           })}
 
@@ -367,15 +389,35 @@ export default function ContactsComponent() {
 }
 
 export function AlertDialogDemo({ employeeId }: any) {
+  const [open, setOpen] = useState(false);
   const dispatch: AppDispatch = useDispatch();
-  const handleEmployeeDelete = () => {
+  const handleEmployeeDelete = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
     dispatch(deleteEmployees(employeeId));
   };
+  const handleEvent = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(true);
+  };
+  const handleCancel = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(false);
+  };
+  const handleChnage = (val: any) => {
+    setOpen(val);
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={handleChnage}>
       <AlertDialogTrigger asChild>
         {/* <Button variant="outline">Show Dialog</Button> */}
-        <div className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0">
+        <div
+          onClick={handleEvent}
+          className=" cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 py-2 w-9 px-0"
+        >
           <Trash2 className="h-3 w-3" />
         </div>
       </AlertDialogTrigger>
@@ -388,7 +430,7 @@ export function AlertDialogDemo({ employeeId }: any) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleEmployeeDelete}>
             Continue
           </AlertDialogAction>
@@ -605,3 +647,69 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
     </Form>
   );
 };
+
+export function ViewContact({ employee = {} }: any) {
+  return (
+    <>
+      <SheetHeader className="mb-4">
+        <SheetTitle className="flex items-center gap-3">
+          <span className="sr-only">The shop busniess inc</span>
+          <h1 className="font-semibold text-base">Employee Details</h1>
+        </SheetTitle>
+        <Separator className="my-2" />
+      </SheetHeader>
+      <CardContent className="w-full  p-0  dark:bg-gray-950">
+        <div className="flex w-full justify-center ">
+          <div
+            className=" relative h-40 w-40  rounded-full  my-4 border"
+            style={{
+              background: employee?.userPic,
+            }}
+          >
+            <img
+              src={employee?.userPic}
+              alt="Employee Image"
+              width={400}
+              height={400}
+              className="w-full h-full object-cover"
+              style={{
+                background: employee?.userPic,
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="text-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex  flex-col text-center w-full">
+              <h3 className="text-xl font-semibold">
+                {" "}
+                {employee.firstName + " " + employee.lastName}{" "}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Software Engineer
+              </p>
+            </div>
+          </div>
+          <Separator className="my-4" />
+          <div className="grid gap-3">
+            <div className="font-semibold">Contact Information</div>
+            <dl className="grid gap-3">
+              <div className="flex items-center justify-between">
+                <dt className="text-muted-foreground">Email</dt>
+                <dd> {employee.email}</dd>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <dt className="text-muted-foreground">phone</dt>
+                <dd>
+                  <a href="tel:"> {employee.mobileNumber}</a>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </CardContent>
+    </>
+  );
+}
