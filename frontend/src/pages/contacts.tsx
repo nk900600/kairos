@@ -660,23 +660,15 @@ export function ViewContact({ employee = {} }: any) {
       </SheetHeader>
       <CardContent className="w-full  p-0  dark:bg-gray-950">
         <div className="flex w-full justify-center ">
-          <div
-            className=" relative h-40 w-40  rounded-full  my-4 border"
-            style={{
-              background: employee?.userPic,
-            }}
-          >
-            <img
-              src={employee?.userPic}
-              alt="Employee Image"
-              width={400}
-              height={400}
-              className="w-full h-full object-cover"
+          <Avatar className="h-40 w-40 border ">
+            <AvatarImage alt="User avatar" src={employee?.userPic} />
+            <AvatarFallback
+              className="uppercase"
               style={{
                 background: employee?.userPic,
               }}
-            />
-          </div>
+            ></AvatarFallback>
+          </Avatar>
         </div>
 
         <div className="text-sm">
