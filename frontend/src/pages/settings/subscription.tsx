@@ -156,6 +156,7 @@ export function Subscription() {
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setLoading] = useState(false);
+  const [isLoadingDelete, setLoadingDelete] = useState(false);
   const [allFeatures, setAllFeatures] = useState([]);
 
   const { myAccount }: any = useSelector(
@@ -243,12 +244,12 @@ export function Subscription() {
   };
 
   const handleFirmDelete = async () => {
-    setLoading(true);
+    setLoadingDelete(true);
     try {
       await dispatch(deleteFirm()).unwrap();
-      setLoading(false);
+      setLoadingDelete(false);
     } catch (e: any) {
-      setLoading(false);
+      setLoadingDelete(false);
     }
   };
   const handleCreateSub = async (e: any) => {
@@ -639,7 +640,7 @@ export function Subscription() {
             <CardFooter className="border-t px-6 py-4 bg-red-100">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" loading={isLoading}>
+                  <Button variant="destructive" loading={isLoadingDelete}>
                     Delete Account
                   </Button>
                 </AlertDialogTrigger>
