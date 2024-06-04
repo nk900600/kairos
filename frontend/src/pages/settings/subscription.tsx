@@ -366,11 +366,11 @@ export function Subscription() {
               </div>{" "}
             </CardContent>
 
-            <CardFooter className="border-t px-6 py-4 flex flex-col gap-4 flex-start">
+            <CardFooter className="border-t px-6 py-4 flex flex-col gap-4 flex-start items-start">
               {!myAccount?.subscripition.isActive && (
                 <div className="bg-red-100 p-4 rounded-md dark:bg-gray-800">
                   <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-600 dark:text-gray-400 ">
                       {myAccount?.subscripition.subscriptionState ==
                         SubscriptionStateType.INITIALIZED &&
                         `Your subscription trial period has ended. Please activate
