@@ -48,10 +48,15 @@ import {
 } from "../../components/ui/form";
 import { AppDispatch } from "../../redux/store";
 import {
+  activateSubscription,
+  cancelSubscription,
+  createSubscriptionGenerateSubLink,
   deleteFirm,
+  pauseSubscription,
   updateEmployees,
   updateFirm,
   updateFirmImage,
+  updateSubcription,
 } from "../../redux/actions";
 import axiosInstance from "../../redux/axios";
 import {
@@ -65,6 +70,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { useQuery } from "../../util/query";
 // const stateEnum = z.enum([
 
 // ]);
@@ -134,6 +142,16 @@ const BillingSchema = z.object({
     .min(111111, "Please Enter a valid Pincode ")
     .max(999999, "Please Enter a valid Pincode"),
 });
+
+export const SubscriptionStateType = Object.freeze({
+  PAUSED: "PAUSED",
+  ACTIVE: "ACTIVE",
+  CUSTOMER_PAUSED: "CUSTOMER PAUSED",
+  CUSTOMER_CANCELLED: "CUSTOMER CANCELLED",
+  ON_HOLD: "ON HOLD",
+  INITIALIZED: "INITIALIZED",
+});
+
 export function Subscription() {
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
@@ -143,6 +161,14 @@ export function Subscription() {
   const { myAccount }: any = useSelector(
     (state: { table: RootState }) => state.table
   );
+
+  const query = useQuery();
+
+  useEffect(() => {
+    if (query.get("status") == "success") {
+      toast.success("Great you are subscribe to the basic plan");
+    }
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(BillingSchema),
@@ -161,10 +187,24 @@ export function Subscription() {
   useEffect(() => {
     setName(myAccount?.employee.Firm?.name);
     setImage(myAccount?.employee.Firm?.image);
-    if (myAccount?.subscripition)
+    if (myAccount?.subscripition) {
       setAllFeatures(
         JSON.parse(myAccount?.subscripition?.Subscription?.features)
       );
+      if (
+        myAccount?.subscripition?.isTrailEnded &&
+        myAccount?.subscripition?.isActive &&
+        myAccount?.subscripition.subscriptionState ==
+          SubscriptionStateType.INITIALIZED
+      ) {
+        dispatch(
+          updateSubcription({
+            id: myAccount?.subscripition?.id,
+            isActive: false,
+          })
+        );
+      }
+    }
   }, [myAccount]);
 
   const onBillingSubmit = async (data: any) => {
@@ -211,6 +251,80 @@ export function Subscription() {
       setLoading(false);
     }
   };
+  const handleCreateSub = async (e: any) => {
+    setLoading(true);
+    try {
+      if (
+        myAccount?.subscripition.subscriptionState ==
+          SubscriptionStateType.INITIALIZED ||
+        myAccount?.subscripition.subscriptionState ==
+          SubscriptionStateType.CUSTOMER_CANCELLED
+      ) {
+        await dispatch(
+          createSubscriptionGenerateSubLink(myAccount?.subscripition?.id)
+        )
+          .unwrap()
+          .then((res) => {
+            window.open(res.authLink, "_blank");
+          });
+      }
+      if (
+        myAccount?.subscripition.subscriptionState ==
+        SubscriptionStateType.PAUSED
+      ) {
+        await dispatch(
+          activateSubscription({
+            id: myAccount?.subscripition?.id,
+            subReferenceId: myAccount?.subscripition.subReferenceId,
+          })
+        )
+          .unwrap()
+          .then((res) => {
+            toast.info("You Subscription Activated");
+          });
+      }
+      setLoading(false);
+    } catch (e: any) {
+      setLoading(false);
+    }
+  };
+
+  const handlePauseState = async () => {
+    setLoading(true);
+    try {
+      await dispatch(
+        pauseSubscription({
+          id: myAccount?.subscripition?.id,
+          subReferenceId: myAccount?.subscripition.subReferenceId,
+        })
+      )
+        .unwrap()
+        .then((res) => {
+          setLoading(false);
+          toast.info("You Subsription paused for the moment");
+        });
+
+      setLoading(false);
+    } catch (e: any) {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelState = async () => {
+    setLoading(true);
+    try {
+      await dispatch(
+        cancelSubscription({
+          id: myAccount?.subscripition?.id,
+          subReferenceId: myAccount?.subscripition.subReferenceId,
+        })
+      ).unwrap();
+      toast.info("You Subsription cancelled");
+      setLoading(false);
+    } catch (e: any) {
+      setLoading(false);
+    }
+  };
 
   return (
     // <main className="flex-1 grid min-h-[400px] gap-4 p-4 md:gap-8 md:p-6">
@@ -222,7 +336,9 @@ export function Subscription() {
             <CardHeader className="">
               <CardTitle className="text-lg flex gap-4">
                 <div>Basic Plan</div>
-                {myAccount?.subscripition?.trialEndDate && <Badge>Trail</Badge>}
+                {!myAccount?.subscripition?.isTrailEnded && (
+                  <Badge>Trail</Badge>
+                )}
               </CardTitle>
               <CardDescription>
                 {myAccount?.subscripition?.Subscription?.additionalNotes}
@@ -247,13 +363,64 @@ export function Subscription() {
                   })}
                 </ul>
               </div>{" "}
-              <div></div>
             </CardContent>
-            <CardFooter className="border-t px-6 py-4 flex gap-4 ">
-              <Button disabled>Upgrade Plan</Button>
-              {!myAccount?.subscripition?.trialEndDate && (
-                <Button variant={"link"}>Need to Cancel?</Button>
+
+            <CardFooter className="border-t px-6 py-4 flex flex-col gap-4 flex-start">
+              {!myAccount?.subscripition.isActive && (
+                <div className="bg-red-100 p-4 rounded-md dark:bg-gray-800">
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {myAccount?.subscripition.subscriptionState ==
+                        SubscriptionStateType.INITIALIZED &&
+                        `Your subscription trial period has ended. Please activate
+                      your subscription to continue enjoying our services. You
+                      will not be able to place new orders until your
+                      subscription is activated`}
+
+                      {(myAccount?.subscripition.subscriptionState ==
+                        SubscriptionStateType.PAUSED ||
+                        myAccount?.subscripition.subscriptionState ==
+                          SubscriptionStateType.CUSTOMER_CANCELLED) &&
+                        `Please activate
+                        your subscription to continue enjoying our services. You
+                        will not be able to place new orders until your
+                        subscription is activated`}
+                    </p>
+                  </div>
+                </div>
               )}
+              <div className="flex gap-4 flex-start w-full ">
+                {!myAccount?.subscripition.isActive && (
+                  <Button onClick={handleCreateSub} loading={isLoading}>
+                    {myAccount?.subscripition.subscriptionState ==
+                      SubscriptionStateType.INITIALIZED &&
+                      "Trail ended, please subscribe"}
+                    {myAccount?.subscripition.subscriptionState ==
+                      SubscriptionStateType.PAUSED && "Please Activate"}
+
+                    {myAccount?.subscripition.subscriptionState ==
+                      SubscriptionStateType.CUSTOMER_CANCELLED &&
+                      "Please Activate"}
+                  </Button>
+                )}
+
+                {myAccount?.subscripition?.isActive &&
+                  myAccount?.subscripition?.subscriptionState ==
+                    SubscriptionStateType.ACTIVE && (
+                    <>
+                      {/* <Button onClick={handlePauseState} variant={"outline"}>
+                        Pause Subscription
+                      </Button> */}
+                      <Button
+                        onClick={handleCancelState}
+                        variant={"link"}
+                        className="text-destructive"
+                      >
+                        Need to Cancel?
+                      </Button>
+                    </>
+                  )}
+              </div>
             </CardFooter>
           </Card>
         </div>

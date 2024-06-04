@@ -1,9 +1,19 @@
+const { where } = require("sequelize");
 const { Firm } = require("../models/firm.model");
 const {
   FirmSubscription,
   Subscription,
+  SubscriptionStateType,
 } = require("../models/subscription.model");
+const {
+  createSub,
+  pauseSub,
+  cancelSub,
+  getSubDetails,
+  activateSub,
+} = require("../utils/cash-free-payments");
 const { calculateNextBillingDate } = require("../utils/util");
+const { format, add } = require("date-fns");
 
 class FirmSubscriptionController {
   // Create a new FirmSubscription
@@ -53,19 +63,6 @@ class FirmSubscriptionController {
     }
   }
 
-  // Get all FirmSubscriptions
-  static async getAllFirmSubscriptions(req, res) {
-    try {
-      const firmSubscriptions = await FirmSubscription.findAll({
-        include: [Subscription, Firm],
-        where: { firmId: req.user.firmId },
-      });
-      return res.status(200).json(firmSubscriptions);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
   // Get a FirmSubscription by ID
   static async getFirmSubscriptionById(req, res) {
     try {
@@ -81,79 +78,7 @@ class FirmSubscriptionController {
     }
   }
 
-  // Update a FirmSubscription
-  static async updateFirmSubscription(req, res) {
-    try {
-      const firmSubscription = await FirmSubscription.findByPk(req.params.id);
-      if (!firmSubscription) {
-        return res.status(404).json({ message: "FirmSubscription not found" });
-      }
-      await firmSubscription.update(req.body);
-      return res.status(200).json(firmSubscription);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
-  // Delete a FirmSubscription
-  static async deleteFirmSubscription(req, res) {
-    try {
-      const firmSubscription = await FirmSubscription.findByPk(req.params.id);
-      if (!firmSubscription) {
-        return res.status(404).json({ message: "FirmSubscription not found" });
-      }
-      await firmSubscription.destroy();
-      return res.status(204).send();
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
-  // Renew a FirmSubscription
-  static async renewFirmSubscription(req, res) {
-    try {
-      const firmSubscriptions = await FirmSubscription.findOne({
-        where: { id: req.params.id },
-      });
-      if (!firmSubscriptions) {
-        return res.status(400).json({ message: "subscription not found" });
-      }
-
-      if (firmSubscriptions && firmSubscriptions.isActive) {
-        return res.status(400).json({ message: "subscription already active" });
-      }
-
-      let nextBillingDate = calculateNextBillingDate(
-        firmSubscriptions.billingCycle
-      );
-
-      firmSubscriptions.isActive = true;
-      firmSubscriptions.nextBillingDate = nextBillingDate;
-      firmSubscriptions.save();
-      return res.status(200).json(firmSubscriptions);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
-  // Cancel a FirmSubscription
-  static async cancelFirmSubscription(req, res) {
-    try {
-      const firmSubscriptions = await FirmSubscription.findOne({
-        where: { id: req.params.id },
-      });
-      if (!firmSubscriptions) {
-        return res.status(400).json({ message: "subscription not found" });
-      }
-
-      firmSubscriptions.isActive = false;
-      firmSubscriptions.save();
-      return res.status(200).json(firmSubscriptions);
-    } catch (error) {
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
+ 
   static async startTrialFirmSubscription(req, res) {
     try {
       if (!req.body?.billingCycle || !req.body?.SubscriptionId) {
@@ -197,6 +122,136 @@ class FirmSubscriptionController {
         include: [{ model: Subscription }],
       });
       return res.status(201).json(subs);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async createSubscriptionPaymentGateway(req, res) {
+    try {
+      console.log("dcdc");
+      createSub({
+        subscriptionId: Math.floor(Math.random() * 10000000) + 1,
+        planId: "1",
+        customerName: req.user.firstName + " " + req.user.lastName,
+        customerPhone: req.user.mobileNumber,
+        customerEmail: req.user.email,
+        returnUrl: `http://localhost:4200/api/payment-redirect/${req.user.firmId}`,
+        authAmount: 1,
+        expiresOn: "2030-12-02 00:00:00",
+        linkExpiry: 5,
+        notificationChannels: ["EMAIL", "SMS"],
+      })
+        .then(async function (response) {
+          console.log(response.data);
+          const { subReferenceId, authLink } = response.data.data;
+          await FirmSubscription.update(
+            {
+              subReferenceId,
+              authLink,
+            },
+            { where: { id: req.params.id } }
+          );
+
+          return res.status(201).json(response.data.data);
+        })
+        .catch((error) => {
+          return res.status(500).json({ message: error.message });
+        });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async pauseSubscriptionPaymentGateway(req, res) {
+    try {
+      pauseSub(req.params.subReferenceId)
+        .then(async function (response) {
+          await FirmSubscription.update(
+            {
+              isActive: false,
+              subscriptionState: SubscriptionStateType.PAUSED,
+            },
+            { where: { id: req.params.id } }
+          );
+
+          return res.status(201).json(response.data);
+        })
+        .catch(function (error) {
+          return res.status(500).json({ message: error.message });
+        });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async activateSubscriptionPaymentGateway(req, res) {
+    try {
+      activateSub(
+        req.params.subReferenceId,
+        JSON.stringify({
+          nextScheduledOn: format(add(new Date(), { days: 3 }), "yyyy-MM-dd"),
+        })
+      )
+        .then(async function (response) {
+          await FirmSubscription.update(
+            {
+              isActive: true,
+              subscriptionState: SubscriptionStateType.ACTIVE,
+            },
+            { where: { id: req.params.id } }
+          );
+
+          return res.status(201).json("sucesss");
+        })
+        .catch(function (error) {
+          console.log(error);
+          return res.status(500).json({ message: error.message });
+        });
+
+      // return res.status(201).json("subs");
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  static async cancelSubscriptionPaymentGateway(req, res) {
+    try {
+      cancelSub(req.params.subReferenceId)
+        .then(async function (response) {
+          await FirmSubscription.update(
+            {
+              isActive: false,
+              subscriptionState: SubscriptionStateType.CUSTOMER_CANCELLED,
+            },
+            { where: { id: req.params.id } }
+          );
+          return res.status(201).json(response.data);
+        })
+        .catch(function (error) {
+          return res.status(500).json({ message: error.message });
+        });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+  static async getSubscriptionPaymentGateway(req, res) {
+    try {
+      getSubDetails(req.params.subReferenceId)
+        .then(async function (response) {
+          await FirmSubscription.update(
+            {
+              isActive: false,
+            },
+            { where: { id: req.params.id } }
+          );
+
+          return res.status(201).json(response.data);
+        })
+        .catch(function (error) {
+          return res.status(500).json({ message: error.message });
+        });
+      return res.status(201).json("subs");
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }

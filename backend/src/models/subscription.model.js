@@ -6,6 +6,14 @@ const BilliingTypes = Object.freeze({
   MONTHLY: "monthly",
   ANNUALLY: "annually",
 });
+const SubscriptionStateType = Object.freeze({
+  PAUSED: "PAUSED",
+  ACTIVE: "ACTIVE",
+  CUSTOMER_PAUSED: "CUSTOMER PAUSED",
+  CUSTOMER_CANCELLED: "CUSTOMER CANCELLED",
+  ON_HOLD: "ON HOLD",
+  INITIALIZED: "INITIALIZED",
+});
 const Subscription = sequelize.define(
   "Subscription",
   {
@@ -86,6 +94,13 @@ const FirmSubscription = sequelize.define(
       type: DataTypes.ENUM(...Object.values(BilliingTypes)),
       allowNull: false,
     },
+    subReferenceId: DataTypes.STRING,
+    authLink: DataTypes.STRING,
+    subscriptionState: {
+      type: DataTypes.ENUM(...Object.values(SubscriptionStateType)),
+      allowNull: true,
+      defaultValue: "INITIALIZED",
+    },
 
     // Additional fields as needed...
   },
@@ -102,5 +117,5 @@ const FirmSubscription = sequelize.define(
 
 FirmSubscription.belongsTo(Subscription);
 FirmSubscription.belongsTo(Firm);
-
-module.exports = { Subscription, FirmSubscription, BilliingTypes };
+// FirmSubscription.sync({ alter: true });
+module.exports = { Subscription, FirmSubscription, BilliingTypes , SubscriptionStateType};

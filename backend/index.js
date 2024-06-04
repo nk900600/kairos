@@ -12,6 +12,7 @@ const initializeFirmTypes = require("./src/utils/create-firm-types");
 const {
   Subscription,
   FirmSubscription,
+  SubscriptionStateType,
 } = require("./src/models/subscription.model");
 const initializeSubsription = require("./src/utils/create-subscription");
 const authMiddleware = require("./src/middleware/auth.middleware");
@@ -41,15 +42,19 @@ async function init() {
     "https://app.theshopbusiness.com",
     "http://app.theshopbusiness.com",
     "http://localhost:3000",
+    "http://localhost:4200",
     "http://192.168.43.209:3000",
-    "*",
+    "http://192.168.43.209:4200",
+    "https://test.cashfree.com",
+    "https://api.cashfree.com",
+    "https://payments-test.cashfree.com",
   ];
 
   app.use(
     cors({
       origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        if (!origin || origin === "null") return callback(null, true);
         if (allowedOrigins.includes(origin)) {
           return callback(null, true);
         } else {
@@ -58,6 +63,7 @@ async function init() {
           return callback(new Error(msg), false);
         }
       }, // Replace with the URL of your front-end app
+      optionsSuccessStatus: 200,
       credentials: true,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
       allowedHeaders:
@@ -81,6 +87,18 @@ async function init() {
   app.use("/api/tables-session", authMiddleware, tableSessionRoutes);
   app.use("/api/firm-subscriptions", authMiddleware, firmSubscriptionRoutes);
   app.use("/api/cart-items", authMiddleware, cartRoutes);
+
+  app.post("/api/payment-redirect/:firmId", async (req, res) => {
+    await FirmSubscription.update(
+      {
+        isActive: true,
+        subscriptionState: SubscriptionStateType.ACTIVE,
+      },
+      { where: { FirmId: req.params.firmId } }
+    );
+
+    res.redirect(`http://localhost:3000/dashboard`);
+  });
 
   app.post("/api/subscribe", async (req, res) => {
     const subscription = req.body;

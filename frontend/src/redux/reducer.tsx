@@ -3,10 +3,12 @@ import { TableType } from "./types/tables";
 import {
   DeleteLeaveTypes,
   UpdateLeaveTypes,
+  activateSubscription,
   addEmployee,
   addItemToCart,
   addTable,
   authenticateUser,
+  cancelSubscription,
   createAllLeaveTypes,
   createLeave,
   createMenu,
@@ -15,6 +17,7 @@ import {
   createOrder,
   createSubcription,
   createSubcriptionTrial,
+  createSubscriptionGenerateSubLink,
   createTableSession,
   deleteAllCartItemFromTableSession,
   deleteEmployees,
@@ -38,6 +41,7 @@ import {
   getAllFirmByNumber,
   login,
   logout,
+  pauseSubscription,
   updateEmployees,
   updateFirm,
   updateFirmImage,
@@ -49,11 +53,13 @@ import {
   updateMenuCustomization,
   updateOrderItemStatus,
   updateOrderStatus,
+  updateSubcription,
   updateTable,
   updateTableStatus,
 } from "./actions";
 import { toast } from "sonner";
 import { RoleEnum } from "../util/role";
+import { SubscriptionStateType } from "../pages/settings/subscription";
 // import { getRandomGradient } from "../util/colorGradient";
 
 export interface RootState {
@@ -156,11 +162,62 @@ const counterSlice = createSlice({
         fetchMyAccount.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount = action.payload;
+          state.myAccount.subscripition.trialEndDate =
+            state.myAccount.subscripition["isTrailEnded"] =
+              new Date(state.myAccount.subscripition.trialEndDate) < new Date();
           // if (!state.myAccount.employee?.Firm.image) {
           //   state.myAccount.employee.Firm.image = getRandomGradient();
           // }
           state.isAdmin =
             action.payload?.employee?.Role?.name == RoleEnum.ADMIN;
+        }
+      )
+      .addCase(
+        updateSubcription.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = {
+            ...state.myAccount.subscripition,
+            ...action.payload,
+          };
+          state.myAccount.subscripition.trialEndDate =
+            state.myAccount.subscripition["isTrailEnded"] =
+              new Date(state.myAccount.subscripition.trialEndDate) < new Date();
+        }
+      )
+      .addCase(
+        pauseSubscription.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = {
+            ...state.myAccount.subscripition,
+            ...{
+              isActive: false,
+              subscriptionState: SubscriptionStateType.PAUSED,
+            },
+          };
+        }
+      )
+      .addCase(
+        activateSubscription.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = {
+            ...state.myAccount.subscripition,
+            ...{
+              isActive: true,
+              subscriptionState: SubscriptionStateType.ACTIVE,
+            },
+          };
+        }
+      )
+      .addCase(
+        cancelSubscription.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = {
+            ...state.myAccount.subscripition,
+            ...{
+              isActive: false,
+              subscriptionState: SubscriptionStateType.CUSTOMER_CANCELLED,
+            },
+          };
         }
       )
       .addCase(
@@ -519,6 +576,15 @@ const counterSlice = createSlice({
         createSubcriptionTrial.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount.subscripition = action.payload;
+        }
+      )
+      .addCase(
+        createSubscriptionGenerateSubLink.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.myAccount.subscripition = {
+            ...state.myAccount.subscripition,
+            ...action.payload,
+          };
         }
       )
 

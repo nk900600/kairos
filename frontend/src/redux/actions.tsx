@@ -683,6 +683,91 @@ export const createSubcriptionTrial = createAsyncThunk(
     }
   }
 );
+export const updateSubcription = createAsyncThunk(
+  "tables/updateSubcription",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `firm-subscriptions/${payload.id}`,
+        payload
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while creating subscrption, please try again"
+      );
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const createSubscriptionGenerateSubLink = createAsyncThunk(
+  "tables/createSubscriptionGenerateSubLink",
+  async (id: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `firm-subscriptions/${id}/create-sub`,
+        {}
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while creating subscrption, please try again"
+      );
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const pauseSubscription = createAsyncThunk(
+  "tables/pauseSubscription",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `firm-subscriptions/${payload.id}/pause/${payload.subReferenceId}`,
+        {}
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while creating subscrption, please try again"
+      );
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const activateSubscription = createAsyncThunk(
+  "tables/activateSubscription",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `firm-subscriptions/${payload.id}/activate/${payload.subReferenceId}`,
+        {}
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while creating subscrption, please try again"
+      );
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
+export const cancelSubscription = createAsyncThunk(
+  "tables/cancelSubscription",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `firm-subscriptions/${payload.id}/cancel/${payload.subReferenceId}`,
+        {}
+      );
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error(
+        "Something went wrong while creating subscrption, please try again"
+      );
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
 
 export const updateLoader = createAsyncThunk(
   "tables/updateLoader",
