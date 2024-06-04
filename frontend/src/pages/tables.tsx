@@ -925,7 +925,6 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
             <ul className="grid gap-3">
               {allOrders
                 .filter((val) => val.tableSessionId == tableSessionObj.id)
-                .filter((val) => val.status != OrderStatuses.CANCELLED)
                 .map((orderData) => {
                   return (
                     <>

@@ -1,12 +1,13 @@
 import { ArrowLeft, ArrowRight, Ratio } from "lucide-react";
 import { Progress } from "../../components/ui/progress";
 import { Button } from "../../components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MenusComponent from "../menus";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { GoBackButton } from "../common/goBackButton";
 import { BreadcrumbComponent } from "../common/breadCrumbs";
-const tables = [1, 2, 3];
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/reducer";
 
 const header: any = {
   table: {
@@ -20,9 +21,23 @@ const header: any = {
 };
 export default function SelectItemsComponent({}) {
   const navigate = useNavigate();
+  const { allTableSessions } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   const goBack = () => {
     navigate(-1); // Go back to the previous page
   };
+  const { tableId } = useParams();
+  useEffect(() => {
+    if (allTableSessions && !!allTableSessions.length) {
+      let id = allTableSessions.filter(
+        (val) => val.tableId == tableId && val.status == "Active"
+      );
+      if (id.length == 0) {
+        navigate("/dashboard");
+      }
+    }
+  }, [allTableSessions]);
 
   return (
     <>
