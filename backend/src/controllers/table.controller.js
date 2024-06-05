@@ -6,7 +6,7 @@ const {
   SessionStatus,
   PaymentStatus,
 } = require("../models/tableSession.model.js");
-const { webPush, subscriptions } = require("../utils/web-notification.js");
+const { webPush, sendPushNotification } = require("../utils/web-notification.js");
 
 class TableController {
   async getAllTables(req, res) {
@@ -57,18 +57,11 @@ class TableController {
         { userId: req.user.id }
       );
 
-      const notificationPayload = {
-        title: "Order Updated",
-        body: "Your order has been updated.",
-        icon: "icon.png",
-      };
-
-      subscriptions.map((subscription) =>
-        webPush.sendNotification(
-          subscription,
-          JSON.stringify(notificationPayload)
-        )
-      );
+      // sendPushNotification(
+      //   { title: "Great!", body: "New Order placed" },
+      //   req.user.firmId,
+      //   8
+      // );
       return res.status(201).json(tables);
     } catch (error) {
       return res.status(400).json({ error: error.message });
