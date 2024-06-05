@@ -235,7 +235,7 @@ class EmployeeController {
   }
 
   async GetEmployeesBetweenDatesRange(req, res) {
-    const { startDate, endDate } = req.query;
+    let { startDate, endDate } = req.query;
 
     try {
       // Validate the query parameters
@@ -244,6 +244,12 @@ class EmployeeController {
           error: "Please provide both startDate and endDate query parameters.",
         });
       }
+
+      startDate = new Date(startDate);
+      startDate.setHours(0, 0, 0, 0); // Set the time to 12:00 AM
+
+      endDate = new Date(endDate);
+      endDate.setHours(23, 59, 0, 0);
 
       const previousMonthStart = moment()
         .subtract(1, "month")
