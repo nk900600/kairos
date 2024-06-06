@@ -340,6 +340,9 @@ export function Subscription() {
                 {!myAccount?.subscripition?.isTrailEnded && (
                   <Badge>Trail</Badge>
                 )}
+                {myAccount?.subscripition?.isActive &&
+                  myAccount?.subscripition?.subscriptionState ==
+                    SubscriptionStateType.ACTIVE && <Badge>Active</Badge>}
               </CardTitle>
               <CardDescription>
                 {myAccount?.subscripition?.Subscription?.additionalNotes}

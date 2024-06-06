@@ -84,6 +84,7 @@ import { currencyMap } from "./menus";
 import { format, parseISO } from "date-fns";
 import { DatePickerWithRange } from "./common/datePicker";
 import axiosInstance from "../redux/axios";
+import { Skeleton } from "../components/ui/skeleton";
 
 const AllTables = [
   {
@@ -122,6 +123,7 @@ export default function OrdersComponent() {
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   const [alltablesCopy, setAlltablesCopy] = useState<any>(alltables);
   const [editOrderData, setEditOrderData] = useState<any>();
+  const [loading, setLoading] = useState<any>();
   const [orderData, setOrderData] = useState<any>([]);
   const [allOrders, setAllOrders] = useState<any>([]);
 
@@ -183,7 +185,7 @@ export default function OrdersComponent() {
   };
 
   const handleDateChnage = (from: any, to: any) => {
-    console.log(from, to);
+    setLoading(true);
     axiosInstance
       .get("orders/get-orders", {
         params: {
@@ -196,6 +198,7 @@ export default function OrdersComponent() {
           res.data.percentage = `+${res.data.percentage}`;
         }
         setAllOrders(res.data.allorders);
+        setLoading(false);
       });
   };
 
@@ -270,388 +273,428 @@ export default function OrdersComponent() {
           <TabsTrigger value="canceled">Canceled </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="confirm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {allOrders
-              ?.filter((val: any) => val.status == OrderStatuses.CONFIRMED)
-              ?.map((val: any) => {
+        {loading && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+              {[1, 1, 1, 1].map((val) => {
                 return (
-                  <>
-                    <Card key="1" className="w-full ">
-                      <CardHeader className="p-4 lg:p-6 md:p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-base">
-                              {
-                                alltables?.find(
-                                  (table: any) =>
-                                    table.id == val?.TableSession?.tableId
-                                )?.tableName
-                              }
-                            </CardTitle>
-
-                            <CardDescription className="text-xs">
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.firstName
-                              }{" "}
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.lastName
-                              }
-                            </CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
-                        <div className="grid gap-2">
-                          {val.orderItems.map((item: any) => {
-                            return (
-                              <>
-                                <div className="flex items-center gap-3">
-                                  <VegIcon />
-
-                                  <label htmlFor={item.id} className="w-full ">
-                                    <div className="grid gap-1 text-sm">
-                                      <div className="font-medium">
-                                        {item.quantity} x {item.MenuItem.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {item.CustomizationChoices.map(
-                                          (choice: any) => choice.name
-                                        ).join(",")}
-                                      </div>
-                                    </div>
-                                  </label>
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                      <CardFooter className=" block  p-4 gap-2 lg:p-6 md:p-6  pt-4 lg:pt-0  md:pt-0  ">
-                        <Separator className="my-4" />
-                        <Button
-                          onClick={() => handleEditOrder(val)}
-                          className="  w-full gap-2"
-                        >
-                          <span> Edit</span>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </>
+                  <div className="flex flex-col space-y-3">
+                    <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[250px]" />
+                      <Skeleton className="h-4 w-[200px]" />
+                    </div>
+                  </div>
                 );
               })}
-          </div>
+            </div>
+          </>
+        )}
 
-          {!allOrders?.filter(
-            (val: any) => val.status == OrderStatuses.CONFIRMED
-          ).length && (
-            <EmptyPlaceholder
-              buttonText=""
-              type="orders"
-              title="No Orders Available"
-              description="No active orders at the moment. New orders will appear here once placed"
-            />
-          )}
-        </TabsContent>
+        {!loading && (
+          <>
+            <TabsContent value="confirm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+                {allOrders
+                  ?.filter((val: any) => val.status == OrderStatuses.CONFIRMED)
+                  ?.map((val: any) => {
+                    return (
+                      <>
+                        <Card key="1" className="w-full ">
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
 
-        <TabsContent value="serve">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {allOrders
-              ?.filter(
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
+
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    </div>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block  p-4 gap-2 lg:p-6 md:p-6  pt-4 lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <Button
+                              onClick={() => handleEditOrder(val)}
+                              className="  w-full gap-2"
+                            >
+                              <span> Edit</span>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </>
+                    );
+                  })}
+              </div>
+
+              {!allOrders?.filter(
+                (val: any) => val.status == OrderStatuses.CONFIRMED
+              ).length && (
+                <EmptyPlaceholder
+                  buttonText=""
+                  type="orders"
+                  title="No Orders Available"
+                  description="No active orders at the moment. New orders will appear here once placed"
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="serve">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+                {allOrders
+                  ?.filter(
+                    (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
+                  )
+                  .map((val: any) => {
+                    return (
+                      <>
+                        <Card key="1" className="w-full ">
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
+
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
+
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
+                                    </div>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <Button
+                              onClick={() => handleMarkAsServed(val)}
+                              className="  w-full gap-2"
+                            >
+                              <span> Mark as served</span>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </>
+                    );
+                  })}
+              </div>
+
+              {!allOrders?.filter(
                 (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
-              )
-              .map((val: any) => {
-                return (
-                  <>
-                    <Card key="1" className="w-full ">
-                      <CardHeader className="p-4 lg:p-6 md:p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-base">
-                              {
-                                alltables?.find(
-                                  (table: any) =>
-                                    table.id == val?.TableSession?.tableId
-                                )?.tableName
-                              }
-                            </CardTitle>
+              ).length && (
+                <EmptyPlaceholder
+                  buttonText=""
+                  type="orders"
+                  title="No Orders Available"
+                  description="No active orders at the moment. New orders will appear here once placed"
+                />
+              )}
+            </TabsContent>
 
-                            <CardDescription className="text-xs">
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.firstName
-                              }{" "}
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.lastName
-                              }
-                            </CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
-                        <div className="grid gap-2">
-                          {val.orderItems.map((item: any) => {
-                            return (
-                              <>
-                                <div className="flex items-center gap-3">
-                                  <VegIcon />
-
-                                  <label htmlFor={item.id} className="w-full ">
-                                    <div className="grid gap-1 text-sm">
-                                      <div className="font-medium">
-                                        {item.quantity} x {item.MenuItem.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {item.CustomizationChoices.map(
-                                          (choice: any) => choice.name
-                                        ).join(",")}
-                                      </div>
-                                    </div>
-                                  </label>
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                      <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
-                        <Separator className="my-4" />
-                        <Button
-                          onClick={() => handleMarkAsServed(val)}
-                          className="  w-full gap-2"
+            <TabsContent value="completed">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+                {allOrders
+                  ?.filter((val: any) => val.status == OrderStatuses.COMPLETED)
+                  .map((val: any) => {
+                    return (
+                      <>
+                        <Card
+                          key="1"
+                          className="w-full  hover:bg-muted/50  cursor-pointer"
+                          onClick={() => handleCardClick(val)}
                         >
-                          <span> Mark as served</span>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </>
-                );
-              })}
-          </div>
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
 
-          {!allOrders?.filter(
-            (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
-          ).length && (
-            <EmptyPlaceholder
-              buttonText=""
-              type="orders"
-              title="No Orders Available"
-              description="No active orders at the moment. New orders will appear here once placed"
-            />
-          )}
-        </TabsContent>
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
 
-        <TabsContent value="completed">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {allOrders
-              ?.filter((val: any) => val.status == OrderStatuses.COMPLETED)
-              .map((val: any) => {
-                return (
-                  <>
-                    <Card
-                      key="1"
-                      className="w-full  hover:bg-muted/50  cursor-pointer"
-                      onClick={() => handleCardClick(val)}
-                    >
-                      <CardHeader className="p-4 lg:p-6 md:p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-base">
-                              {
-                                alltables?.find(
-                                  (table: any) =>
-                                    table.id == val?.TableSession?.tableId
-                                )?.tableName
-                              }
-                            </CardTitle>
-
-                            <CardDescription className="text-xs">
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.firstName
-                              }{" "}
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.lastName
-                              }
-                            </CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
-                        <div className="grid gap-2">
-                          {val.orderItems.map((item: any) => {
-                            return (
-                              <>
-                                <div className="flex items-center gap-3">
-                                  <VegIcon />
-
-                                  <label htmlFor={item.id} className="w-full ">
-                                    <div className="grid gap-1 text-sm">
-                                      <div className="font-medium">
-                                        {item.quantity} x {item.MenuItem.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {item.CustomizationChoices.map(
-                                          (choice: any) => choice.name
-                                        ).join(",")}
-                                      </div>
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
                                     </div>
-                                  </label>
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                      <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
-                        <Separator className="my-4" />
-                        <div className="flex justify-between items-center">
-                          <p className="text-xs text-gray-500">
-                            {format(
-                              parseISO(val.orderDate),
-                              "dd MMM yyyy 'at' h:mma"
-                            )}
-                          </p>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-gray-500">
+                                {format(
+                                  parseISO(val.orderDate),
+                                  "dd MMM yyyy 'at' h:mma"
+                                )}
+                              </p>
 
-                          <Button variant="ghost" className=" h-3 gap-2">
-                            <span>
-                              {" "}
-                              {currencyMap.get("INR")}
-                              {val.totalAmount}
-                            </span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  </>
-                );
-              })}
-          </div>
-          {!allOrders?.filter(
-            (val: any) => val.status == OrderStatuses.COMPLETED
-          ).length && (
-            <EmptyPlaceholder
-              buttonText=""
-              type="orders"
-              title="No Orders Available"
-              description="No active orders at the moment. New orders will appear here once placed"
-            />
-          )}
-        </TabsContent>
-        <TabsContent value="canceled">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
-            {allOrders
-              ?.filter((val: any) => val.status == OrderStatuses.CANCELLED)
-              .map((val: any) => {
-                return (
-                  <>
-                    <Card
-                      key="1"
-                      className="w-full  hover:bg-muted/50  cursor-pointer"
-                      onClick={() => handleCardClick(val)}
-                    >
-                      <CardHeader className="p-4 lg:p-6 md:p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-base">
-                              {
-                                alltables?.find(
-                                  (table: any) =>
-                                    table.id == val?.TableSession?.tableId
-                                )?.tableName
-                              }
-                            </CardTitle>
+                              <Button variant="ghost" className=" h-3 gap-2">
+                                <span>
+                                  {" "}
+                                  {currencyMap.get("INR")}
+                                  {val.totalAmount}
+                                </span>
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </>
+                    );
+                  })}
+              </div>
+              {!allOrders?.filter(
+                (val: any) => val.status == OrderStatuses.COMPLETED
+              ).length && (
+                <EmptyPlaceholder
+                  buttonText=""
+                  type="orders"
+                  title="No Orders Available"
+                  description="No active orders at the moment. New orders will appear here once placed"
+                />
+              )}
+            </TabsContent>
+            <TabsContent value="canceled">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
+                {allOrders
+                  ?.filter((val: any) => val.status == OrderStatuses.CANCELLED)
+                  .map((val: any) => {
+                    return (
+                      <>
+                        <Card
+                          key="1"
+                          className="w-full  hover:bg-muted/50  cursor-pointer"
+                          onClick={() => handleCardClick(val)}
+                        >
+                          <CardHeader className="p-4 lg:p-6 md:p-6">
+                            <div className="flex items-center gap-4">
+                              <div className="flex-1">
+                                <CardTitle className="text-base">
+                                  {
+                                    alltables?.find(
+                                      (table: any) =>
+                                        table.id == val?.TableSession?.tableId
+                                    )?.tableName
+                                  }
+                                </CardTitle>
 
-                            <CardDescription className="text-xs">
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.firstName
-                              }{" "}
-                              {
-                                allEmployees?.find(
-                                  (contact) => contact.id == val.createdBy
-                                )?.lastName
-                              }
-                            </CardDescription>
-                          </div>
+                                <CardDescription className="text-xs">
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.firstName
+                                  }{" "}
+                                  {
+                                    allEmployees?.find(
+                                      (contact) => contact.id == val.createdBy
+                                    )?.lastName
+                                  }
+                                </CardDescription>
+                              </div>
 
-                          <Badge variant={"destructive"}>{"Canceled"}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
-                        <div className="grid gap-2">
-                          {val.orderItems.map((item: any) => {
-                            return (
-                              <>
-                                <div className="flex items-center gap-3">
-                                  <VegIcon />
+                              <Badge variant={"destructive"}>
+                                {"Canceled"}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className=" p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  pb-0  lg:pb-0  md:pb-0  ">
+                            <div className="grid gap-2">
+                              {val.orderItems.map((item: any) => {
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-3">
+                                      <VegIcon />
 
-                                  <label htmlFor={item.id} className="w-full ">
-                                    <div className="grid gap-1 text-sm">
-                                      <div className="font-medium">
-                                        {item.quantity} x {item.MenuItem.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {item.CustomizationChoices.map(
-                                          (choice: any) => choice.name
-                                        ).join(",")}
-                                      </div>
+                                      <label
+                                        htmlFor={item.id}
+                                        className="w-full "
+                                      >
+                                        <div className="grid gap-1 text-sm">
+                                          <div className="font-medium">
+                                            {item.quantity} x{" "}
+                                            {item.MenuItem.name}
+                                          </div>
+                                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {item.CustomizationChoices.map(
+                                              (choice: any) => choice.name
+                                            ).join(",")}
+                                          </div>
+                                        </div>
+                                      </label>
                                     </div>
-                                  </label>
-                                </div>
-                              </>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                      <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
-                        <Separator className="my-4" />
-                        <div className="flex justify-between items-center">
-                          <p className="text-xs text-gray-500">
-                            {format(
-                              parseISO(val.orderDate),
-                              "dd MMM yyyy 'at' h:mma"
-                            )}
-                          </p>
+                                  </>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                          <CardFooter className=" block p-4 gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0  ">
+                            <Separator className="my-4" />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-gray-500">
+                                {format(
+                                  parseISO(val.orderDate),
+                                  "dd MMM yyyy 'at' h:mma"
+                                )}
+                              </p>
 
-                          <Button variant="ghost" className=" h-3 gap-2">
-                            <span>
-                              {currencyMap.get("INR")}
-                              {val.totalAmount}
-                            </span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  </>
-                );
-              })}
-          </div>
+                              <Button variant="ghost" className=" h-3 gap-2">
+                                <span>
+                                  {currencyMap.get("INR")}
+                                  {val.totalAmount}
+                                </span>
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardFooter>
+                        </Card>
+                      </>
+                    );
+                  })}
+              </div>
 
-          {!allOrders.filter(
-            (val: any) => val.status == OrderStatuses.CANCELLED
-          ).length && (
-            <EmptyPlaceholder
-              buttonText=""
-              type="orders"
-              title="No Orders Available"
-              description="No active orders at the moment. New orders will appear here once placed"
-            />
-          )}
-        </TabsContent>
+              {!allOrders.filter(
+                (val: any) => val.status == OrderStatuses.CANCELLED
+              ).length && (
+                <EmptyPlaceholder
+                  buttonText=""
+                  type="orders"
+                  title="No Orders Available"
+                  description="No active orders at the moment. New orders will appear here once placed"
+                />
+              )}
+            </TabsContent>
+          </>
+        )}
       </Tabs>
 
       <Sheet {...sheetProps}>

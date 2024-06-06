@@ -385,6 +385,9 @@ class OrderController {
               },
             ],
           },
+          {
+            model: TableSession,
+          },
         ],
         order: [
           ["orderDate", "ASC"], // Order by the orderDate in ascending order
