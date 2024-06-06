@@ -52,7 +52,8 @@ export function DrawerDialogComponent({
   };
   const { open, setOpen, component, compProps, title, description }: any =
     useContext(DrawerContext);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  // const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = true;
   const DynamicComponent = () => {
     const Component = componentMap[component];
     return <Component {...compProps} />;

@@ -8,6 +8,7 @@ import {
   Copy,
   CreditCard,
   Ellipsis,
+  EllipsisIcon,
   ListFilter,
   MoreVertical,
   Truck,
@@ -81,6 +82,8 @@ import { LiveTimerMinSec } from "../hooks/liveTImer";
 import { EditOrderComponent } from "./sidepanels/editorder";
 import { currencyMap } from "./menus";
 import { format, parseISO } from "date-fns";
+import { DatePickerWithRange } from "./common/datePicker";
+import axiosInstance from "../redux/axios";
 
 const AllTables = [
   {
@@ -111,13 +114,16 @@ const AllTables = [
 ];
 
 export default function OrdersComponent() {
-  const { alltables, allOrders, allEmployees } = useSelector(
-    (state: { table: RootState }) => state.table
-  );
+  const {
+    alltables,
+    allOrders: orders,
+    allEmployees,
+  } = useSelector((state: { table: RootState }) => state.table);
   const [isOpen, setOpen] = useState<boolean | undefined>(undefined);
   const [alltablesCopy, setAlltablesCopy] = useState<any>(alltables);
   const [editOrderData, setEditOrderData] = useState<any>();
-  const [orderData, setOrderData] = useState<any>();
+  const [orderData, setOrderData] = useState<any>([]);
+  const [allOrders, setAllOrders] = useState<any>([]);
 
   const dispatch: AppDispatch = useDispatch();
   let sheetProps: any = {
@@ -140,6 +146,10 @@ export default function OrdersComponent() {
     }));
     setAlltablesCopy([{ tableName: "Show all", checked: true }, ...data]);
   }, [alltables]);
+
+  useEffect(() => {
+    setAllOrders(orders);
+  }, [orders]);
 
   const handleOnCheck = (isChecked: any, data: any, index: number): any => {
     if (index != 0) {
@@ -171,6 +181,24 @@ export default function OrdersComponent() {
     setOrderData(order);
     setOpen(true);
   };
+
+  const handleDateChnage = (from: any, to: any) => {
+    console.log(from, to);
+    axiosInstance
+      .get("orders/get-orders", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        if (!res.data?.percentage?.includes("-")) {
+          res.data.percentage = `+${res.data.percentage}`;
+        }
+        setAllOrders(res.data.allorders);
+      });
+  };
+
   return (
     <>
       <BreadcrumbComponent
@@ -184,6 +212,13 @@ export default function OrdersComponent() {
         <h1 className="flex-1  whitespace-nowrap text-lg sm:text-2xl  font-semibold tracking-tight ">
           All Orders
         </h1>
+        <div className="flex gap-4 justify-start md:justify-end items-center">
+          <DatePickerWithRange
+            onDateChange={handleDateChnage}
+            defaultEnd={0}
+            className={"h-8 hidden sm:flex"}
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2 h-8 ">
@@ -208,18 +243,25 @@ export default function OrdersComponent() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <div className="flex gap-4  flex sm:hidden">
+        <DatePickerWithRange
+          onDateChange={handleDateChnage}
+          defaultEnd={0}
+          className={"h-8 "}
+        />
+      </div>
 
       <Tabs defaultValue="serve" className="w-full">
         <TabsList className="grid w-full mb-4 lg:w-2/3 grid-cols-3">
           {/* <TabsTrigger value="confirm">Confirmed</TabsTrigger> */}
           <TabsTrigger value="serve">
             Serve
-            {!!allOrders.filter(
-              (val) => val.status == OrderStatuses.READY_FOR_PICKUP
+            {!!allOrders?.filter(
+              (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
             ).length
               ? "(" +
-                allOrders.filter(
-                  (val) => val.status == OrderStatuses.READY_FOR_PICKUP
+                allOrders?.filter(
+                  (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
                 ).length +
                 ")"
               : ""}
@@ -231,8 +273,8 @@ export default function OrdersComponent() {
         <TabsContent value="confirm">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allOrders
-              .filter((val) => val.status == OrderStatuses.CONFIRMED)
-              .map((val: any) => {
+              ?.filter((val: any) => val.status == OrderStatuses.CONFIRMED)
+              ?.map((val: any) => {
                 return (
                   <>
                     <Card key="1" className="w-full ">
@@ -304,8 +346,9 @@ export default function OrdersComponent() {
               })}
           </div>
 
-          {!allOrders.filter((val) => val.status == OrderStatuses.CONFIRMED)
-            .length && (
+          {!allOrders?.filter(
+            (val: any) => val.status == OrderStatuses.CONFIRMED
+          ).length && (
             <EmptyPlaceholder
               buttonText=""
               type="orders"
@@ -318,7 +361,9 @@ export default function OrdersComponent() {
         <TabsContent value="serve">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allOrders
-              .filter((val) => val.status == OrderStatuses.READY_FOR_PICKUP)
+              ?.filter(
+                (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
+              )
               .map((val: any) => {
                 return (
                   <>
@@ -391,8 +436,8 @@ export default function OrdersComponent() {
               })}
           </div>
 
-          {!allOrders.filter(
-            (val) => val.status == OrderStatuses.READY_FOR_PICKUP
+          {!allOrders?.filter(
+            (val: any) => val.status == OrderStatuses.READY_FOR_PICKUP
           ).length && (
             <EmptyPlaceholder
               buttonText=""
@@ -406,7 +451,7 @@ export default function OrdersComponent() {
         <TabsContent value="completed">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allOrders
-              .filter((val) => val.status == OrderStatuses.COMPLETED)
+              ?.filter((val: any) => val.status == OrderStatuses.COMPLETED)
               .map((val: any) => {
                 return (
                   <>
@@ -493,8 +538,9 @@ export default function OrdersComponent() {
                 );
               })}
           </div>
-          {!allOrders.filter((val) => val.status == OrderStatuses.COMPLETED)
-            .length && (
+          {!allOrders?.filter(
+            (val: any) => val.status == OrderStatuses.COMPLETED
+          ).length && (
             <EmptyPlaceholder
               buttonText=""
               type="orders"
@@ -506,7 +552,7 @@ export default function OrdersComponent() {
         <TabsContent value="canceled">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6  ">
             {allOrders
-              .filter((val) => val.status == OrderStatuses.CANCELLED)
+              ?.filter((val: any) => val.status == OrderStatuses.CANCELLED)
               .map((val: any) => {
                 return (
                   <>
@@ -595,8 +641,9 @@ export default function OrdersComponent() {
               })}
           </div>
 
-          {!allOrders.filter((val) => val.status == OrderStatuses.CANCELLED)
-            .length && (
+          {!allOrders.filter(
+            (val: any) => val.status == OrderStatuses.CANCELLED
+          ).length && (
             <EmptyPlaceholder
               buttonText=""
               type="orders"
@@ -642,39 +689,38 @@ export function ViewOrder({ order }: any) {
   }, [order]);
   return (
     <>
-      <SheetHeader className="mb-4 ">
-        <SheetTitle>
+      <SheetHeader className="mb-4 mt-4 ">
+        <SheetTitle className="flex justify-between items-center">
           {
-            alltables.find((val) => val.id == orderData.TableSession.tableId)
-              ?.tableName
+            alltables.find(
+              (val: any) => val.id == orderData.TableSession.tableId
+            )?.tableName
           }
+
+          {/* <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"outline"} className="h-8">
+                <EllipsisIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Export as</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>PDF</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Excel</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu> */}
         </SheetTitle>
         <SheetDescription>
           Order Id - {orderData.id}{" "}
           {orderData.status == OrderStatuses.CANCELLED && (
             <Badge variant={"destructive"}>{"Canceled"}</Badge>
           )}{" "}
+          <div>{format(new Date(orderData.createdAt), "MMMM dd, yyyy")}</div>
         </SheetDescription>
         <Separator className="my-2" />
       </SheetHeader>
-
-      {/* <CardHeader className="flex flex-row items-start bg-muted/50">
-        <div className="grid gap-0.5">
-          <CardTitle className="group flex items-center gap-2 text-lg">
-            {
-              alltables.find((val) => val.id == orderData.TableSession.tableId)
-                ?.tableName
-            }
-          </CardTitle>
-          <CardDescription>
-            {" "}
-            Order Id - {orderData.id}{" "}
-            {orderData.status == OrderStatuses.CANCELLED && (
-              <Badge variant={"destructive"}>{"Canceled"}</Badge>
-            )}{" "}
-          </CardDescription>
-        </div>
-      </CardHeader> */}
 
       <CardContent className="p-0 mt-3 text-sm">
         <div className="grid gap-3">

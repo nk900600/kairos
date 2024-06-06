@@ -372,6 +372,20 @@ class OrderController {
             [Op.between]: [new Date(startDate), new Date(endDate)],
           },
         },
+        include: [
+          {
+            model: OrderItem,
+            as: "orderItems",
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+              {
+                model: MenuItem,
+              },
+            ],
+          },
+        ],
         order: [
           ["orderDate", "ASC"], // Order by the orderDate in ascending order
         ],

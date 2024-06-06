@@ -20,6 +20,7 @@ export function DatePickerWithRange({
   dateObj = null,
   disableDate = [],
   onDateChange,
+  defaultEnd = 7,
 }: any) {
   useEffect(() => {
     if (onDateChange) {
@@ -33,7 +34,7 @@ export function DatePickerWithRange({
   const [state, setState] = React.useState<any>([
     {
       startDate: new Date(),
-      endDate: addDays(new Date(), 7),
+      endDate: addDays(new Date(), defaultEnd),
       key: "selection",
     },
   ]);
@@ -55,8 +56,9 @@ export function DatePickerWithRange({
               id="date"
               variant={"outline"}
               className={cn(
-                "w-[250px] justify-start text-left font-normal w-full",
-                !state && "text-muted-foreground"
+                "w-[250px] justify-start text-left font-normal w-full" +
+                  !state && "text-muted-foreground",
+                className
               )}
             >
               {/* <CalendarIcon className="mr-2 h-4 w-4" /> */}
@@ -91,8 +93,9 @@ export function DatePickerWithRange({
               id="date"
               variant={"outline"}
               className={cn(
-                "w-[300px] justify-start text-left font-normal w-full",
-                !state && "text-muted-foreground"
+                "w-[300px] justify-start text-left font-normal w-full" +
+                  !state && "text-muted-foreground",
+                className
               )}
             >
               <span>Date Range</span>
