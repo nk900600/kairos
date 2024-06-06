@@ -6,7 +6,10 @@ const {
   SessionStatus,
   PaymentStatus,
 } = require("../models/tableSession.model.js");
-const { webPush, sendPushNotification } = require("../utils/web-notification.js");
+const {
+  webPush,
+  sendPushNotification,
+} = require("../utils/web-notification.js");
 
 class TableController {
   async getAllTables(req, res) {
@@ -146,7 +149,11 @@ class TableController {
 
       if (req.body?.status == TableStatus.AVAILABLE) {
         await TableSession.update(
-          { status: SessionStatus.CLOSE, paymentStatus: PaymentStatus.PAID },
+          {
+            status: SessionStatus.CLOSE,
+            paymentStatus: PaymentStatus.PAID,
+            endTime: new Date(),
+          },
           {
             where: { tableId: req.params.id, status: SessionStatus.ACTIVE },
             transaction,
