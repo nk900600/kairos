@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { TableStatus } = require("../enums/tables.enum.js");
 const { Table } = require("../models/table.model.js");
 const {
@@ -5,6 +6,7 @@ const {
   SessionStatus,
 } = require("../models/tableSession.model.js");
 const { mobileNumberRegex } = require("../utils/const.js");
+const { eachDayOfInterval, format, addDays } = require("date-fns");
 
 class TableSessionController {
   async createSession(req, res) {
@@ -117,6 +119,88 @@ class TableSessionController {
       return res.status(200).json(sessions);
     } catch (error) {
       return res.status(500).json({ message: error.message });
+    }
+  }
+  async getAverageDataPerTableSessions(req, res) {
+    try {
+      let { startDate, endDate } = req.query;
+      startDate = new Date(startDate);
+      startDate.setHours(0, 0, 0, 0); // Set the time to 12:00 AM
+
+      endDate = new Date(endDate);
+      endDate.setHours(23, 59, 59, 999); // Include the entire end day
+
+      const days = eachDayOfInterval({ start: startDate, end: endDate });
+      const dailyWaitTimeMetrics = [];
+      let cumulativeWaitTime = 0;
+      let cumulativeSessions = 0;
+
+      console.log(days, "days");
+
+      for (const day of days) {
+        const dayStart = new Date(day);
+        const dayEnd = addDays(day, 1);
+
+        const sessions = await TableSession.findAll({
+          where: {
+            firmId: req.user.firmId,
+            endTime: {
+              [Op.ne]: null,
+            },
+            startTime: {
+              [Op.gte]: dayStart,
+              [Op.lt]: dayEnd,
+            },
+          },
+        });
+
+        const totalWaitTime = sessions.reduce((acc, session) => {
+          const startTime = new Date(session.startTime);
+          const endTime = new Date(session.endTime);
+          const waitTime = (endTime - startTime) / (1000 * 60); // Convert milliseconds to minutes
+          return acc + waitTime;
+        }, 0);
+        const currentDaySessions = sessions.length;
+
+        if (currentDaySessions > 0) {
+          cumulativeWaitTime += totalWaitTime;
+          cumulativeSessions += currentDaySessions;
+        }
+        const averageWaitTime =
+          cumulativeSessions > 0 ? cumulativeWaitTime / cumulativeSessions : 0;
+
+        dailyWaitTimeMetrics.push({
+          date: format(dayStart, "yyyy-MM-dd"),
+          averageWaitTime,
+          waitTimePerDay: totalWaitTime,
+        });
+      }
+
+      const tables = await Table.findAll({
+        where: {
+          firmId: req.user.firmId,
+        },
+      });
+
+      // Average Tine per table is calculated
+      const averageWaitTime =
+        cumulativeSessions > 0 ? cumulativeWaitTime / cumulativeSessions : 0;
+      const numberOfDays = Math.ceil(
+        (endDate - startDate) / (1000 * 60 * 60 * 24)
+      );
+      // const tableTurnoverRate = sessions.length / tables.length;
+
+      const tableTurnoverRate =
+        tables.length > 0 && numberOfDays > 0
+          ? cumulativeSessions / (tables.length * numberOfDays)
+          : 0;
+
+      return res
+        .status(200)
+        .json({ tableTurnoverRate, averageWaitTime, dailyWaitTimeMetrics });
+    } catch (error) {
+      console.error("Error fetching average ratings:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 }

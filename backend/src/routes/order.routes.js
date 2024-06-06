@@ -4,6 +4,7 @@ const OrderController = require("../controllers/order.controller");
 
 router.post("/", OrderController.create);
 router.get("/get-orders", OrderController.GetOrderBetweenDatesRange);
+router.get("/service-time", OrderController.getAverageServiceTime);
 router.post("/:id/order-items", OrderController.createOrderItem);
 router.get("/", OrderController.findAll);
 router.post("/:orderId", OrderController.updateOrderStatus);

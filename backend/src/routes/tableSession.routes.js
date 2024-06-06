@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const tableSessionController = require("../controllers/tableSession.controller");
-
+router.get(
+  "/average-data",
+  tableSessionController.getAverageDataPerTableSessions
+);
 router.post("/", tableSessionController.createSession);
 router.put("/:id", tableSessionController.updateSession);
 router.delete("/:id", tableSessionController.deleteSession);

@@ -81,6 +81,26 @@ export function DashBoardContent() {
         }
         setLeaves(res.data);
       });
+    axiosInstance
+      .get("/tables-session/average-data", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+      });
+    axiosInstance
+      .get("orders/service-time", {
+        params: {
+          startDate: from,
+          endDate: to,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+      });
   };
 
   return (

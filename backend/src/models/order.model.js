@@ -150,4 +150,4 @@ OrderItem.belongsToMany(CustomizationChoice, {
 // Order.sync({ force: true });
 // OrderItem.sync({ force: true });
 // OrderItemCustomizationsChoices.sync({ force: true });
-module.exports = { Order, OrderItem, OrderItemCustomizationsChoice };
+module.exports = { Order, OrderItem, OrderItemCustomizationsChoice , OrderStatuses};

@@ -5,6 +5,7 @@ const {
   Order,
   OrderItem,
   OrderItemCustomizationsChoice,
+  OrderStatuses,
 } = require("../models/order.model");
 const { TableSession } = require("../models/tableSession.model");
 const { Table } = require("../models/table.model");
@@ -12,6 +13,7 @@ const { CartItem } = require("../models/cart.model");
 const moment = require("moment");
 const { calculatePercentageChange } = require("../utils/percentageCount");
 const { sendPushNotification } = require("../utils/web-notification");
+const { eachDayOfInterval, addDays, format } = require("date-fns");
 // const { sendPushNotification } = require("../utils/web-notification");
 class OrderController {
   // Create a new order
@@ -435,6 +437,70 @@ class OrderController {
       res.status(500).json({ error: "Internal server error" });
     }
   }
+
+  async getAverageServiceTime(req, res) {
+    let { startDate, endDate } = req.query;
+
+    try {
+      startDate = new Date(startDate);
+      startDate.setHours(0, 0, 0, 0); // Set the time to 12:00 AM
+
+      endDate = new Date(endDate);
+      endDate.setHours(23, 59, 0, 0);
+
+      const days = eachDayOfInterval({ start: startDate, end: endDate });
+      const dailyServiceTimeMetrics = [];
+      let cumulativeServiceTime = 0;
+      let cumulativeOrders = 0;
+
+      for (const day of days) {
+        const dayStart = new Date(day);
+        const dayEnd = addDays(day, 1);
+
+        const orders = await Order.findAll({
+          where: {
+            firmId: req.user.firmId,
+            orderDate: {
+              [Op.gte]: dayStart,
+              [Op.lt]: dayEnd,
+            },
+            status: OrderStatuses.COMPLETED, // Ensure only completed orders are considered
+          },
+        });
+
+        const totalServiceTime = orders.reduce((acc, order) => {
+          const startTime = new Date(order.orderDate);
+          const endTime = new Date(order.updatedAt);
+          const serviceTime = (endTime - startTime) / (1000 * 60); // Convert milliseconds to minutes
+          return acc + serviceTime;
+        }, 0);
+
+        const currentDayOrders = orders.length;
+
+        if (currentDayOrders > 0) {
+          cumulativeServiceTime += totalServiceTime;
+          cumulativeOrders += currentDayOrders;
+        }
+        const averageServiceTime =
+          cumulativeOrders > 0 ? cumulativeServiceTime / cumulativeOrders : 0;
+
+        dailyServiceTimeMetrics.push({
+          date: format(dayStart, "yyyy-MM-dd"),
+          averageServiceTime,
+          ordersPerDay: currentDayOrders,
+        });
+      }
+      const averageServiceTime =
+        cumulativeOrders > 0 ? cumulativeServiceTime / cumulativeOrders : 0;
+      return res
+        .status(200)
+        .json({ averageServiceTime, dailyServiceTimeMetrics });
+    } catch (error) {
+      console.error("Error fetching average ratings:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
   async updateOrderStatus(req, res) {
     const { orderId } = req.params;
 
