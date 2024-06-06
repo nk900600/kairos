@@ -82,8 +82,8 @@ export default class SalesChart extends PureComponent {
       <ResponsiveContainer width={"100%"} height={350} minWidth={0}>
         <BarChart width={685} height={400} data={data}>
           <Bar dataKey="uv" />
-          <XAxis dataKey="name" className="text-xs text-muted-foreground" />
-          <YAxis className="text-xs text-muted-foreground" />
+          {/* <XAxis dataKey="name" className="text-xs text-muted-foreground" />
+          <YAxis className="text-xs text-muted-foreground" /> */}
           <Tooltip />
         </BarChart>
       </ResponsiveContainer>

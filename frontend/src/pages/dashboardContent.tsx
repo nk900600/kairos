@@ -28,6 +28,9 @@ import axiosInstance from "../redux/axios";
 import { OrderStatuses } from "./chefsPanel";
 import { EmptyPlaceholder } from "./common/emptyPlaceholder";
 import { NavLink } from "react-router-dom";
+import { LineChartComponent } from "./common/lineChart";
+import { format } from "date-fns";
+import { SelectionBoxComponent } from "./common/selectionBox";
 
 export function DashBoardContent() {
   const { allEmployees, myAccount, isAdmin, allOrders, alltables } =
@@ -36,8 +39,13 @@ export function DashBoardContent() {
   const [employee, setEmployee] = useState<any>(null);
   const [orders, setOrders] = useState<any>(null);
   const [leaves, setLeaves] = useState<any>(null);
-
-  useEffect(() => {}, []);
+  const [lineData, setLineData] = useState<any>(null);
+  const [table, setTableData] = useState<any>([]);
+  const [order, setOrderData] = useState<any>([]);
+  const [currentOverview, setCurrentOverview] = useState<any>({
+    name: "Orders",
+    id: "orders",
+  });
 
   const handleDateChnage = (from: any, to: any) => {
     // get employee Data
@@ -90,6 +98,21 @@ export function DashBoardContent() {
       })
       .then((res) => {
         console.log(res.data);
+
+        res.data.dailyWaitTimeMetrics = res.data.dailyWaitTimeMetrics.map(
+          (val: any) => {
+            return {
+              name: format(val.date, `do MMMM`),
+              daily: val.waitTimePerDay.toFixed(2),
+              average: val.averageWaitTime.toFixed(2),
+              amt: val.waitTimePerDay.toFixed(2),
+              dailylable: "Daily Wait per table",
+              averagelable: "Average Wait per table",
+              type: "table",
+            };
+          }
+        );
+        setTableData(res.data.dailyWaitTimeMetrics);
       });
     axiosInstance
       .get("orders/service-time", {
@@ -100,7 +123,32 @@ export function DashBoardContent() {
       })
       .then((res) => {
         console.log(res.data);
+        res.data.dailyServiceTimeMetrics = res.data.dailyServiceTimeMetrics.map(
+          (val: any) => {
+            return {
+              name: format(val.date, `do MMMM`),
+              daily: val.ordersPerDay.toFixed(2),
+              average: val.averageServiceTime.toFixed(2),
+              amt: val.ordersPerDay.toFixed(2),
+              dailylable: "Daily Orders",
+              averagelable: "Average Orders",
+              type: "order",
+            };
+          }
+        );
+        setLineData(res.data.dailyServiceTimeMetrics);
+        setOrderData(res.data.dailyServiceTimeMetrics);
+        setCurrentOverview({
+          name: "Orders",
+          id: "orders",
+        });
       });
+  };
+
+  const handleOnChange = (type: any) => {
+    if (type.id == "table") {
+      setLineData(table);
+    } else setLineData(order);
   };
 
   return (
@@ -195,17 +243,22 @@ export function DashBoardContent() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-1 sm:col-span-4">
           <div className="flex flex-col space-y-1.5 p-6">
-            <h3 className="font-semibold leading-none tracking-tight">
-              Overview
+            <h3 className="text-xl font-semibold leading-none tracking-tight ">
+              Overview of
+              <SelectionBoxComponent
+                current={currentOverview}
+                onSelection={handleOnChange}
+              ></SelectionBoxComponent>
             </h3>
           </div>
           <CardContent className="grid gap-8">
-            <SalesChart />
+            {/* <SalesChart /> */}
+            <LineChartComponent data={lineData}></LineChartComponent>
           </CardContent>
         </Card>
         <Card className=" col-span-1 sm:col-span-3">
           <div className="flex flex-col space-y-1.5 p-6">
-            <h3 className="font-semibold leading-none tracking-tight">
+            <h3 className=" text-xl font-semibold leading-none tracking-tight">
               Active Orders
             </h3>
             <p className="text-sm text-muted-foreground">
