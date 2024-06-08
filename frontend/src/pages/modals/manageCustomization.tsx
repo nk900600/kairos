@@ -97,13 +97,21 @@ export default function ManageCustomization({ menuId, choice }: any) {
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     try {
+      let payload: any = {
+        menuId: menuId,
+        name: data.name,
+        maxMultiSelect: data.maxChoices,
+        choices: data.choices.map((val: any) => ({
+          additionalPrice: val.price,
+          dietType: val.diet,
+          name: val.name,
+        })),
+      };
       if (choice) {
-        data.menuId = menuId;
-        data.customizationId = choice.id;
-        await dispatch(updateMenuCustomization(data)).unwrap();
+        payload.customizationId = choice.id;
+        await dispatch(updateMenuCustomization(payload)).unwrap();
       } else {
-        data.menuId = menuId;
-        await dispatch(createMenuCustomization(data)).unwrap();
+        await dispatch(createMenuCustomization(payload)).unwrap();
       }
       setOpen(false);
       setIsLoading(false);
@@ -220,7 +228,7 @@ export default function ManageCustomization({ menuId, choice }: any) {
                   name={`choices.${index}.diet`}
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel htmlFor={"diet"}>Price INR</FormLabel>
+                      <FormLabel htmlFor={"diet"}>Diet Type</FormLabel>
 
                       <Select
                         onValueChange={handleDesginationChange}

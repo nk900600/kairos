@@ -475,11 +475,11 @@ const counterSlice = createSlice({
             );
 
             if (InnerIndex !== -1) {
-              let { choices, name, maxChoices } = action.payload;
+              let { choices, name, maxMultiSelect } = action.payload;
               state.allMenu[index].Customizations[InnerIndex] = {
                 ...state.allMenu[index].Customizations[InnerIndex],
                 name,
-                maxMultiSelect: maxChoices,
+                maxMultiSelect: maxMultiSelect,
               };
 
               choices.forEach((val: any, index2: number) => {
@@ -488,9 +488,7 @@ const counterSlice = createSlice({
                 ].CustomizationChoices[index2] = {
                   ...state.allMenu[index].Customizations[InnerIndex]
                     .CustomizationChoices[index2],
-                  additionalPrice: val.price,
-                  dietType: val.diet,
-                  name: val.name,
+                  ...val,
                 };
               });
             }
