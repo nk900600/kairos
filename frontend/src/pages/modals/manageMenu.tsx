@@ -368,7 +368,14 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
   const handleExcelDownload = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    generateSampleExcel();
+    const url =
+      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Menu_Template.xlsx"; // Replace with your file URL
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "file-to-download.txt"; // Replace with your desired file name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
   return (
     <>
