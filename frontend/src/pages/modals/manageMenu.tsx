@@ -53,8 +53,9 @@ import { useContext, useDebugValue, useEffect, useState } from "react";
 import DrawerContext from "../../context/drawerContext";
 import { Separator } from "../../components/ui/separator";
 import { DownloadIcon } from "lucide-react";
-import generateSampleExcel from "../common/excelfile";
 import { CreatableSelectComponent } from "../common/createSelect";
+import * as XLSX from "xlsx";
+import { processExcelData } from "../../util/processExcelData";
 
 const FormSchema = z.object({
   type: z.enum(["all", "mentions", "none"], {
@@ -364,7 +365,34 @@ export function ManageMenu({ menu = {} }: any) {
   );
 }
 
+const menuItemFileSchema = z.object({
+  "Spice Level": z.enum(["Mild", "Spicy", "Low"]).optional(),
+  "Diet Type": z.enum(["Vegetarian", "Non-Vegetarian", "Vegan"]).optional(),
+  "Choice Diet Type": z
+    .enum(["Vegetarian", "Non-Vegetarian", "Vegan"])
+    .optional(),
+});
+
+const validateData = (data: any) => {
+  const errors: any = [];
+
+  data.forEach((row: any, index: any) => {
+    console.log(row);
+    const validation = menuItemFileSchema.safeParse(row);
+    if (!validation.success) {
+      errors.push({
+        row: index + 1,
+        errors: validation.error.errors,
+      });
+    }
+  });
+
+  return errors;
+};
+
 export const BulkCreationMenu = ({ currentStepClick }: any) => {
+  const [excelErrors, setExcelError] = useState<any>([]);
+  const [excelData, setExcelData] = useState<any>([]);
   const handleExcelDownload = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
@@ -372,10 +400,58 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
       "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Menu_Template.xlsx"; // Replace with your file URL
     const link = document.createElement("a");
     link.href = url;
-    link.download = "file-to-download.txt"; // Replace with your desired file name
+    link.download = "Sample_Menu_Template.xlsx"; // Replace with your desired file name
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleFileChange = async (e: any) => {
+    setExcelData(null);
+    setExcelData(null);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        const validationErrors = validateData(jsonData);
+        if (validationErrors.length > 0) {
+          validationErrors.forEach((row: any) => {
+            row.errors.forEach((e: any) => {
+              toast.error(
+                `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+              );
+            });
+          });
+          setExcelError(validationErrors);
+        } else {
+          setExcelData(jsonData);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  const handleExcelUpload = () => {
+    if (excelErrors.length > 0) {
+      excelErrors.forEach((row: any) => {
+        row.errors.forEach((e: any) => {
+          toast.error(
+            `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+          );
+        });
+      });
+      return;
+    }
+    let payload = [];
+    console.log(processExcelData(excelData));
   };
   return (
     <>
@@ -388,8 +464,13 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <Input id="file-upload" type="file" />
-          <Button>Upload</Button>
+          <Input
+            id="file-upload"
+            type="file"
+            onChange={handleFileChange}
+            accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          />
+          <Button onClick={handleExcelUpload}>Upload</Button>
         </div>
 
         <div
