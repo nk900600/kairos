@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const sequelize = require("../db/db");
 const { CartItem, CartItemCustomization } = require("../models/cart.model");
 const { OrderItem, Order } = require("../models/order.model");
@@ -34,8 +35,11 @@ class MenuItemsController {
   }
   async getAllCategories(req, res) {
     try {
-      const menuItems = await Category.findAll({});
-
+      const menuItems = await Category.findAll({
+        where: {
+          [Op.or]: [{ firmId: null }, { firmId: req.user.firmId }],
+        },
+      });
       return res.json(menuItems);
     } catch (error) {
       console.error("Error fetching menu items:", error);
