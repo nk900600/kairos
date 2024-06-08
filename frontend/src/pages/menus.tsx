@@ -116,6 +116,7 @@ export function MenuHeaderComponent() {
     setTitle("Add New Item");
     setDescription(" ");
     setComponent("manageMenu");
+    setCompProps({ menu: {} });
   };
   return (
     <>
@@ -234,6 +235,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     setTitle("Add New Item");
     setDescription(" ");
     setComponent("manageMenu");
+    setCompProps({ menu: {} });
   };
 
   const handleEditMenuClick = (table: any) => {

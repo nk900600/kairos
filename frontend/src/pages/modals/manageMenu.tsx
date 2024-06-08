@@ -65,7 +65,7 @@ const menuItemSchema = z.object({
   dietType: z.string(),
 });
 
-export function ManageMenu({ menu }: any) {
+export function ManageMenu({ menu = {} }: any) {
   const { allMenu, allMenuCategories } = useSelector(
     (state: { table: RootState }) => state.table
   );
@@ -84,7 +84,7 @@ export function ManageMenu({ menu }: any) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState("bulk");
+  const [currentStep, setCurrentStep] = useState(menu?.id ? "one" : "bulk");
   const [newCategory, setNewCategory] = useState("bulk");
 
   const { setOpen }: any = useContext(DrawerContext);
@@ -198,7 +198,6 @@ export function ManageMenu({ menu }: any) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="categoryId"
@@ -207,7 +206,6 @@ export function ManageMenu({ menu }: any) {
                     <FormLabel>Category</FormLabel>
                     <FormControl>
                       <Select
-                        //   onValueChange={handleDesginationChange}
                         defaultValue={
                           !menu?.id && allMenuCategories?.length
                             ? allMenuCategories[0]?.title
