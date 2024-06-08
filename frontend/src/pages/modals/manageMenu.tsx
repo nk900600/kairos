@@ -44,12 +44,18 @@ import { Switch } from "../../components/ui/switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/reducer";
 import { AppDispatch } from "../../redux/store";
-import { createMenu, updateMenu } from "../../redux/actions";
+import {
+  createMenu,
+  createMenuCategories,
+  updateMenu,
+} from "../../redux/actions";
 import { useContext, useDebugValue, useEffect, useState } from "react";
 import DrawerContext from "../../context/drawerContext";
 import { Separator } from "../../components/ui/separator";
 import { DownloadIcon } from "lucide-react";
 import generateSampleExcel from "../common/excelfile";
+import { CreatableSelectComponent } from "../common/createSelect";
+
 const FormSchema = z.object({
   type: z.enum(["all", "mentions", "none"], {
     required_error: "You need to select a notification type.",
@@ -60,7 +66,7 @@ const menuItemSchema = z.object({
   name: z.string().min(1, "Name is Required"),
   description: z.string().min(1, "Description is Required"),
   price: z.number().min(1, "Price is Required"),
-  categoryId: z.string(),
+  category: z.object({ value: z.string(), label: z.string(), id: z.number() }),
   spiceLevel: z.string(),
   dietType: z.string(),
 });
@@ -75,9 +81,19 @@ export function ManageMenu({ menu = {} }: any) {
       name: menu?.name || "",
       description: menu?.description || "",
       price: menu?.price || 0,
-      categoryId: menu?.categoryId
-        ? allMenuCategories?.find((val) => val.id == menu?.categoryId).title
-        : allMenuCategories[0].title,
+      category: menu?.categoryId
+        ? allMenuCategories
+            .map((val) => ({
+              value: val.title,
+              label: val.title,
+              id: val.id,
+            }))
+            .find((val) => val.id == menu?.categoryId)
+        : allMenuCategories.map((val) => ({
+            value: val.title,
+            label: val.title,
+            id: val.id,
+          }))[0],
       spiceLevel: menu?.spiceLevel || "Mild",
       dietType: menu?.dietType || "Vegetarian",
     },
@@ -85,10 +101,10 @@ export function ManageMenu({ menu = {} }: any) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(menu?.id ? "one" : "bulk");
-  const [newCategory, setNewCategory] = useState("bulk");
-
+  const [isLoadingCat, setIsLoadingCat] = useState(false);
   const { setOpen }: any = useContext(DrawerContext);
   const dispatch: AppDispatch = useDispatch();
+
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     console.log(data);
@@ -99,7 +115,7 @@ export function ManageMenu({ menu = {} }: any) {
         data = {
           ...data,
           categoryId: allMenuCategories.find(
-            (val) => val.title == data.categoryId
+            (val) => val.title == data.category.value
           )?.id,
         };
         data.id = menu.id;
@@ -108,7 +124,7 @@ export function ManageMenu({ menu = {} }: any) {
         data = {
           ...data,
           categoryId: allMenuCategories.find(
-            (val) => val.title == data.categoryId
+            (val) => val.title == data.category.value
           )?.id,
         };
 
@@ -125,13 +141,25 @@ export function ManageMenu({ menu = {} }: any) {
     setCurrentStep(step);
   };
 
-  const handleAddCatChange = (e: any) => {
-    console.log(e.target.value);
-    setNewCategory(e.target.value);
+  const handleCreate = async (inputValue: any) => {
+    try {
+      setIsLoadingCat(true);
+      await dispatch(createMenuCategories({ title: inputValue })).unwrap();
+      setIsLoadingCat(false);
+      form.setValue(
+        "category",
+        {
+          value: inputValue,
+          label: inputValue,
+          id: 1234,
+        },
+        { shouldValidate: true }
+      );
+    } catch (e) {
+      setIsLoadingCat(false);
+    }
   };
-  const handleAddClick = (e: any) => {
-    allMenuCategories.push({ title: newCategory });
-  };
+
   return (
     <>
       {currentStep == "bulk" && (
@@ -200,51 +228,26 @@ export function ManageMenu({ menu = {} }: any) {
               />
               <FormField
                 control={form.control}
-                name="categoryId"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Select
-                        defaultValue={
-                          !menu?.id && allMenuCategories?.length
-                            ? allMenuCategories[0]?.title
-                            : allMenuCategories?.find(
-                                (val) => val.id == menu?.categoryId
-                              ).title
-                        }
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a verified email to display" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* <div className="p-2 ">
-                            <div className="space-y-2">
-                              <Label htmlFor="new-item">Add a new item</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  id="new-item"
-                                  placeholder="Enter a new category"
-                                  onChange={handleAddCatChange}
-                                />
-                                <Button onClick={handleAddClick}>Add</Button>
-                              </div>
-                            </div>
-                          </div>
 
-                          <SelectSeparator></SelectSeparator> */}
-                          {allMenuCategories.map((item) => {
-                            return (
-                              <SelectItem value={item.title}>
-                                {item.title}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+                    <FormControl>
+                      <CreatableSelectComponent
+                        onChange={field.onChange}
+                        // onChange={handleCreateData}
+                        options={allMenuCategories.map((val) => ({
+                          value: val.title,
+                          label: val.title,
+                          id: val.id,
+                        }))}
+                        onCreateOption={handleCreate}
+                        isLoading={isLoadingCat}
+                        value={field.value}
+                        placeholder="Select"
+                        defaultValue={field.value}
+                      ></CreatableSelectComponent>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

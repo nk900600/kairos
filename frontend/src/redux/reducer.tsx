@@ -12,6 +12,7 @@ import {
   createAllLeaveTypes,
   createLeave,
   createMenu,
+  createMenuCategories,
   createMenuCustomization,
   createNewFirm,
   createOrder,
@@ -396,6 +397,12 @@ const counterSlice = createSlice({
         fetchAllMenuCategories.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.allMenuCategories = action.payload;
+        }
+      )
+      .addCase(
+        createMenuCategories.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenuCategories.push(action.payload);
         }
       )
       .addCase(

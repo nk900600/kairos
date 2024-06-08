@@ -388,6 +388,24 @@ class MenuItemsController {
       res.status(500).send("Error deleting Customization item");
     }
   }
+  async createCategory(req, res) {
+    try {
+      if (!req.body?.title) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const category = await Category.create({
+        ...req.body,
+        firmTypeId: 1,
+        firmId: req.user.firmId,
+      });
+
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).send("Error creating category");
+    }
+  }
 }
 
 module.exports = new MenuItemsController();

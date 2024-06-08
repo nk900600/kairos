@@ -4,6 +4,7 @@ const menuItemsController = require("./../controllers/menuItem.controller");
 
 router.get("/", menuItemsController.getAllMenuItems);
 router.get("/categories", menuItemsController.getAllCategories);
+router.post("/categories", menuItemsController.createCategory);
 router.get("/:id", menuItemsController.getMenuItem);
 router.get(
   "/:id/customization/:customid",

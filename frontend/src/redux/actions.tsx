@@ -338,6 +338,18 @@ export const fetchAllMenuCategories = createAsyncThunk(
     }
   }
 );
+export const createMenuCategories = createAsyncThunk(
+  "tables/createMenuCategories",
+  async (payload: any, { getState, rejectWithValue }) => {
+    try {
+      let response = await axios.post(`menus/categories`, payload);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      toast.error("Something went wrong while creating categories");
+      return rejectWithValue("Something went wrong while creating categories");
+    }
+  }
+);
 export const fetchAllMenus = createAsyncThunk(
   "tables/fetchAllMenus",
   async (_, { getState, rejectWithValue }) => {
