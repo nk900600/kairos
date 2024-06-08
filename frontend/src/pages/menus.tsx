@@ -200,7 +200,7 @@ export default function MenusComponent({ canPlaceOrder = false }) {
     // }
   }, [allTableSessions]);
   const scrollToCategory = (id: any) => {
-    menuRefs.current[id].scrollIntoView({ behavior: "smooth" });
+    menuRefs?.current[id]?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleOpenMenu = (w: any) => {
