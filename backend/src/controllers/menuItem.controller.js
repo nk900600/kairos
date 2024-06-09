@@ -437,8 +437,15 @@ class MenuItemsController {
       });
 
       for (const item of menuItems) {
-        const { name, description, price, categoryName, spiceLevel, dietType } =
-          item;
+        const {
+          name,
+          description,
+          price,
+          categoryName,
+          spiceLevel,
+          dietType,
+          customizations,
+        } = item;
 
         // Create the menu item
         const menuItem = await MenuItem.create(
@@ -455,8 +462,7 @@ class MenuItemsController {
           { transaction, userId: req.user.id, ignoreDuplicates: true }
         );
 
-        if (req.body?.customizations && req.body?.customizations.length > 0) {
-          const customizations = req.body?.customizations;
+        if (customizations && customizations.length > 0) {
           for (const customizationData of customizations) {
             if (!customizationData.name) {
               throw new Error("Missing required fields - customization - Name");
