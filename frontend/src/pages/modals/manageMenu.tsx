@@ -422,7 +422,7 @@ export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
       reader.onload = (e: any) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
+        const sheetName = workbook.SheetNames[1];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
@@ -454,6 +454,10 @@ export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
           );
         });
       });
+      return;
+    }
+    if (excelData.length == 0) {
+      toast.error(`No Menu Data found`);
       return;
     }
     try {
