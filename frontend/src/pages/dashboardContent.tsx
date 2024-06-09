@@ -253,7 +253,17 @@ export function DashBoardContent() {
           </div>
           <CardContent className="grid gap-8">
             {/* <SalesChart /> */}
-            <LineChartComponent data={lineData}></LineChartComponent>
+            {lineData?.filter((val: any) => val.average !== "0.00")?.length >
+            0 ? (
+              <LineChartComponent data={lineData}></LineChartComponent>
+            ) : (
+              <EmptyPlaceholder
+                type="dashboard_chart"
+                title="No Data Available"
+                description="There is currently no data to display on this graph"
+                buttonText=""
+              ></EmptyPlaceholder>
+            )}
           </CardContent>
         </Card>
         <Card className=" col-span-1 sm:col-span-3">

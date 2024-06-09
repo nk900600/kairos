@@ -33,7 +33,7 @@ import {
 } from "../../components/ui/select";
 import { currencyMap } from "../menus";
 import { AppDispatch } from "../../redux/store";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   createOrder,
   deleteAllCartItemFromTableSession,
@@ -41,6 +41,8 @@ import {
   updateItemToCart,
 } from "../../redux/actions";
 import { EmptyPlaceholder } from "../common/emptyPlaceholder";
+import { RootState } from "@/src/redux/reducer";
+import { toast } from "sonner";
 
 const items = [1, 2, 3];
 
@@ -53,7 +55,9 @@ export function CurrentOrderContentComponent({
   const [totalAmount, setTotalAmount] = useState<any>(0);
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-
+  const { myAccount }: any = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   useEffect(() => {
     setTotalAmount(
       cartData.reduce((total: any, item: any) => {
@@ -98,6 +102,10 @@ export function CurrentOrderContentComponent({
   };
 
   const handleSendToChef = async () => {
+    if (!myAccount?.subscripition.isActive) {
+      toast.error("Please have an active subscription to place an order");
+      return;
+    }
     setIsLoading(true);
     const payload = {
       tableSessionId: tableSessionId,

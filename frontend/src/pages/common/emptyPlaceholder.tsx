@@ -20,6 +20,8 @@ const imageMapper: any = {
   login: "../../Waiters-bro(1).svg",
   leaves:
     "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/Trip.gif",
+  dashboard_chart:
+    "https://kairos-public-images.s3.eu-north-1.amazonaws.com/frontend-public/No+data.gif",
 };
 export const EmptyPlaceholder = ({
   type,
