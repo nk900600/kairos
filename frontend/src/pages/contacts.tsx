@@ -658,10 +658,10 @@ export const BulkCreationContact = ({ currentStepClick, success }: any) => {
     e.preventDefault();
     e.stopPropagation();
     const url =
-      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Menu_Template.xlsx"; // Replace with your file URL
+      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Contact_Template.xlsx";
     const link = document.createElement("a");
     link.href = url;
-    link.download = "Sample_Menu_Template.xlsx"; // Replace with your desired file name
+    link.download = "Sample_Menu_Template.xlsx";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -726,27 +726,6 @@ export const BulkCreationContact = ({ currentStepClick, success }: any) => {
         managerFirstName: contact["Manager First Name"],
         managerLastName: contact["Manager Last Name"],
       }));
-
-      // let allManagers: any = {};
-
-      // payload.forEach((val: any) => {
-      //   if (val.managerFirstName && val.managerLasttName) {
-      //     allManagers[
-      //       `${val.managerFirstName} ${val.managerLasttName}`
-      //     ] = `${val.managerFirstName} ${val.managerLasttName}`;
-      //   }
-      // });
-
-      // let allMangers: any = [];
-      // let allRestUsers: any = [];
-
-      // payload.forEach((item: any) => {
-      //   if (`${item.firstName} ${item.lastName}` in allManagers) {
-      //     allMangers.push(item);
-      //   } else {
-      //     allRestUsers.push(item);
-      //   }
-      // });
 
       await dispatch(createBulkContact(payload)).unwrap();
       setLoading(false);
