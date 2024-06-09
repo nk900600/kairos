@@ -816,7 +816,7 @@ export const BulkCreationTable = ({ currentStepClick, success }: any) => {
     e.preventDefault();
     e.stopPropagation();
     const url =
-      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Contact_Template.xlsx";
+      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Table_Template.xlsx";
     const link = document.createElement("a");
     link.href = url;
     link.download = "Sample_Menu_Template.xlsx";
