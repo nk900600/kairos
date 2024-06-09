@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   CirclePlus,
   CircleUser,
+  DownloadIcon,
   Filter,
   ListFilter,
   Pencil,
@@ -64,6 +65,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import {
   addEmployee,
+  createBulkContact,
   deleteEmployees,
   fetchAllEmployees,
   fetchDesgination,
@@ -92,72 +94,9 @@ import {
   SheetTrigger,
 } from "../components/ui/sheet";
 import { Separator } from "../components/ui/separator";
-
-const AllDesgination = [
-  {
-    id: 0,
-    value: "Show all",
-    isChecked: true,
-  },
-  {
-    id: 1,
-    value: "Chef",
-    isChecked: false,
-  },
-  {
-    id: 2,
-    value: "Waiter",
-    isChecked: false,
-  },
-  {
-    id: 3,
-    value: "Manager",
-    isChecked: false,
-  },
-];
-
-const AllEmployees = [
-  {
-    employee: "John Doe",
-    designation: "Chef",
-  },
-  {
-    employee: "Jane Smith",
-    designation: "Sous Chef",
-  },
-  {
-    employee: "Emily Johnson",
-    designation: "Pastry Chef",
-  },
-  {
-    employee: "Michael Brown",
-    designation: "Line Cook",
-  },
-  {
-    employee: "Sarah Davis",
-    designation: "Prep Cook",
-  },
-  {
-    employee: "David Wilson",
-    designation: "Kitchen Assistant",
-  },
-  {
-    employee: "Linda Martinez",
-    designation: "Dishwasher",
-  },
-  {
-    employee: "James Rodriguez",
-    designation: "Restaurant Manager",
-  },
-  {
-    employee: "Jessica Garcia",
-    designation: "Assistant Manager",
-  },
-  {
-    employee: "William Hernandez",
-    designation: "Waiter",
-  },
-];
+import { processExcelData } from "../util/processExcelData";
+import * as XLSX from "xlsx";
+import { validateData } from "../util/validateExcelFromSchema";
 
 export default function ContactsComponent() {
   const { allEmployees, allDesgination, isAdmin } = useSelector(
@@ -395,6 +334,7 @@ export function AlertDialogDemo({ employeeId }: any) {
     e.preventDefault();
     e.stopPropagation();
     dispatch(deleteEmployees(employeeId));
+    setOpen(false);
   };
   const handleEvent = (e: any) => {
     e.preventDefault();
@@ -467,6 +407,10 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
   );
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(
+    employeeData?.id ? "one" : "bulk"
+  );
+
   const form = useForm({
     resolver: zodResolver(addEmployeeSchema),
     defaultValues: {
@@ -519,136 +463,355 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
     setIsLoading(false);
   };
 
+  const handleCurrentStepClick = (step: any) => {
+    setCurrentStep(step);
+  };
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel htmlFor="firstName">First Name</FormLabel>
-                <FormControl>
-                  <Input id="firstName" placeholder="Joe" {...field} />
-                </FormControl>
-                {fieldState.error && (
-                  <FormMessage>{fieldState.error.message}</FormMessage>
-                )}
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel htmlFor="lastName">Last Name</FormLabel>
-                <FormControl>
-                  <Input id="lastName" placeholder="Rogan" {...field} />
-                </FormControl>
-                {fieldState.error && (
-                  <FormMessage>{fieldState.error.message}</FormMessage>
-                )}
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="mobileNumber"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="mobileNumber">Mobile Number</FormLabel>
-              <FormControl>
-                <Input
-                  id="mobileNumber"
-                  type="number"
-                  placeholder="1234567890"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              {fieldState.error && (
-                <FormMessage>{fieldState.error.message}</FormMessage>
-              )}
-            </FormItem>
-          )}
+    <>
+      {currentStep == "bulk" && (
+        <BulkCreationContact
+          success={() => setOpen(false)}
+          currentStepClick={handleCurrentStepClick}
         />
+      )}
 
-        <FormField
-          control={form.control}
-          name="desgination"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="desgination">Designation</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a employee desgination" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {allDesgination.map((item) => {
-                    return (
-                      <SelectItem value={item.title}>{item.title}</SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+      {currentStep == "one" && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="firstName">First Name</FormLabel>
+                    <FormControl>
+                      <Input id="firstName" placeholder="Joe" {...field} />
+                    </FormControl>
+                    {fieldState.error && (
+                      <FormMessage>{fieldState.error.message}</FormMessage>
+                    )}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="lastName">Last Name</FormLabel>
+                    <FormControl>
+                      <Input id="lastName" placeholder="Rogan" {...field} />
+                    </FormControl>
+                    {fieldState.error && (
+                      <FormMessage>{fieldState.error.message}</FormMessage>
+                    )}
+                  </FormItem>
+                )}
+              />
+            </div>
 
-        {employeeData?.Role?.name !== "Admin" && (
-          <FormField
-            control={form.control}
-            name="manager"
-            render={({ field, fieldState }) => (
-              <FormItem>
-                <FormLabel htmlFor="desgination">Manager</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+            <FormField
+              control={form.control}
+              name="mobileNumber"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel htmlFor="mobileNumber">Mobile Number</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a manager" />
-                    </SelectTrigger>
+                    <Input
+                      id="mobileNumber"
+                      type="number"
+                      placeholder="1234567890"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {allEmployees
-                      // .filter((val) =>
-                      //   !!employeeData?.managerId
-                      //     ? val.id != employeeData?.id
-                      //     : true
-                      // )
-                      .map((item) => {
+                  {fieldState.error && (
+                    <FormMessage>{fieldState.error.message}</FormMessage>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="desgination"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel htmlFor="desgination">Designation</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a employee desgination" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {allDesgination.map((item) => {
                         return (
-                          <SelectItem
-                            value={item.firstName + " " + item.lastName}
-                          >
-                            {item.firstName + " " + item.lastName}
+                          <SelectItem value={item.title}>
+                            {item.title}
                           </SelectItem>
                         );
                       })}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-        )}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
 
-        <Button loading={isLoading} type="submit">
-          {employeeData?.id ? "Update Employee" : "Add Employee"}
+            {employeeData?.Role?.name !== "Admin" && (
+              <FormField
+                control={form.control}
+                name="manager"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="desgination">Manager</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a manager" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {allEmployees
+                          // .filter((val) =>
+                          //   !!employeeData?.managerId
+                          //     ? val.id != employeeData?.id
+                          //     : true
+                          // )
+                          .map((item) => {
+                            return (
+                              <SelectItem
+                                value={item.firstName + " " + item.lastName}
+                              >
+                                {item.firstName + " " + item.lastName}
+                              </SelectItem>
+                            );
+                          })}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
+            <div className="flex gap-4">
+              <Button
+                variant={"secondary"}
+                onClick={() => setCurrentStep("bulk")}
+              >
+                Back
+              </Button>
+              <Button loading={isLoading} type="submit" className="w-full">
+                {employeeData?.id ? "Update Employee" : "Add Employee"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      )}
+    </>
+  );
+};
+
+const addEmployeeBulkSchema = z.object({
+  "First Name": z
+    .string()
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
+    .min(1, "First Name is required.")
+    .max(50, "Character lkmit exceeded"),
+  "Last Name": z
+    .string()
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
+    .min(1, "Last Name is required.")
+    .max(50, "Character lkmit exceeded"),
+  "Manager First Name": z
+    .string()
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
+    .min(1, "First Name is required.")
+    .max(50, "Character lkmit exceeded")
+    .optional(),
+  "Manager Last Name": z
+    .string()
+    .regex(/^[A-Za-z\s]*$/, "Please enter a valid Name")
+    .min(1, "Last Name is required.")
+    .max(50, "Character lkmit exceeded")
+    .optional(),
+  "Mobile Number": z
+    .number()
+    .min(1111111111, "Not a valid mobile number.")
+    .max(9999999999, "Not a valid mobile number"),
+  Designation: z.string().nonempty("Designation is required."),
+});
+
+export const BulkCreationContact = ({ currentStepClick, success }: any) => {
+  const [excelErrors, setExcelError] = useState<any>([]);
+  const [excelData, setExcelData] = useState<any>([]);
+  const [loading, setLoading] = useState<any>(false);
+  const dispatch: AppDispatch = useDispatch();
+  const handleExcelDownload = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url =
+      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Menu_Template.xlsx"; // Replace with your file URL
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Sample_Menu_Template.xlsx"; // Replace with your desired file name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileChange = async (e: any) => {
+    setExcelError(null);
+    setExcelData(null);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        const validationErrors = validateData(jsonData, addEmployeeBulkSchema);
+        if (validationErrors.length > 0) {
+          validationErrors.forEach((row: any) => {
+            row.errors.forEach((e: any) => {
+              toast.error(
+                `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+              );
+            });
+          });
+          setExcelError(validationErrors);
+        } else {
+          setExcelData(jsonData);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelErrors && excelErrors.length > 0) {
+      excelErrors.forEach((row: any) => {
+        row.errors.forEach((e: any) => {
+          toast.error(
+            `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+          );
+        });
+      });
+      return;
+    }
+    if (excelData.length == 0) {
+      toast.error(`No Employee Data found`);
+      return;
+    }
+    try {
+      setLoading(true);
+      let payload = excelData.map((contact: any) => ({
+        firstName: contact["First Name"],
+        lastName: contact["Last Name"],
+        mobileNumber: contact["Mobile Number"],
+        desginationName: contact["Designation"],
+        role: 3,
+        managerFirstName: contact["Manager First Name"],
+        managerLastName: contact["Manager Last Name"],
+      }));
+
+      // let allManagers: any = {};
+
+      // payload.forEach((val: any) => {
+      //   if (val.managerFirstName && val.managerLasttName) {
+      //     allManagers[
+      //       `${val.managerFirstName} ${val.managerLasttName}`
+      //     ] = `${val.managerFirstName} ${val.managerLasttName}`;
+      //   }
+      // });
+
+      // let allMangers: any = [];
+      // let allRestUsers: any = [];
+
+      // payload.forEach((item: any) => {
+      //   if (`${item.firstName} ${item.lastName}` in allManagers) {
+      //     allMangers.push(item);
+      //   } else {
+      //     allRestUsers.push(item);
+      //   }
+      // });
+
+      await dispatch(createBulkContact(payload)).unwrap();
+      setLoading(false);
+      success();
+    } catch (e) {
+      setLoading(false);
+    }
+  };
+  return (
+    <>
+      <div className="grid gap-4">
+        <div className="grid gap-1">
+          {/* <FormLabel>Bulk Upload</FormLabel> */}
+          <Label htmlFor="file-upload">Bulk Upload</Label>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Upload an Excel file to create multiple items at once.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Input
+            id="file-upload"
+            type="file"
+            onChange={handleFileChange}
+            accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          />
+          <Button onClick={handleExcelUpload} loading={loading}>
+            Upload
+          </Button>
+        </div>
+
+        <div
+          onClick={(e) => handleExcelDownload(e)}
+          className="flex gap-2 bg-blue-100 items-center justify-between cursor-pointer  rounded-lg border p-3 shadow-sm"
+        >
+          {/* <FormLabel>Bulk Upload</FormLabel> */}
+          <div className="grid gap-1 ">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Download an Sample Excel file
+            </p>
+          </div>
+
+          <DownloadIcon className="w-4 h-4"></DownloadIcon>
+        </div>
+      </div>
+
+      <Separator orientation="horizontal" />
+      <div className="grid gap-4">
+        <div className="grid gap-1">
+          <Label htmlFor="create-item">Create Single Contact</Label>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Click the button to create a new item.
+          </p>
+        </div>
+        <Button id="create-item" onClick={() => currentStepClick("one")}>
+          Add Single Contact
         </Button>
-      </form>
-    </Form>
+      </div>
+    </>
   );
 };
 
 export function ViewContact({ employee = {} }: any) {
+  const { allDesgination } = useSelector(
+    (state: { table: RootState }) => state.table
+  );
   return (
     <>
       <SheetHeader className="mb-4">
@@ -679,7 +842,11 @@ export function ViewContact({ employee = {} }: any) {
                 {employee.firstName + " " + employee.lastName}{" "}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
-                Software Engineer
+                {
+                  allDesgination?.find(
+                    (val) => val.id == employee?.designationId
+                  )?.title
+                }
               </p>
             </div>
           </div>

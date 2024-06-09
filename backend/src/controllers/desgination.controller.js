@@ -32,12 +32,9 @@ class DesignationController {
         where: { id: req.user.firmId },
       });
       const designations = await Designation.findAll({
-        where: { firmTypeId: firm.type },
-        // where: {
-        //   firmId: {
-        //     [Op.in]: [req.user.firmId],
-        //   },
-        // },
+        where: {
+          [Op.or]: [{ firmTypeId: firm.type }, { firmId: req.user.firmId }],
+        },
       });
       res.json(designations);
     } catch (error) {

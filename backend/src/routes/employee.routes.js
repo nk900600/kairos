@@ -10,6 +10,7 @@ router.get("/get-employee", employeeController.GetEmployeesBetweenDatesRange);
 router.get("/", employeeController.getAllEmployees);
 router.get("/:id", employeeController.getEmployeeById);
 router.post("/", employeeController.createEmployee);
+router.post("/bulk", employeeController.createEmployeeBulk);
 router.put("/:id", employeeController.updateEmployee);
 router.delete("/:id", employeeController.deleteEmployee);
 router.post(

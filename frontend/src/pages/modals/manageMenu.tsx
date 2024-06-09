@@ -57,6 +57,7 @@ import { DownloadIcon } from "lucide-react";
 import { CreatableSelectComponent } from "../common/createSelect";
 import * as XLSX from "xlsx";
 import { processExcelData } from "../../util/processExcelData";
+import { validateData } from "../../util/validateExcelFromSchema";
 
 const FormSchema = z.object({
   type: z.enum(["all", "mentions", "none"], {
@@ -377,23 +378,6 @@ const menuItemFileSchema = z.object({
     .optional(),
 });
 
-const validateData = (data: any) => {
-  const errors: any = [];
-
-  data.forEach((row: any, index: any) => {
-    console.log(row);
-    const validation = menuItemFileSchema.safeParse(row);
-    if (!validation.success) {
-      errors.push({
-        row: index + 1,
-        errors: validation.error.errors,
-      });
-    }
-  });
-
-  return errors;
-};
-
 export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
   const [excelErrors, setExcelError] = useState<any>([]);
   const [excelData, setExcelData] = useState<any>([]);
@@ -414,7 +398,7 @@ export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
 
   const handleFileChange = async (e: any) => {
     setExcelData(null);
-    setExcelData(null);
+    setExcelError(null);
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -426,7 +410,7 @@ export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const validationErrors = validateData(jsonData);
+        const validationErrors = validateData(jsonData, menuItemFileSchema);
         if (validationErrors.length > 0) {
           validationErrors.forEach((row: any) => {
             row.errors.forEach((e: any) => {
@@ -446,7 +430,7 @@ export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
   };
 
   const handleExcelUpload = async () => {
-    if (excelErrors.length > 0) {
+    if (excelErrors && excelErrors.length > 0) {
       excelErrors.forEach((row: any) => {
         row.errors.forEach((e: any) => {
           toast.error(

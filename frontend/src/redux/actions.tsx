@@ -134,6 +134,17 @@ export const addEmployee = createAsyncThunk(
     }
   }
 );
+export const createBulkContact = createAsyncThunk(
+  "tables/createBulkContact",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      let response = await axios.post(`employees/bulk`, payload);
+      return response.data; // return the id to identify which table was deleted
+    } catch (error) {
+      return rejectWithValue("Failed to delete table");
+    }
+  }
+);
 
 export const fetchMyAccount = createAsyncThunk(
   "tables/fetchMyAccount",

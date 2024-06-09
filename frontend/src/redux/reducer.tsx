@@ -10,6 +10,7 @@ import {
   authenticateUser,
   cancelSubscription,
   createAllLeaveTypes,
+  createBulkContact,
   createBulkMenu,
   createLeave,
   createMenu,
@@ -248,6 +249,12 @@ const counterSlice = createSlice({
         addEmployee.fulfilled,
         (state: RootState, action: PayloadAction<TableType[]>) => {
           state.allEmployees.push(action.payload);
+        }
+      )
+      .addCase(
+        createBulkContact.fulfilled,
+        (state: RootState, action: PayloadAction<TableType[]>) => {
+          state.allEmployees = action.payload;
         }
       )
       .addCase(

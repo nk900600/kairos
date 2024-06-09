@@ -103,6 +103,127 @@ class EmployeeController {
       return res.status(400).json({ error: error.message });
     }
   }
+  async createEmployeeBulk(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      if (!req.body?.length) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const firm = await Firm.findByPk(req.user.firmId);
+      // Create All desginations
+
+      const excelEmployees = req.body;
+      let desginations = excelEmployees.map((val) => {
+        if (val.mobileNumber && !mobileNumberRegex.test(val.mobileNumber)) {
+          return res
+            .status(400)
+            .json({ message: "Invalid mobile number format" });
+        }
+
+        return val.desginationName;
+      });
+
+      await Designation.bulkCreate(
+        desginations.map((val) => ({
+          title: val,
+          firmTypeId: firm.type,
+          firmId: req.user.firmId,
+        })),
+        { transaction, ignoreDuplicates: true }
+      );
+
+      const designations = await Designation.findAll({
+        where: {
+          [Op.or]: [{ firmTypeId: firm.type }, { firmId: req.user.firmId }],
+        },
+      });
+      // res.json(designations);
+
+      let designationMap = {};
+
+      designations.forEach((val) => {
+        designationMap[val.title] = val.id;
+      });
+
+      // Step 1: Retrieve all existing mobile numbers for the firm
+      const existingEmployees = await Employee.findAll({
+        where: { firmId: req.user.firmId },
+        attributes: ["mobileNumber"],
+        raw: true,
+      });
+
+      const existingMobileNumbers = new Set(
+        existingEmployees.map((emp) => emp.mobileNumber)
+      );
+
+      // Step 2: Filter out employees with already registered mobile numbers
+      const newEmployees = excelEmployees.filter(
+        (employee) => !existingMobileNumbers.has(employee.mobileNumber)
+      );
+
+      if (newEmployees.length !== excelEmployees.length) {
+        return res.status(400).json({
+          message:
+            "Some Users were already registered with same mobile numbers",
+        });
+      }
+
+      await Employee.bulkCreate(
+        newEmployees.map((employee) => {
+          return {
+            firstName: employee.firstName,
+            lastName: employee?.lastName,
+            mobileNumber: employee?.mobileNumber,
+            designationId: designationMap[employee.desginationName],
+            roleId: employee.role,
+            firmId: req.user.firmId,
+
+            userPic: getRandomGradient(),
+          };
+        }),
+        { userId: req.user.id, transaction, ignoreDuplicates: true }
+      );
+
+      // Step 4: Retrieve all employees to create a mapping
+      const allEmployees = await Employee.findAll({
+        where: { firmId: req.user.firmId },
+        attributes: ["id", "firstName", "lastName", "mobileNumber"],
+        raw: true,
+        transaction,
+      });
+
+      const employeeMap = new Map();
+      allEmployees.forEach((emp) => {
+        employeeMap.set(`${emp.firstName} ${emp.lastName}`, emp.id);
+      });
+
+      // Step 5: Update employees with their manager IDs
+      for (const employee of newEmployees) {
+        if (employee.managerFirstName && employee.managerLastName) {
+          const managerFullName = `${employee.managerFirstName} ${employee.managerLastName}`;
+          if (employeeMap.has(managerFullName)) {
+            const managerId = employeeMap.get(managerFullName);
+            await Employee.update(
+              { managerId: managerId },
+              { where: { mobileNumber: employee.mobileNumber }, transaction }
+            );
+          }
+        }
+      }
+
+      const employeesss = await Employee.findAll({
+        where: { firmId: req.user.firmId },
+        transaction,
+      });
+      await transaction.commit();
+
+      return res.status(201).json(employeesss);
+    } catch (error) {
+      await transaction.rollback();
+      return res.status(400).json({ error: error.message });
+    }
+  }
 
   async updateEmployee(req, res) {
     try {
@@ -188,7 +309,6 @@ class EmployeeController {
 
   async uploadUserPic(req, res) {
     try {
-      console.log(req.file.path);
       const fileContent = fs.readFileSync(req.file.path);
       const params = {
         Bucket: "kairos-userpics",
@@ -201,7 +321,6 @@ class EmployeeController {
       s3.upload(params, async (err, data) => {
         // Delete the file from the local uploads folder
         fs.unlinkSync(req.file.path);
-        console.log(data);
         if (err) {
           return res.status(500).json({ error: err });
         }
