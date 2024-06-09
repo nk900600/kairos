@@ -330,11 +330,15 @@ export default function ContactsComponent() {
 export function AlertDialogDemo({ employeeId }: any) {
   const [open, setOpen] = useState(false);
   const dispatch: AppDispatch = useDispatch();
-  const handleEmployeeDelete = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dispatch(deleteEmployees(employeeId));
-    setOpen(false);
+  const handleEmployeeDelete = async (e: any) => {
+    try {
+      e.preventDefault();
+      e.stopPropagation();
+      await dispatch(deleteEmployees(employeeId)).unwrap();
+      setOpen(false);
+    } catch (e: any) {
+      console.log(e);
+    }
   };
   const handleEvent = (e: any) => {
     e.preventDefault();
@@ -602,12 +606,14 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
               />
             )}
             <div className="flex gap-4">
-              <Button
-                variant={"secondary"}
-                onClick={() => setCurrentStep("bulk")}
-              >
-                Back
-              </Button>
+              {employeeData?.id && (
+                <Button
+                  variant={"secondary"}
+                  onClick={() => setCurrentStep("bulk")}
+                >
+                  Back
+                </Button>
+              )}
               <Button loading={isLoading} type="submit" className="w-full">
                 {employeeData?.id ? "Update Employee" : "Add Employee"}
               </Button>
@@ -741,7 +747,7 @@ export const BulkCreationContact = ({ currentStepClick, success }: any) => {
           {/* <FormLabel>Bulk Upload</FormLabel> */}
           <Label htmlFor="file-upload">Bulk Upload</Label>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Upload an Excel file to create multiple items at once.
+            Upload an Excel file to create multiple contacts at once.
           </p>
         </div>
         <div className="flex items-center gap-4">

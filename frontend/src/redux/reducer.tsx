@@ -12,6 +12,7 @@ import {
   createAllLeaveTypes,
   createBulkContact,
   createBulkMenu,
+  createBulkTable,
   createLeave,
   createMenu,
   createMenuCategories,
@@ -131,6 +132,12 @@ const counterSlice = createSlice({
         addTable.fulfilled,
         (state: RootState, action: PayloadAction<TableType>) => {
           state.alltables.push(action.payload);
+        }
+      )
+      .addCase(
+        createBulkTable.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.alltables = action.payload;
         }
       )
       .addCase(

@@ -45,6 +45,18 @@ export const addTable = createAsyncThunk(
     }
   }
 );
+export const createBulkTable = createAsyncThunk(
+  "tables/createBulkTable",
+  async (table: TableType, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`tables/bulk`, table);
+      return response.data;
+    } catch (error) {
+      toast.error("Something went wrong while adding, please try again");
+      return rejectWithValue("Failed to Add table");
+    }
+  }
+);
 
 export const deleteTable = createAsyncThunk(
   "tables/delete",
@@ -117,7 +129,18 @@ export const deleteEmployees = createAsyncThunk(
     try {
       await axios.delete(`employees/${id}`);
       return id; // return the id to identify which table was deleted
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response.data) {
+        if (
+          error.response.data.error.includes(
+            "Cannot delete or update a parent row"
+          )
+        )
+          toast.error("Cannot delete as this employee is a manager ");
+      } else {
+        toast.error("Something went wrong while deleting ");
+      }
+
       return rejectWithValue("Failed to delete table");
     }
   }

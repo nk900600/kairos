@@ -59,14 +59,34 @@ class TableController {
         { ...req.body, firmId: req.user.firmId },
         { userId: req.user.id }
       );
-
-      // sendPushNotification(
-      //   { title: "Great!", body: "New Order placed" },
-      //   req.user.firmId,
-      //   8
-      // );
       return res.status(201).json(tables);
     } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
+  async createBulkTable(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      if (!req.body?.length) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      await Table.bulkCreate(
+        req.body.map((val) => ({
+          tableName: val.tableName,
+          capacity: val.capacity,
+          firmId: req.user.firmId,
+        })),
+        { userId: req.user.id, transaction, ignoreDuplicates: true }
+      );
+      const tables = await Table.findAll({
+        where: { firmId: req.user.firmId },
+        transaction,
+      });
+      await transaction.commit();
+      return res.status(200).json(tables);
+    } catch (error) {
+      await transaction.rollback();
       return res.status(400).json({ error: error.message });
     }
   }

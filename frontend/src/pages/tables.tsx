@@ -7,6 +7,7 @@ import {
   ClockIcon,
   CreditCard,
   DollarSign,
+  DownloadIcon,
   Edit,
   Edit2,
   Edit3,
@@ -66,6 +67,7 @@ import { BreadcrumbComponent } from "./common/breadCrumbs";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addTable,
+  createBulkTable,
   createTableSession,
   deleteTable,
   fetchTables,
@@ -109,6 +111,9 @@ import { useSwipeable } from "react-swipeable";
 import { OrderStatuses } from "./chefsPanel";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { useQuery } from "../util/query";
+import { toast } from "sonner";
+import { validateData } from "../util/validateExcelFromSchema";
+import * as XLSX from "xlsx";
 const AllDesgination = [
   {
     id: 0,
@@ -687,7 +692,9 @@ const tableSchema = z.object({
 
 export const ManageTable = ({ tableData = {} }: any) => {
   const { open, setOpen }: any = useContext(DrawerContext);
-
+  const [currentStep, setCurrentStep] = useState(
+    tableData?.id ? "one" : "bulk"
+  );
   const dispatch: AppDispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
@@ -716,52 +723,220 @@ export const ManageTable = ({ tableData = {} }: any) => {
     }
     setIsLoading(false);
   };
+  const handleCurrentStepClick = (step: any) => {
+    setCurrentStep(step);
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        <FormField
-          control={form.control}
-          name="tableName"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="tableName">Table Name</FormLabel>
-              <FormControl>
-                <Input id="tableName" placeholder="Table 1" {...field} />
-              </FormControl>
-              {fieldState.error && (
-                <FormMessage>{fieldState.error.message}</FormMessage>
-              )}
-            </FormItem>
-          )}
+    <>
+      {currentStep == "bulk" && (
+        <BulkCreationTable
+          success={() => setOpen(false)}
+          currentStepClick={handleCurrentStepClick}
         />
-        <FormField
-          control={form.control}
-          name="capacity"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel htmlFor="capacity">Seat Capacity</FormLabel>
-              <FormControl>
-                <Input
-                  id="capacity"
-                  type="number"
-                  placeholder="4"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              {fieldState.error && (
-                <FormMessage>{fieldState.error.message}</FormMessage>
-              )}
-            </FormItem>
-          )}
-        />
+      )}
 
-        <Button loading={isLoading} type="submit">
-          Save
+      {currentStep == "one" && (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <FormField
+              control={form.control}
+              name="tableName"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel htmlFor="tableName">Table Name</FormLabel>
+                  <FormControl>
+                    <Input id="tableName" placeholder="Table 1" {...field} />
+                  </FormControl>
+                  {fieldState.error && (
+                    <FormMessage>{fieldState.error.message}</FormMessage>
+                  )}
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="capacity"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel htmlFor="capacity">Seat Capacity</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="capacity"
+                      type="number"
+                      placeholder="4"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  {fieldState.error && (
+                    <FormMessage>{fieldState.error.message}</FormMessage>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <div className="flex gap-4">
+              {!tableData?.id && (
+                <Button
+                  variant={"secondary"}
+                  onClick={() => setCurrentStep("bulk")}
+                >
+                  Back
+                </Button>
+              )}
+              <Button loading={isLoading} type="submit" className="w-full">
+                Save
+              </Button>
+            </div>
+          </form>
+        </Form>
+      )}
+    </>
+  );
+};
+
+const addTableBulkSchema = z.object({
+  "Table Name": z
+    .string()
+    .min(1, "Table name is required.")
+    .max(50, "Character lkmit exceeded"),
+  "No of seats": z
+    .number()
+    .min(1, "Seat capacity must be at least 1.")
+    .max(30, "Please Enter number less than 30"),
+});
+
+export const BulkCreationTable = ({ currentStepClick, success }: any) => {
+  const [excelErrors, setExcelError] = useState<any>([]);
+  const [excelData, setExcelData] = useState<any>([]);
+  const [loading, setLoading] = useState<any>(false);
+  const dispatch: AppDispatch = useDispatch();
+  const handleExcelDownload = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url =
+      "https://kairos-public-images.s3.eu-north-1.amazonaws.com/bulk_creation_template/Sample_Contact_Template.xlsx";
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Sample_Menu_Template.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileChange = async (e: any) => {
+    setExcelError(null);
+    setExcelData(null);
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        const validationErrors = validateData(jsonData, addTableBulkSchema);
+        if (validationErrors.length > 0) {
+          validationErrors.forEach((row: any) => {
+            row.errors.forEach((e: any) => {
+              toast.error(
+                `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+              );
+            });
+          });
+          setExcelError(validationErrors);
+        } else {
+          setExcelData(jsonData);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  const handleExcelUpload = async () => {
+    if (excelErrors && excelErrors.length > 0) {
+      excelErrors.forEach((row: any) => {
+        row.errors.forEach((e: any) => {
+          toast.error(
+            `Excel error: Row ${row.row}, Col name:${e.path}, error:${e.message}`
+          );
+        });
+      });
+      return;
+    }
+    if (excelData.length == 0) {
+      toast.error(`No Employee Data found`);
+      return;
+    }
+    try {
+      setLoading(true);
+      let payload = excelData.map((table: any) => ({
+        tableName: table["Table Name"],
+        capacity: table["No of seats"],
+      }));
+
+      await dispatch(createBulkTable(payload)).unwrap();
+      setLoading(false);
+      success();
+    } catch (e) {
+      setLoading(false);
+    }
+  };
+  return (
+    <>
+      <div className="grid gap-4">
+        <div className="grid gap-1">
+          {/* <FormLabel>Bulk Upload</FormLabel> */}
+          <Label htmlFor="file-upload">Bulk Upload</Label>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Upload an Excel file to create multiple tables at once.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <Input
+            id="file-upload"
+            type="file"
+            onChange={handleFileChange}
+            accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          />
+          <Button onClick={handleExcelUpload} loading={loading}>
+            Upload
+          </Button>
+        </div>
+
+        <div
+          onClick={(e) => handleExcelDownload(e)}
+          className="flex gap-2 bg-blue-100 items-center justify-between cursor-pointer  rounded-lg border p-3 shadow-sm"
+        >
+          {/* <FormLabel>Bulk Upload</FormLabel> */}
+          <div className="grid gap-1 ">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Download an Sample Excel file
+            </p>
+          </div>
+
+          <DownloadIcon className="w-4 h-4"></DownloadIcon>
+        </div>
+      </div>
+
+      <Separator orientation="horizontal" />
+      <div className="grid gap-4">
+        <div className="grid gap-1">
+          <Label htmlFor="create-item">Create Single table</Label>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Click the button to create a new item.
+          </p>
+        </div>
+        <Button id="create-item" onClick={() => currentStepClick("one")}>
+          Add Single Table
         </Button>
-      </form>
-    </Form>
+      </div>
+    </>
   );
 };
 
