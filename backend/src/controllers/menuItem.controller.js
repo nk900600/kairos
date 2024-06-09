@@ -410,6 +410,111 @@ class MenuItemsController {
       res.status(500).send("Error creating category");
     }
   }
+  async createBulkMenuItems(req, res) {
+    const transaction = await sequelize.transaction();
+    try {
+      if (!req.body?.length) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const menuItems = req.body;
+
+      const allCategory = menuItems.map((item) => ({
+        title: item.categoryName,
+        firmTypeId: 1,
+        firmId: req.user.firmId,
+      }));
+
+      await Category.bulkCreate(allCategory, { ignoreDuplicates: true });
+      const allCategories = await Category.findAll({
+        where: {
+          [Op.or]: [{ firmId: null }, { firmId: req.user.firmId }],
+        },
+      });
+      const categoriesMap = {};
+      allCategories.forEach((val) => {
+        categoriesMap[val.title] = val.id;
+      });
+
+      for (const item of menuItems) {
+        const { name, description, price, categoryName, spiceLevel, dietType } =
+          item;
+
+        // Create the menu item
+        const menuItem = await MenuItem.create(
+          {
+            name,
+            description,
+            price,
+            categoryId: categoriesMap[categoryName],
+            available: true,
+            spiceLevel,
+            dietType,
+            firmId: req.user.firmId,
+          },
+          { transaction, userId: req.user.id, ignoreDuplicates: true }
+        );
+
+        if (req.body?.customizations && req.body?.customizations.length > 0) {
+          const customizations = req.body?.customizations;
+          for (const customizationData of customizations) {
+            if (!customizationData.name) {
+              throw new Error("Missing required fields - customization - Name");
+            }
+
+            const customization = await Customization.create(
+              {
+                ...customizationData,
+                menuItemId: menuItem.id,
+              },
+              { transaction, userId: req.user.id }
+            );
+
+            if (
+              customizationData.choices &&
+              customizationData.choices.length > 0
+            ) {
+              for (const choiceData of customizationData.choices) {
+                if (!choiceData.name) {
+                  throw new Error(
+                    "Missing required fields - choiceData - Name"
+                  );
+                }
+                await CustomizationChoice.create(
+                  {
+                    ...choiceData,
+                    CustomizationId: customization.id,
+                  },
+                  { transaction, userId: req.user.id }
+                );
+              }
+            }
+          }
+        }
+      }
+
+      await transaction.commit();
+      const items = await MenuItem.findAll({
+        where: { firmId: req.user.firmId },
+        include: [
+          {
+            model: Customization,
+            include: [
+              {
+                model: CustomizationChoice,
+              },
+            ],
+          },
+        ],
+      });
+
+      res.status(201).json({ items });
+    } catch (error) {
+      transaction.rollback();
+      console.error("Error creating bulk menu items:", error);
+      res.status(500).send("Error creating bulk menu items");
+    }
+  }
 }
 
 module.exports = new MenuItemsController();

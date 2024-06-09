@@ -11,6 +11,7 @@ router.get(
   menuItemsController.getMenuCustomization
 );
 router.post("/", menuItemsController.createMenuItem);
+router.post("/bulk", menuItemsController.createBulkMenuItems);
 router.patch("/:id", menuItemsController.updateMenuItem);
 router.patch(
   "/:id/customization/:customid",

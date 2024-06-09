@@ -56,11 +56,7 @@ const MenuItem = sequelize.define(
       defaultValue: true,
     },
     spiceLevel: {
-      type: DataTypes.ENUM(
-        SpiceLevel.MEDIUM,
-        SpiceLevel.MILD,
-        SpiceLevel.SPICY
-      ),
+      type: DataTypes.ENUM(SpiceLevel.LOW, SpiceLevel.MILD, SpiceLevel.SPICY),
       defaultValue: null,
     },
     dietType: {
@@ -173,5 +169,5 @@ Customization.belongsTo(MenuItem, {
   foreignKey: "menuItemId",
   allowNull: false,
 });
-// Category.sync({ alter: true });
+// MenuItem.sync({ alter: true });
 module.exports = { MenuItem, Customization, CustomizationChoice, Category };

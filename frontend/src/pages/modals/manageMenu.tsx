@@ -45,6 +45,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/reducer";
 import { AppDispatch } from "../../redux/store";
 import {
+  createBulkMenu,
   createMenu,
   createMenuCategories,
   updateMenu,
@@ -164,7 +165,10 @@ export function ManageMenu({ menu = {} }: any) {
   return (
     <>
       {currentStep == "bulk" && (
-        <BulkCreationMenu currentStepClick={handleCurrentStepClick} />
+        <BulkCreationMenu
+          success={() => setOpen(false)}
+          currentStepClick={handleCurrentStepClick}
+        />
       )}
 
       {currentStep == "one" && (
@@ -390,9 +394,11 @@ const validateData = (data: any) => {
   return errors;
 };
 
-export const BulkCreationMenu = ({ currentStepClick }: any) => {
+export const BulkCreationMenu = ({ currentStepClick, success }: any) => {
   const [excelErrors, setExcelError] = useState<any>([]);
   const [excelData, setExcelData] = useState<any>([]);
+  const [loading, setLoading] = useState<any>(false);
+  const dispatch: AppDispatch = useDispatch();
   const handleExcelDownload = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
@@ -439,7 +445,7 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
     }
   };
 
-  const handleExcelUpload = () => {
+  const handleExcelUpload = async () => {
     if (excelErrors.length > 0) {
       excelErrors.forEach((row: any) => {
         row.errors.forEach((e: any) => {
@@ -450,8 +456,15 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
       });
       return;
     }
-    let payload = [];
-    console.log(processExcelData(excelData));
+    try {
+      setLoading(true);
+      let payload = processExcelData(excelData);
+      await dispatch(createBulkMenu(payload)).unwrap();
+      setLoading(false);
+      success();
+    } catch (e) {
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -470,7 +483,9 @@ export const BulkCreationMenu = ({ currentStepClick }: any) => {
             onChange={handleFileChange}
             accept=".xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
           />
-          <Button onClick={handleExcelUpload}>Upload</Button>
+          <Button onClick={handleExcelUpload} loading={loading}>
+            Upload
+          </Button>
         </div>
 
         <div

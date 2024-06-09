@@ -10,6 +10,7 @@ import {
   authenticateUser,
   cancelSubscription,
   createAllLeaveTypes,
+  createBulkMenu,
   createLeave,
   createMenu,
   createMenuCategories,
@@ -415,6 +416,12 @@ const counterSlice = createSlice({
         createMenu.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.allMenu.push(action.payload);
+        }
+      )
+      .addCase(
+        createBulkMenu.fulfilled,
+        (state: RootState, action: PayloadAction<any>) => {
+          state.allMenu = action.payload;
         }
       )
       .addCase(

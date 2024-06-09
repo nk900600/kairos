@@ -8,7 +8,7 @@ const CategoryType = Object.freeze({
 });
 const SpiceLevel = Object.freeze({
   MILD: "Mild",
-  MEDIUM: "Medium",
+  LOW: "Low",
   SPICY: "Spicy",
   // VERYSPICY: "Very Spicy",
 });
