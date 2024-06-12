@@ -870,16 +870,19 @@ export const updateWebPushSub = createAsyncThunk(
               });
               const state: any = getState();
               const firmId = state.table?.myAccount.employee.Firm.id;
-              const desginationId =
-                state.table?.myAccount.employee.Designation.id;
-              subscription = JSON.parse(JSON.stringify(subscription));
-              subscription.firmId = firmId;
-              subscription.designationId = desginationId;
 
-              try {
-                await axios.post("/subscribe", subscription);
-              } catch (e: any) {
-                toast.error("Somthing went wrong while subscribing ");
+              const desginationId =
+                state.table?.myAccount?.employee?.Designation?.id;
+              if (desginationId) {
+                subscription = JSON.parse(JSON.stringify(subscription));
+                subscription.firmId = firmId;
+                subscription.designationId = desginationId;
+
+                try {
+                  await axios.post("/subscribe", subscription);
+                } catch (e: any) {
+                  toast.error("Somthing went wrong while subscribing ");
+                }
               }
             }
           });

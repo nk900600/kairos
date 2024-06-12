@@ -172,12 +172,15 @@ const counterSlice = createSlice({
         fetchMyAccount.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount = action.payload;
-          state.myAccount.subscripition.trialEndDate =
+          if(state.myAccount.subscripition) {
+            state.myAccount.subscripition.trialEndDate =
             state.myAccount.subscripition["isTrailEnded"] =
               new Date(state.myAccount.subscripition.trialEndDate) < new Date();
           // if (!state.myAccount.employee?.Firm.image) {
           //   state.myAccount.employee.Firm.image = getRandomGradient();
           // }
+          }
+       
           state.isAdmin =
             action.payload?.employee?.Role?.name == RoleEnum.ADMIN;
         }
