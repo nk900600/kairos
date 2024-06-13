@@ -514,7 +514,13 @@ class MenuItemsController {
         ],
       });
 
-      res.status(201).json({ items });
+
+      const categories = await Category.findAll({
+        where: {
+          [Op.or]: [{ firmId: null }, { firmId: req.user.firmId }],
+        },
+      });
+      res.status(201).json({ items,categories });
     } catch (error) {
       transaction.rollback();
       console.error("Error creating bulk menu items:", error);

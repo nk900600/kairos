@@ -438,7 +438,9 @@ const counterSlice = createSlice({
       .addCase(
         createBulkMenu.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
-          state.allMenu = action.payload;
+          const {items,categories} = action.payload
+          state.allMenu = items;
+          state.allMenuCategories = categories;
         }
       )
       .addCase(

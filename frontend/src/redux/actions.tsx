@@ -413,7 +413,7 @@ export const createBulkMenu = createAsyncThunk(
   async (payload: any, { rejectWithValue }) => {
     try {
       let response = await axios.post(`menus/bulk`, payload);
-      return response.data.items; // return the id to identify which table was deleted
+      return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something wnet wrong while adding, please try again");
       return rejectWithValue("Failed to delete table");
