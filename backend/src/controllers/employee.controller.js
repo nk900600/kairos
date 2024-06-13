@@ -137,6 +137,7 @@ class EmployeeController {
         where: {
           [Op.or]: [{ firmTypeId: firm.type }, { firmId: req.user.firmId }],
         },
+        transaction,
       });
       // res.json(designations);
 
@@ -178,7 +179,6 @@ class EmployeeController {
             designationId: designationMap[employee.desginationName],
             roleId: employee.role,
             firmId: req.user.firmId,
-
             userPic: getRandomGradient(),
           };
         }),
@@ -212,13 +212,13 @@ class EmployeeController {
         }
       }
 
-      const employeesss = await Employee.findAll({
+      const newBulkEmployees = await Employee.findAll({
         where: { firmId: req.user.firmId },
         transaction,
       });
       await transaction.commit();
 
-      return res.status(201).json(employeesss);
+      return res.status(201).json({ newBulkEmployees, designations });
     } catch (error) {
       await transaction.rollback();
       return res.status(400).json({ error: error.message });

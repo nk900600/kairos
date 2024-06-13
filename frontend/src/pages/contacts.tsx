@@ -426,10 +426,10 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
             ?.title
         : "",
       manager: employeeData?.managerId
-        ? allEmployees.find((val) => val.id == employeeData?.managerId)
-            .firstName +
+        ? allEmployees?.find((val) => val.id == employeeData?.managerId)
+            ?.firstName +
           " " +
-          allEmployees.find((val) => val.id == employeeData?.managerId).lastName
+          allEmployees?.find((val) => val.id == employeeData?.managerId)?.lastName
         : employeeData?.Role?.name == "Admin"
         ? employeeData?.firstName + " " + employeeData?.lastName
         : "",
@@ -606,14 +606,12 @@ export const ManageEmployees = ({ employeeData = {} }: any) => {
               />
             )}
             <div className="flex gap-4">
-              {employeeData?.id && (
                 <Button
                   variant={"secondary"}
                   onClick={() => setCurrentStep("bulk")}
                 >
                   Back
                 </Button>
-              )}
               <Button loading={isLoading} type="submit" className="w-full">
                 {employeeData?.id ? "Update Employee" : "Add Employee"}
               </Button>
@@ -683,7 +681,7 @@ export const BulkCreationContact = ({ currentStepClick, success }: any) => {
       reader.onload = (e: any) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
+        const sheetName = workbook.SheetNames[1];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 

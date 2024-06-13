@@ -49,7 +49,6 @@ export function DashBoardContent() {
 
   const handleDateChnage = (from: any, to: any) => {
     // get employee Data
-    console.log(from, to);
     axiosInstance
       .get("employees/get-employee", {
         params: {
@@ -97,8 +96,6 @@ export function DashBoardContent() {
         },
       })
       .then((res) => {
-        console.log(res.data);
-
         res.data.dailyWaitTimeMetrics = res.data.dailyWaitTimeMetrics.map(
           (val: any) => {
             return {

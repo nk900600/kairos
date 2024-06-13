@@ -263,8 +263,10 @@ const counterSlice = createSlice({
       )
       .addCase(
         createBulkContact.fulfilled,
-        (state: RootState, action: PayloadAction<TableType[]>) => {
-          state.allEmployees = action.payload;
+        (state: RootState, action: PayloadAction<any>) => {
+          const {newBulkEmployees  , designations} = action.payload
+           state.allEmployees = newBulkEmployees;
+           state.allDesgination = designations
         }
       )
       .addCase(
