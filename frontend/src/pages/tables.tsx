@@ -194,6 +194,7 @@ export default function TableComponent() {
 
   const handleEditClick = (table: any) => {
     setOpen(true);
+    setComponent("manageTable");
     setTitle("Edit Table");
     setDescription(" ");
     setCompProps({ tableData: table });
@@ -204,11 +205,13 @@ export default function TableComponent() {
     setTitle("Add Table");
     setComponent("manageTable");
     setDescription("Please add New Table ");
+    setCompProps({ tableData: {} });
   };
 
   const handleReservationClick = (event: any) => {
     setOpen(true);
     setTitle("Create Reservation");
+    setComponent("manageTable");
     setDescription("Please Create a new resertvation ");
     setComponent("manageReservation");
   };
