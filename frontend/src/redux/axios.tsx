@@ -1,6 +1,7 @@
 import axios from "axios";
 
 // const BASE_URL = "http://localhost:4200/api";
+// const BASE_URL = "http://192.168.43.209:4200/api";
 export const BASE_URL = "https://api.theshopbusiness.com/api";
 // Create an instance of axios
 const axiosInstance = axios.create({
@@ -31,13 +32,13 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // Perform actions before request is sent
     // E.g., Inserting auth token in headers
-    // const token = localStorage.getItem("authToken");
-    // if (token) {
-    config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
-    config.headers["x-refresh-token"] = `${localStorage.getItem(
-      "refreshtoken"
-    )}`;
-    // }
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      config.headers["x-refresh-token"] = `${localStorage.getItem(
+        "refreshtoken"
+      )}`;
+    }
     return config;
   },
   (error) => {
