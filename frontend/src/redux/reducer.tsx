@@ -172,15 +172,16 @@ const counterSlice = createSlice({
         fetchMyAccount.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
           state.myAccount = action.payload;
-          if(state.myAccount.subscripition) {
+          if (state.myAccount.subscripition) {
             state.myAccount.subscripition.trialEndDate =
-            state.myAccount.subscripition["isTrailEnded"] =
-              new Date(state.myAccount.subscripition.trialEndDate) < new Date();
-          // if (!state.myAccount.employee?.Firm.image) {
-          //   state.myAccount.employee.Firm.image = getRandomGradient();
-          // }
+              state.myAccount.subscripition["isTrailEnded"] =
+                new Date(state.myAccount.subscripition.trialEndDate) <
+                new Date();
+            // if (!state.myAccount.employee?.Firm.image) {
+            //   state.myAccount.employee.Firm.image = getRandomGradient();
+            // }
           }
-       
+
           state.isAdmin =
             action.payload?.employee?.Role?.name == RoleEnum.ADMIN;
         }
@@ -246,11 +247,11 @@ const counterSlice = createSlice({
             };
           }
 
-          if(action.payload.id == state.myAccount?.employee?.id){
+          if (action.payload.id == state.myAccount?.employee?.id) {
             state.myAccount.employee = {
               ...state.myAccount.employee,
-              ...action.payload
-            }
+              ...action.payload,
+            };
           }
         }
       )
@@ -271,9 +272,9 @@ const counterSlice = createSlice({
       .addCase(
         createBulkContact.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
-          const {newBulkEmployees  , designations} = action.payload
-           state.allEmployees = newBulkEmployees;
-           state.allDesgination = designations
+          const { newBulkEmployees, designations } = action.payload;
+          state.allEmployees = newBulkEmployees;
+          state.allDesgination = designations;
         }
       )
       .addCase(
@@ -447,7 +448,7 @@ const counterSlice = createSlice({
       .addCase(
         createBulkMenu.fulfilled,
         (state: RootState, action: PayloadAction<any>) => {
-          const {items,categories} = action.payload
+          const { items, categories } = action.payload;
           state.allMenu = items;
           state.allMenuCategories = categories;
         }

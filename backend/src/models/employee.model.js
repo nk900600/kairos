@@ -132,28 +132,38 @@ const Role = sequelize.define("Role", {
 });
 
 // Define the Designation model
-const Designation = sequelize.define("Designation", {
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  firmTypeId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "FirmTypes", // Assumes you have a Users table
-      key: "id",
+const Designation = sequelize.define(
+  "Designation",
+  {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    firmTypeId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "FirmTypes", // Assumes you have a Users table
+        key: "id",
+      },
+    },
+    firmId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "Firms", // Assumes you have a Users table
+        key: "id",
+      },
     },
   },
-  firmId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: "Firms", // Assumes you have a Users table
-      key: "id",
-    },
-  },
-});
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ["firmId", "firmTypeId", "title"],
+      },
+    ],
+  }
+);
 // Define the Document model
 const Document = sequelize.define("Document", {
   // Document fields
@@ -168,8 +178,16 @@ const Document = sequelize.define("Document", {
 });
 
 // Hooks
-Employee.beforeCreate((table, options) => {
-  table.createdBy = options.userId;
+Employee.beforeCreate(async (employee, options) => {
+  employee.createdBy = options.userId;
+  // if not owner
+  if (employee?.roleId !== 1 ) {
+    const existingAssignments = await Employee.count({ where: { mobileNumber: employee.mobileNumber } });
+    if (existingAssignments > 0) {
+      throw new Error('An employee can not be assigned to multiple shop.');
+    }
+  }
+
 });
 Employee.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;

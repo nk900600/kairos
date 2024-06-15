@@ -561,11 +561,11 @@ export function Subscription() {
                                 })}
                               </SelectContent>
                             </Select>
-                            {fieldState.error && (
+                            {/* {fieldState.error && (
                               <FormMessage>
-                                {fieldState.error.message}
+                             {" You need to select a state"}
                               </FormMessage>
-                            )}
+                            )} */}
                           </FormItem>
                         )}
                       />

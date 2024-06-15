@@ -361,7 +361,7 @@ export default function LeavesComponent() {
             ).length && (
             <EmptyPlaceholder
               title="No Leaves Applied yet"
-              description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
+              description="Remember, even superheroes need a day off!"
               buttonText="Apply leaves"
               type="leaves"
               onButtonClick={() => handleAddPolicyClick()}
@@ -435,7 +435,7 @@ export default function LeavesComponent() {
           ).length && (
             <EmptyPlaceholder
               title="No Leaves history yet"
-              description="Well, well, well! It seems like everyone is working so hard that nobody has thought about taking a break. Remember, even superheroes need a day off! To keep up the great work and ensure you’re at your best, don’t forget to apply for your well-deserved leave."
+              description="Remember, even superheroes need a day off!"
               type="leaves"
               buttonText=""
             ></EmptyPlaceholder>
