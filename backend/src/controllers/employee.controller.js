@@ -182,7 +182,7 @@ class EmployeeController {
             userPic: getRandomGradient(),
           };
         }),
-        { userId: req.user.id, transaction, ignoreDuplicates: true }
+        { userId: req.user.id, transaction, individualHooks: true }
       );
 
       // Step 4: Retrieve all employees to create a mapping

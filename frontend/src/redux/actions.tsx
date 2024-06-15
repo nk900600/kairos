@@ -7,6 +7,7 @@ import { ResponsiveContainer } from "recharts";
 import axios from "./axios";
 import { vapidKeys } from "../const/allConsts";
 import { urlBase64ToUint8Array } from "../util/urlBase64ToUint8Array";
+import { createReturn } from "typescript";
 
 export const fetchTables: any = createAsyncThunk<any>(
   "tables/fetch",
@@ -163,8 +164,9 @@ export const createBulkContact = createAsyncThunk(
     try {
       let response = await axios.post(`employees/bulk`, payload);
       return response.data; // return the id to identify which table was deleted
-    } catch (error) {
-      return rejectWithValue("Failed to delete table");
+    } catch (error: any) {
+      if (error?.response?.data?.error) toast.error(error.response.data?.error);
+      return rejectWithValue("Failed to create bulk employees");
     }
   }
 );
@@ -174,6 +176,10 @@ export const fetchMyAccount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       let response = await axios.get(`employees/me`);
+      if (!response.data?.employee) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
       return response.data; // return the id to identify which table was deleted
     } catch (error) {
       toast.error("Something went wrong while fetching your data");

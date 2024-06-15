@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const sequelize = require("../db/db.js");
-const { Employee } = require("../models/employee.model.js");
+const { Employee, Designation } = require("../models/employee.model.js");
 const { Firm } = require("../models/firm.model.js");
 const { Leave, LeaveType } = require("../models/leave.model.js");
 const { MenuItem, Category } = require("../models/menuItem.model.js");
@@ -76,11 +76,13 @@ class FirmController {
 
     try {
       const firmId = req.params.id;
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { transaction });
       await Leave.destroy({ where: { firmId: firmId } }, { transaction });
       await LeaveType.destroy({ where: { firmId: firmId } }, { transaction });
       await MenuItem.destroy({ where: { firmId: firmId } }, { transaction });
       await Category.destroy({ where: { firmId: firmId } }, { transaction });
       await Order.destroy({ where: { firmId: firmId } }, { transaction });
+      await Designation.destroy({ where: { firmId: firmId } }, { transaction });
       await FirmSubscription.destroy(
         { where: { FirmId: firmId } },
         { transaction }
@@ -127,6 +129,9 @@ class FirmController {
         },
         transaction,
       });
+
+      await sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { transaction });
+      
       await transaction.commit();
       res.send("Firm deleted successfully");
     } catch (error) {

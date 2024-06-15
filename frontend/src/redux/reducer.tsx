@@ -245,6 +245,13 @@ const counterSlice = createSlice({
               ...action.payload,
             };
           }
+
+          if(action.payload.id == state.myAccount?.employee?.id){
+            state.myAccount.employee = {
+              ...state.myAccount.employee,
+              ...action.payload
+            }
+          }
         }
       )
       .addCase(

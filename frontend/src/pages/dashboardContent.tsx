@@ -119,7 +119,6 @@ export function DashBoardContent() {
         },
       })
       .then((res) => {
-        console.log(res.data);
         res.data.dailyServiceTimeMetrics = res.data.dailyServiceTimeMetrics.map(
           (val: any) => {
             return {
