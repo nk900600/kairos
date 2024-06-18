@@ -156,9 +156,9 @@ export default function SignUp() {
               <div className="grid gap-2 text-left">
                 <img
                   alt="TSB"
-                  className="h-10 w-10"
+                  className="h-8 w-10"
                   height="00"
-                  src="./logo.svg"
+                  src="./icon2.png"
                   width="300"
                 />
                 <h1 className="text-3xl font-bold">Create your Account</h1>
@@ -289,9 +289,13 @@ export default function SignUp() {
                 </div>
                 <div className="mt-1 text-left text-sm">
                   Take me to?{" "}
-                  <NavLink to="/login" className="underline">
+                  <a
+                    href="https://theshopbusiness.com/"
+                    target="_blank"
+                    className="underline"
+                  >
                     Home page
-                  </NavLink>
+                  </a>
                 </div>
               </div>
             </>

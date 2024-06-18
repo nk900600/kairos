@@ -116,9 +116,9 @@ export default function Login() {
               <div className="grid gap-2 text-left">
                 <img
                   alt="TSB"
-                  className="h-10 w-10"
+                  className="h-8 w-10"
                   height="00"
-                  src="./logo.svg"
+                  src="./icon2.png"
                   width="300"
                 />
                 <h1 className="text-3xl font-bold">Log in</h1>

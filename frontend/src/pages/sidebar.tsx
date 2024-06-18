@@ -212,9 +212,9 @@ function Sidebar() {
             <div className="flex items-center gap-2 font-semibold">
               <img
                 alt="TSB"
-                className="h-6 w-6"
+                className="h-6 w-7"
                 height="00"
-                src="./logo.svg"
+                src="./icon2.png"
                 width="300"
               />
               <span className="text-muted-foreground">/</span>
