@@ -395,8 +395,8 @@ export default function LeavesComponent() {
                             </CardTitle>
 
                             <CardDescription className="text-xs">
-                              {leave.LeaveType.name}{" "}
-                              {"(" + leave.duration + " Days)"}
+                              {leave?.LeaveType?.name}{" "}
+                              {"(" + leave?.duration + " Days)"}
                             </CardDescription>
                           </div>
                           <div className="flex-1">
@@ -572,7 +572,6 @@ export const ManageLeave = ({ leave }: any) => {
 
   const onSubmit = async () => {
     let dates: any = getValues();
-
     if (!dates.startDate || !dates.endDate) {
       return;
     }
@@ -583,16 +582,16 @@ export const ManageLeave = ({ leave }: any) => {
       if (leave?.id) {
         // await dispatch(updateEmployees(data)).unwrap();
         let payload = {
-          startDate: format(dates.startDate, "yyyy-MM-dd"),
-          endDate: format(dates.endDate, "yyyy-MM-dd"),
+          startDate: dates.startDate,
+          endDate: dates.endDate,
           id: leave?.id,
           reason: reason,
         };
         await dispatch(updateLeave(payload)).unwrap();
       } else {
         let payload = {
-          startDate: format(dates.startDate, "yyyy-MM-dd"),
-          endDate: format(dates.endDate, "yyyy-MM-dd"),
+          startDate: dates.startDate,
+          endDate: dates.endDate,
           reason: reason,
           LeaveTypeId: allLeavesTypes.find((val) => val.name == leaveType)?.id,
           managerId: myAccount.employee.managerId,
@@ -611,9 +610,9 @@ export const ManageLeave = ({ leave }: any) => {
     setLeaveType(data);
   };
 
-  const handleDatePicker = (date: any) => {
-    setValue("startDate", date?.from); // Set startDate to April 1, 2024
-    setValue("endDate", date?.to);
+  const handleDatePicker = (from: any, to: any) => {
+    setValue("startDate", from); // Set startDate to April 1, 2024
+    setValue("endDate", to);
   };
   return (
     <Form {...form}>
@@ -627,7 +626,7 @@ export const ManageLeave = ({ leave }: any) => {
               <FormLabel htmlFor="startDate">Select Dates</FormLabel>
               <FormControl>
                 <DatePickerWithRange
-                  onDateChange={(d: any) => handleDatePicker(d)}
+                  onDateChange={handleDatePicker}
                   className="w-full"
                   dateObj={{
                     from: leave?.startDate
@@ -643,6 +642,7 @@ export const ManageLeave = ({ leave }: any) => {
                       to: subDays(new Date(), 1),
                     },
                   ]}
+                  showRangeButton={false}
                 ></DatePickerWithRange>
               </FormControl>
               {fieldState.error && (

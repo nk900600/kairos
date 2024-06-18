@@ -121,12 +121,6 @@ const Leave = sequelize.define(
   },
   {
     timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ["createdBy", "startDate"],
-      },
-    ],
   }
 );
 
@@ -142,6 +136,6 @@ Leave.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;
 });
 
-// Leave.sync({});
+// Leave.sync({ alter: true });
 // LeaveType.sync({});
 module.exports = { Leave, LeaveType, LeaveStatus, LeaveDurationType };
