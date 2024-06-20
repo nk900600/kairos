@@ -18,9 +18,9 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: data.body,
-    icon: "https://kairos-public-images.s3.eu-north-1.amazonaws.com/testgmn(2)(1)(1).png",
+    icon: "https://kairos-public-images.s3.eu-north-1.amazonaws.com/tsb-192.png",
     data: {
-      url: "https://via.placeholder.com/128",
+      url: "https://app.theshopbusiness.com",
     },
   };
   event.waitUntil(

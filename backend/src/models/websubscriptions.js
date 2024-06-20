@@ -7,7 +7,6 @@ const WebSubscription = sequelize.define(
     endpoint: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     keys: {
       type: DataTypes.JSON,

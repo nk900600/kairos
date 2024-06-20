@@ -164,9 +164,9 @@ export function Dashboard() {
               <div className="flex items-center gap-2 text-lg font-semibold mb-4">
                 <img
                   alt="TSB"
-                  className="h-8 w-8"
+                  className="h-6 w-7"
                   height="00"
-                  src="./logo.svg"
+                  src="./icon2.png"
                   width="300"
                 />
 
@@ -234,9 +234,9 @@ export function Dashboard() {
             <div className="flex items-center gap-2  justify-center text-lg font-semibold md:hidden ">
               <img
                 alt="TSB"
-                className="h-6 w-6"
+                className="h-6 w-7"
                 height="00"
-                src="./logo.svg"
+                src="./icon2.png"
                 width="300"
               />
               <span className="text-muted-foreground">/</span>

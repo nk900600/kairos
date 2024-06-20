@@ -424,18 +424,20 @@ class MenuItemsController {
         firmTypeId: 1,
         firmId: req.user.firmId,
       }));
-
-      await Category.bulkCreate(allCategory, { ignoreDuplicates: true });
+      await Category.bulkCreate(allCategory, {
+        ignoreDuplicates: true,
+        transaction,
+      });
       const allCategories = await Category.findAll({
         where: {
           [Op.or]: [{ firmId: null }, { firmId: req.user.firmId }],
         },
+        transaction,
       });
       const categoriesMap = {};
       allCategories.forEach((val) => {
         categoriesMap[val.title] = val.id;
       });
-
       for (const item of menuItems) {
         const {
           name,
@@ -446,7 +448,6 @@ class MenuItemsController {
           dietType,
           customizations,
         } = item;
-
         // Create the menu item
         const menuItem = await MenuItem.create(
           {
@@ -514,13 +515,12 @@ class MenuItemsController {
         ],
       });
 
-
       const categories = await Category.findAll({
         where: {
           [Op.or]: [{ firmId: null }, { firmId: req.user.firmId }],
         },
       });
-      res.status(201).json({ items,categories });
+      res.status(201).json({ items, categories });
     } catch (error) {
       transaction.rollback();
       console.error("Error creating bulk menu items:", error);

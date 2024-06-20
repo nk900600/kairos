@@ -7,7 +7,6 @@ const Table = sequelize.define(
     tableName: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     capacity: {
       type: DataTypes.INTEGER,
@@ -64,6 +63,12 @@ const Table = sequelize.define(
   },
   {
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["tableName", "firmId"],
+      },
+    ],
   }
 );
 
@@ -74,5 +79,6 @@ Table.beforeCreate((table, options) => {
 Table.beforeUpdate((table, options) => {
   table.updatedBy = options.userId;
 });
+// Table.sync({ alter: true });
 
 module.exports = { Table };
