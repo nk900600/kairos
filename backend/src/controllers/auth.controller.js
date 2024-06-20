@@ -299,6 +299,12 @@ class AuthController {
         otpDetails?.deviceInfo || req.headers["user-agent"]; // Example: using User-Agent header
       const geo = geoip.lookup(otpDetails.ipAddress);
       otpDetails.region = otpDetails?.region || (geo ? geo.city : "Unknown");
+      const origin = req.headers.origin || req.headers.host; // Get the origin or host from headers
+      otpDetails.isLocal = false;
+      // Check if the origin is localhost
+      if (origin.includes("localhost")) {
+        otpDetails.isLocal = true;
+      }
 
       const result = await this.generateOtpHelper(otpDetails);
 
@@ -376,32 +382,35 @@ class AuthController {
       const otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
-      if (email) {
-        const mailOptions = {
-          from: '"The Shop Business Inc" <nikhil@theshopbusiness.com>', // Sender address
-          to: email, // List of recipients
-          subject: "OTP for updating email", // Subject line
-          html: emailOtpTemplate(otpValue), // HTML body
-        };
-        try {
-          EmailService.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.log(error);
-              return
-            }
-            console.log("Message sent: %s", info.messageId);
+      if (!otpDetails.isLocal) {
+        if (email) {
+          const mailOptions = {
+            from: '"The Shop Business Inc" <nikhil@theshopbusiness.com>', // Sender address
+            to: email, // List of recipients
+            subject: "OTP for updating email", // Subject line
+            html: emailOtpTemplate(otpValue), // HTML body
+          };
+          try {
+            EmailService.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                console.log(error);
+                return;
+              }
+              console.log("Message sent: %s", info.messageId);
+            });
+          } catch (e) {
+            console.log("Email was not send");
+          }
+        } else {
+          // commenting for now
+          await fast2smsApiAxios.post("bulkV2", {
+            route: "otp",
+            variables_values: otpValue,
+            numbers: mobileNumber,
           });
-        } catch (e) {
-          console.log("Email was not send");
         }
-      } else {
-        // commenting for now
-        await fast2smsApiAxios.post("bulkV2", {
-          route: "otp",
-          variables_values: otpValue,
-          numbers: mobileNumber,
-        });
       }
+
       let otpRecord;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {

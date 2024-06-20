@@ -100,22 +100,14 @@ async function init() {
     res.redirect(`http://localhost:3000/dashboard`);
   });
 
-  app.post("/api/subscribe", async (req, res) => {
+  app.post("/api/subscribe", authMiddleware, async (req, res) => {
     const subscription = req.body;
     try {
       const existingSubscription = await WebSubscription.findOne({
-        where: { endpoint: subscription.endpoint },
+        where: { endpoint: subscription.endpoint, firmId: subscription.firmId },
       });
 
-      if (existingSubscription) {
-        // Update existing subscription
-        await existingSubscription.update({
-          keys: subscription.keys,
-          firmId: subscription.firmId,
-          designationId: subscription.designationId,
-        });
-      } else {
-        // Create new subscription
+      if (!existingSubscription) {
         await WebSubscription.create({
           endpoint: subscription.endpoint,
           keys: subscription.keys,
@@ -141,9 +133,9 @@ async function init() {
 
 init();
 
-// let sql = "ALTER TABLE CategoryTypes\n";
+// let sql = "ALTER TABLE MenuItems\n";
 // for (let i = 1; i <= 60; i++) {
-//   sql += `  DROP INDEX \`title_${i}\`${i < 60 ? "," : ""}\n`;
+//   sql += `  DROP INDEX \`name_${i}\`${i < 60 ? "," : ""}\n`;
 // }
 
 // console.log(sql);

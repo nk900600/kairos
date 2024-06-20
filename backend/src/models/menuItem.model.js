@@ -32,7 +32,6 @@ const MenuItem = sequelize.define(
   {
     name: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
     },
     description: DataTypes.STRING,
@@ -92,6 +91,12 @@ const MenuItem = sequelize.define(
   },
   {
     timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ["name", "firmId", "categoryId"],
+      },
+    ],
   }
 );
 
@@ -129,38 +134,48 @@ const CustomizationChoice = sequelize.define("CustomizationChoice", {
   },
 });
 
-const Category = sequelize.define("CategoryType", {
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  firmTypeId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "FirmTypes", // Assumes you have a Users table
-      key: "id",
+const Category = sequelize.define(
+  "CategoryType",
+  {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    firmTypeId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "FirmTypes", // Assumes you have a Users table
+        key: "id",
+      },
+    },
+    firmId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "Firms", // Assumes you have a Users table
+        key: "id",
+      },
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
-  firmId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: "Firms", // Assumes you have a Users table
-      key: "id",
-    },
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
-});
+  {
+    indexes: [
+      {
+        unique: true,
+        fields: ["title", "firmTypeId", "firmId"],
+      },
+    ],
+  }
+);
 
 CustomizationChoice.belongsTo(Customization), { foreignKey: "customizationId" };
 Customization.hasMany(CustomizationChoice);
