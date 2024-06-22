@@ -3,6 +3,7 @@
  * @see https://v0.dev/t/CRuD8k4BN0z
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
+import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
 // import Hamburger from "/Hamburger.gif";
 
@@ -30,9 +31,15 @@ export const EmptyPlaceholder = ({
   buttonText = "Add customization",
   onButtonClick = () => {},
   children: any = <></>,
+  className = "",
 }: any) => {
   return (
-    <div className="flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12">
+    <div
+      className={cn(
+        "flex flex-col items-center w-full justify-center gap-6 p-4 md:p-12",
+        className
+      )}
+    >
       {type && (
         <img
           alt="Empty state illustration"

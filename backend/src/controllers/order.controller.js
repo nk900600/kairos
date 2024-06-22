@@ -101,6 +101,9 @@ class OrderController {
               },
             ],
           },
+          {
+            model: TableSession,
+          },
         ],
       });
 
