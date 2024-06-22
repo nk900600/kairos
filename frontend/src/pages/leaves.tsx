@@ -685,8 +685,14 @@ export const ManageLeave = ({ leave }: any) => {
 };
 
 const leaveTypeSchema = z.object({
-  name: z.string().max(50, "Character lkmit exceeded"),
-  numLeavesAvailable: z.number().max(365, "Please Enter number less than 30"),
+  name: z
+    .string()
+    .min(1, "Name is required.")
+    .max(50, "Character Limit exceeded"),
+  numLeavesAvailable: z
+    .number()
+    .min(1, "Leaves must be at least 1.")
+    .max(365, "Please Enter number less than 30"),
 });
 export const ManageLeaveType = ({ leaveType = {} }: any) => {
   const { open, setOpen }: any = useContext(DrawerContext);

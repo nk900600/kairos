@@ -59,13 +59,16 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   const onSubmit = async (data: any) => {
+    setIsLoading(true);
     try {
       await generateOtp();
     } catch (e: any) {
       if (e?.response) toast.error(e.response.data.message);
       else toast.error("Something went wrong");
+      setIsLoading(false);
       return;
     }
+    setIsLoading(false);
     setCurrentStep(2);
   };
 
@@ -90,6 +93,10 @@ export default function Login() {
   };
 
   const handleCreate = async (otpValue: any) => {
+    if (!otpValue) {
+      toast.error("Otp is required");
+      return;
+    }
     setIsLoading(true);
     let data = form.getValues();
     let payload = {
@@ -175,6 +182,7 @@ export default function Login() {
               goBack={() => setCurrentStep(1)}
               resendSms={() => handleTryAgain()}
               buttonText="Login"
+              loading={isLoading}
             ></OtpComponent>
           )}
         </div>
