@@ -149,7 +149,6 @@ function Sidebar() {
     (state: { table: RootState }) => state.table
   );
 
-  const [globalError, setGlobalError] = useState("");
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   useEffect(() => {
