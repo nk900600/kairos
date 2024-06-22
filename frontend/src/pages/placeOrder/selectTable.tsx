@@ -1,8 +1,5 @@
-import { ArrowLeft, ArrowRight, Ratio } from "lucide-react";
-import { Progress } from "../../components/ui/progress";
-import { Button } from "../../components/ui/button";
-import { useEffect, useState } from "react";
-import MenusComponent from "../menus";
+import { Ratio } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoBackButton } from "../common/goBackButton";
 import { BreadcrumbComponent } from "../common/breadCrumbs";
@@ -11,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createTableSession } from "../../redux/actions";
 import { RootState } from "../../redux/reducer";
 import { EmptyPlaceholder } from "../common/emptyPlaceholder";
+import { Badge } from "../../components/ui/badge";
 
 const header: any = {
   table: {
@@ -26,20 +24,18 @@ export default function SelectTableComponent({ step = "table" }) {
   const [currentStep, setCurrentStep] = useState("table");
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
-  const goBack = () => {
-    navigate(-1); // Go back to the previous page
-  };
 
   const handleTableClick = async (table: any) => {
     try {
-      await dispatch(
-        createTableSession({
-          startTime: Date.now(),
-          customerName: "",
-          customerMobile: 0,
-          tableId: table.id,
-        })
-      ).unwrap();
+      if (table.status !== "Occupied")
+        await dispatch(
+          createTableSession({
+            startTime: Date.now(),
+            customerName: "",
+            customerMobile: 0,
+            tableId: table.id,
+          })
+        ).unwrap();
     } catch (e) {
       return;
     }
@@ -75,16 +71,13 @@ export default function SelectTableComponent({ step = "table" }) {
 }
 
 export function TableComponent({ handleTableClick }: any) {
-  const [currentStep, setCurrentStep] = useState("table");
-
   const { alltables: tables, allTableSessions } = useSelector(
     (state: { table: RootState }) => state.table
   );
 
-  const availbleTables = tables.filter((val) => val.status == "Available");
-  // .filter(
-  //   (val) => !allTableSessions.map((tab) => tab.tableId).includes(val.id)
-  // );
+  const availbleTables = tables.filter(
+    (val) => val.status == "Available" || val.status == "Occupied"
+  );
 
   return (
     <>
@@ -100,6 +93,13 @@ export function TableComponent({ handleTableClick }: any) {
                 <Ratio className="h-10 w-10"></Ratio>
                 <p className="font-medium mt-2"> {table.tableName}</p>
                 <p className="text-xs mt-1">Seats {table?.capacity}</p>
+
+                {table.status == "Occupied" && (
+                  <Badge variant={"secondary"} className="mt-2">
+                    {" "}
+                    {table.status}
+                  </Badge>
+                )}
               </div>
             );
           })}

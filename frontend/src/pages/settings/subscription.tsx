@@ -120,13 +120,8 @@ const countryEnum = z.enum(["India"], {
   required_error: "You need to select a country.",
 });
 const BillingSchema = z.object({
-  state: z.enum<any, any>(
-    states.map((val) => val.name),
-    {
-      required_error: "You need to select a state.",
-    }
-  ),
-  country: countryEnum,
+  state: z.string().min(1, "State is required."),
+  country: z.string().min(1, "Country is required."),
   address: z
     .string()
     .regex(/^[A-Za-z0-9\s]*$/, "Please enter a valid address ")
@@ -561,11 +556,11 @@ export function Subscription() {
                                 })}
                               </SelectContent>
                             </Select>
-                            {/* {fieldState.error && (
+                            {fieldState.error && (
                               <FormMessage>
-                             {" You need to select a state"}
+                                {fieldState.error.message}
                               </FormMessage>
-                            )} */}
+                            )}
                           </FormItem>
                         )}
                       />

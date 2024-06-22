@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../redux/axios";
 import { OrderStatuses } from "./chefsPanel";
 import { EmptyPlaceholder } from "./common/emptyPlaceholder";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { LineChartComponent } from "./common/lineChart";
 import { format } from "date-fns";
 import { SelectionBoxComponent } from "./common/selectionBox";
@@ -46,6 +46,8 @@ export function DashBoardContent() {
     name: "Orders",
     id: "orders",
   });
+
+  const navigate = useNavigate();
 
   const handleDateChnage = (from: any, to: any) => {
     // get employee Data
@@ -145,6 +147,10 @@ export function DashBoardContent() {
     if (type.id == "table") {
       setLineData(table);
     } else setLineData(order);
+  };
+
+  const handleViweAll = () => {
+    navigate("/orders");
   };
 
   return (
@@ -258,15 +264,25 @@ export function DashBoardContent() {
                 title="No Data Available"
                 description="There is currently no data to display on this graph"
                 buttonText=""
+                className="md:p-0"
               ></EmptyPlaceholder>
             )}
           </CardContent>
         </Card>
         <Card className=" col-span-1 sm:col-span-3">
           <div className="flex flex-col space-y-1.5 p-6">
-            <h3 className=" text-xl font-semibold leading-none tracking-tight">
-              Active Orders
-            </h3>
+            <div className="flex justify-between align-center">
+              <h3 className=" text-xl font-semibold leading-none tracking-tight">
+                Active Orders
+              </h3>
+              <Button
+                onClick={handleViweAll}
+                className="p-0 h-0"
+                variant={"link"}
+              >
+                View All
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               You have{" "}
               {
@@ -289,12 +305,27 @@ export function DashBoardContent() {
                     val.status
                   )
               )
+              .filter((val, index) => index < 6)
               .map((val) => {
                 return (
                   <div className="flex items-center gap-4">
                     <Avatar className="hidden h-9 w-9 sm:flex">
-                      <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                      <AvatarFallback>OM</AvatarFallback>
+                      <AvatarImage
+                        alt="User avatar"
+                        src={
+                          allEmployees?.find(
+                            (contact) => contact.id == val.createdBy
+                          ).userPic
+                        }
+                      />
+                      <AvatarFallback
+                        className="uppercase"
+                        style={{
+                          background: allEmployees?.find(
+                            (contact) => contact.id == val.createdBy
+                          )?.userPic,
+                        }}
+                      ></AvatarFallback>
                     </Avatar>
                     <div className="grid gap-1">
                       <p className="text-sm font-medium leading-none">
