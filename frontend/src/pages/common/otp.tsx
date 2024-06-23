@@ -1,20 +1,25 @@
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "../../components/ui/input-otp";
 import { Button } from "../../components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 export function OtpComponent({
   goBack,
   submit,
   resendSms,
   buttonText = "Create Account",
+  errorText = "Otp is required",
+  loading = false,
 }: any) {
   const [value, setValue] = useState("");
+  const [otpError, setOtpError] = useState(errorText);
+  const handleValueChange = (value: any) => {
+    setValue(value);
+    if (value) setOtpError("");
+    else setOtpError(errorText);
+  };
   return (
     <div className="mx-auto sm:w-[350px] w-full space-y-6">
       <div className="space-y-2 ">
@@ -25,11 +30,7 @@ export function OtpComponent({
       </div>
       <div className="space-y-4">
         <div className="space-y-2">
-          <InputOTP
-            maxLength={6}
-            value={value}
-            onChange={(value) => setValue(value)}
-          >
+          <InputOTP maxLength={6} value={value} onChange={handleValueChange}>
             <InputOTPGroup>
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
@@ -41,6 +42,10 @@ export function OtpComponent({
             </InputOTPGroup>
           </InputOTP>
         </div>
+
+        {/* {!!otpError && (
+          <p className={"text-sm font-medium text-destructive"}>{otpError}</p>
+        )} */}
 
         <p className="text-gray-500 dark:text-gray-400 text-sm">
           Didn't get the OTP?
@@ -62,6 +67,7 @@ export function OtpComponent({
             className="w-full"
             type="submit"
             onClick={() => submit(value)}
+            loading={loading}
           >
             {buttonText}
           </Button>

@@ -315,7 +315,7 @@ export function DashBoardContent() {
                         src={
                           allEmployees?.find(
                             (contact) => contact.id == val.createdBy
-                          ).userPic
+                          )?.userPic
                         }
                       />
                       <AvatarFallback

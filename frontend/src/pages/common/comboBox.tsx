@@ -47,6 +47,7 @@ import {
   fetchTables,
   getAllFirmByNumber,
   logout,
+  updateWebPushSub,
 } from "../../redux/actions";
 function sleep(ms: any) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,6 +90,7 @@ export function ComboBoxComponent() {
           dispatch(getAllFirmByNumber()).unwrap(),
         ])
           .then(() => {
+            dispatch(updateWebPushSub());
             dispatch(updateLoader(false));
             setPosition(firm.id);
             setCurrentFirm(firm);

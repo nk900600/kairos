@@ -124,6 +124,10 @@ export default function SignUp() {
   };
 
   const handleCreate = async (otpValue: any) => {
+    if (!otpValue) {
+      toast.error("Otp is required");
+      return;
+    }
     setIsLoading(true);
     let data = form.getValues();
     let payload = {
@@ -305,6 +309,7 @@ export default function SignUp() {
               submit={handleCreate}
               goBack={() => setCurrentStep(1)}
               resendSms={() => handleTryAgain()}
+              loading={isLoading}
             ></OtpComponent>
           )}
         </div>
