@@ -255,13 +255,13 @@ export function DashBoardContent() {
               <h3 className=" text-xl font-semibold leading-none tracking-tight">
                 Active Orders
               </h3>
-              <Button
+              {/* <Button
                 onClick={handleViweAll}
                 className="p-0 h-0"
                 variant={"link"}
               >
                 View All
-              </Button>
+              </Button> */}
             </div>
             <p className="text-sm text-muted-foreground">
               You have{" "}
