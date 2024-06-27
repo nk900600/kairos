@@ -43,6 +43,7 @@ import {
 import { EmptyPlaceholder } from "../common/emptyPlaceholder";
 import { RootState } from "@/src/redux/reducer";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const items = [1, 2, 3];
 
@@ -58,6 +59,7 @@ export function CurrentOrderContentComponent({
   const { myAccount }: any = useSelector(
     (state: { table: RootState }) => state.table
   );
+  const navigate = useNavigate();
   useEffect(() => {
     setTotalAmount(
       cartData.reduce((total: any, item: any) => {
@@ -125,6 +127,7 @@ export function CurrentOrderContentComponent({
       await dispatch(
         deleteAllCartItemFromTableSession(tableSessionId)
       ).unwrap();
+      navigate("/tables?mytables=true");
     } catch (e) {}
     setIsLoading(false);
     onCloseClick();

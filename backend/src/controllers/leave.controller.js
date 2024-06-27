@@ -120,22 +120,7 @@ class LeaveController {
   }
 
   async GetLeavesBetweenDatesRange(req, res) {
-    let { startDate, endDate } = req.query;
-
     try {
-      // Validate the query parameters
-      if (!startDate || !endDate) {
-        return res.status(400).json({
-          error: "Please provide both startDate and endDate query parameters.",
-        });
-      }
-
-      startDate = new Date(startDate);
-      startDate.setHours(0, 0, 0, 0); // Set the time to 12:00 AM
-
-      endDate = new Date(endDate);
-      endDate.setHours(23, 59, 0, 0);
-
       const previousMonthStart = moment()
         .subtract(1, "month")
         .startOf("month")
@@ -146,12 +131,10 @@ class LeaveController {
         .toDate();
 
       // Query the database for average ratings
-      const leaves = await Leave.findAll({
+      const leaves = await Leave.count({
         where: {
           firmId: req.user.firmId,
-          createdAt: {
-            [Op.between]: [startDate, endDate],
-          },
+          status: "Pending",
         },
       });
       const employeesPreviousMonth = await Leave.count({
@@ -160,6 +143,7 @@ class LeaveController {
           createdAt: {
             [Op.between]: [previousMonthStart, previousMonthEnd],
           },
+          status: "Pending",
         },
       });
 

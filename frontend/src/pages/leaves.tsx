@@ -594,7 +594,7 @@ export const ManageLeave = ({ leave }: any) => {
           endDate: dates.endDate,
           reason: reason,
           LeaveTypeId: allLeavesTypes.find((val) => val.name == leaveType)?.id,
-          managerId: myAccount.employee.managerId,
+          managerId: myAccount.employee.managerId || myAccount.employee.id,
         };
 
         await dispatch(createLeave(payload)).unwrap();
@@ -628,20 +628,7 @@ export const ManageLeave = ({ leave }: any) => {
                 <DatePickerWithRange
                   onDateChange={handleDatePicker}
                   className="w-full"
-                  dateObj={{
-                    from: leave?.startDate
-                      ? new Date(leave?.startDate)
-                      : new Date(),
-                    to: leave?.endDate
-                      ? new Date(leave?.endDate)
-                      : addDays(new Date(), 3),
-                  }}
-                  disableDate={[
-                    {
-                      from: new Date(1990, 1, 1),
-                      to: subDays(new Date(), 1),
-                    },
-                  ]}
+                  defaultEnd={3}
                   showRangeButton={false}
                 ></DatePickerWithRange>
               </FormControl>
@@ -661,7 +648,7 @@ export const ManageLeave = ({ leave }: any) => {
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a verified email to display" />
+                  <SelectValue placeholder="Select a Leave Policy" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

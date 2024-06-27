@@ -51,19 +51,12 @@ export function DashBoardContent() {
 
   const handleDateChnage = (from: any, to: any) => {
     // get employee Data
-    axiosInstance
-      .get("employees/get-employee", {
-        params: {
-          startDate: from,
-          endDate: to,
-        },
-      })
-      .then((res) => {
-        if (!res.data?.percentage?.includes("-")) {
-          res.data.percentage = `+${res.data.percentage}`;
-        }
-        setEmployee(res.data);
-      });
+    axiosInstance.get("employees/get-employee").then((res) => {
+      if (!res.data?.percentage?.includes("-")) {
+        res.data.percentage = `+${res.data.percentage}`;
+      }
+      setEmployee(res.data);
+    });
     axiosInstance
       .get("orders/get-orders", {
         params: {
@@ -77,19 +70,12 @@ export function DashBoardContent() {
         }
         setOrders(res.data);
       });
-    axiosInstance
-      .get("leaves/get-leaves", {
-        params: {
-          startDate: from,
-          endDate: to,
-        },
-      })
-      .then((res) => {
-        if (!res.data?.percentage?.includes("-")) {
-          res.data.percentage = `+${res.data.percentage}`;
-        }
-        setLeaves(res.data);
-      });
+    axiosInstance.get("leaves/get-leaves").then((res) => {
+      if (!res.data?.percentage?.includes("-")) {
+        res.data.percentage = `+${res.data.percentage}`;
+      }
+      setLeaves(res.data);
+    });
     axiosInstance
       .get("/tables-session/average-data", {
         params: {
@@ -191,7 +177,20 @@ export function DashBoardContent() {
             </p>
           </CardContent>
         </Card>
-
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {orders?.allorders?.length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {orders?.percentage}% from last month
+            </p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -215,28 +214,9 @@ export function DashBoardContent() {
             <CalendarClock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {
-                leaves?.allLeaves.filter((val: any) => val.status == "Pending")
-                  .length
-              }
-            </div>
+            <div className="text-2xl font-bold">{leaves?.allLeaves}</div>
             <p className="text-xs text-muted-foreground">
               {leaves?.percentage}% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders?.allorders?.length}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {orders?.percentage}% from last month
             </p>
           </CardContent>
         </Card>
@@ -255,10 +235,10 @@ export function DashBoardContent() {
           </div>
           <CardContent className="grid gap-8">
             {/* <SalesChart /> */}
-            {lineData?.filter((val: any) => val.average !== "0.00")?.length >
-            0 ? (
-              <LineChartComponent data={lineData}></LineChartComponent>
-            ) : (
+            {/* {lineData?.filter((val: any) => val.average !== "0.00")?.length >
+            0 ? ( */}
+            <LineChartComponent data={lineData}></LineChartComponent>
+            {/* ) : (
               <EmptyPlaceholder
                 type="dashboard_chart"
                 title="No Data Available"
@@ -266,7 +246,7 @@ export function DashBoardContent() {
                 buttonText=""
                 className="md:p-0"
               ></EmptyPlaceholder>
-            )}
+            )} */}
           </CardContent>
         </Card>
         <Card className=" col-span-1 sm:col-span-3">

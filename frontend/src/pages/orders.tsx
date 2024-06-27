@@ -218,7 +218,7 @@ export default function OrdersComponent() {
         <div className="flex gap-4 justify-start md:justify-end items-center">
           <DatePickerWithRange
             onDateChange={handleDateChnage}
-            defaultEnd={0}
+            defaultEnd={30}
             className={"h-8 hidden sm:flex"}
           />
         </div>
@@ -249,7 +249,7 @@ export default function OrdersComponent() {
       <div className="flex gap-4  flex sm:hidden">
         <DatePickerWithRange
           onDateChange={handleDateChnage}
-          defaultEnd={0}
+          defaultEnd={30}
           className={"h-8 "}
         />
       </div>
