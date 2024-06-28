@@ -1,0 +1,33 @@
+config:
+  target: "https://api.theshopbusiness.com"
+  tls:
+    rejectUnauthorized: false
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: Warm up
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: Ramp up load
+    - duration: 300
+      arrivalRate: 50
+      name: Sustained load
+  variables:
+    authToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoxNiwiZmlyc3ROYW1lIjoiTmlraGlsIiwibGFzdE5hbWUiOiJPd25lciIsInVzZXJQaWMiOiJsaW5lYXItZ3JhZGllbnQoMTI1ZGVnLCAjREJEMkNBLCAjQzAyNjg1KSIsIm1vYmlsZU51bWJlciI6IjcyMDQ3NzYwMTYiLCJlbWFpbCI6Im5pa3Nyb2FkMnN1Y2Nlc3NAZ21haWwuY29tIiwic3RyZWV0IjpudWxsLCJjaXR5IjpudWxsLCJzdGF0ZSI6bnVsbCwiemlwIjpudWxsLCJjb3VudHJ5IjpudWxsLCJkYXRlT2ZCaXJ0aCI6bnVsbCwiZW1lcmdlbmN5Q29udGFjdE5hbWUiOm51bGwsImVtZXJnZW5jeUNvbnRhY3RSZWxhdGlvbnNoaXAiOm51bGwsImVtZXJnZW5jeUNvbnRhY3RQaG9uZSI6bnVsbCwibWFuYWdlcklkIjpudWxsLCJmaXJtSWQiOjE3LCJyb2xlSWQiOjEsImRlc2lnbmF0aW9uSWQiOjgsImNyZWF0ZWRCeSI6bnVsbCwidXBkYXRlZEJ5IjoxNiwicmVtb3ZlZEJ5IjpudWxsLCJjcmVhdGVkQXQiOiIyMDI0LTA2LTA5VDE2OjAzOjE0LjAwMFoiLCJ1cGRhdGVkQXQiOiIyMDI0LTA2LTE0VDA1OjEwOjEwLjAwMFoifSwiaWF0IjoxNzE5MTQ3MTg0LCJleHAiOjE3NTA2ODMxODR9.hTgc_56SpT2RUyiNyB2-TW2XnzdiRNDJqU2e7a11FCM"
+
+scenarios:
+  - name: "Complex API Flow"
+    flow:
+      - put:
+          url: "/api/cart-items/47"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            id: 47
+            quantity: 1
+          name: "Add quatity in cart"
+  
+
+# artillery run --output report.json load-test.yml
+# artillery report report.json
