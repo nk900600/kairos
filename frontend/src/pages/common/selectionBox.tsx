@@ -30,7 +30,7 @@ export function SelectionBoxComponent({
   const [currentData, setCurrentData] = React.useState<any>(current);
   const [data, setData] = React.useState([
     { name: "Orders", id: "order" },
-    { name: "Tables", id: "table" },
+    { name: "Wait per Tables", id: "table" },
   ]);
   const [position, setPosition] = React.useState("");
 

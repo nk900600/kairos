@@ -17,10 +17,8 @@ import { DefinedRange } from "react-date-range";
 
 export function DatePickerWithRange({
   className,
-  dateObj = null,
-  disableDate = [],
   onDateChange,
-  defaultEnd = 7,
+  defaultEnd = 30,
   showRangeButton = true,
 }: any) {
   useEffect(() => {
@@ -34,8 +32,8 @@ export function DatePickerWithRange({
 
   const [state, setState] = React.useState<any>([
     {
-      startDate: new Date(),
-      endDate: addDays(new Date(), defaultEnd),
+      startDate: subDays(new Date(), defaultEnd),
+      endDate: new Date(),
       key: "selection",
     },
   ]);

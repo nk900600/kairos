@@ -36,10 +36,10 @@ export const LineChartComponent = ({ data = [], keys = [] }: any) => {
         }}
       >
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
-        <XAxis dataKey="name" />
+        {/* <XAxis dataKey="name" /> */}
         {/* <YAxis /> */}
         <Tooltip content={<CustomTooltip />} />
-        <Legend />/
+        <Legend />
         <Line
           type="monotone"
           dataKey="daily"
