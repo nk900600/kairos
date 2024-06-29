@@ -28,7 +28,6 @@ services:
       - mysql
     ports:
       - "4200:4200"
-    # command: npm install && npm run-script start-dev
 
   mysql:
     image: mysql:5.7
