@@ -18,6 +18,10 @@ const initializeSubsription = require("./src/utils/create-subscription");
 const authMiddleware = require("./src/middleware/auth.middleware");
 const authController = require("./src/controllers/auth.controller");
 const { WebSubscription } = require("./src/models/websubscriptions");
+const fs = require("fs");
+const { exec } = require("child_process");
+const { s3 } = require("./src/utils/aws-obj");
+const path = require("path");
 
 async function init() {
   const authRoutes = require("./src/routes/auth.routes");
@@ -120,6 +124,63 @@ async function init() {
       res.status(400).json({ error: "Something went wrong" + e });
     }
   });
+  app.get("/api/take-sql-dump", authMiddleware, async (req, res) => {
+    try {
+      // Get the database configuration
+      const config = sequelize.config;
+      const sqlBackup = path.join(__dirname, "database_backups");
+      // Ensure the dump directory exists
+      if (!fs.existsSync(sqlBackup)) {
+        fs.mkdirSync(sqlBackup, { recursive: true });
+      }
+
+      const dockerContainerName = "karios-mysql"; // Adjust the container name as needed
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const dumpFilename = `dump_${timestamp}.sql`;
+
+      // Create a temporary file to store MySQL credentials
+      const tmpConfigPath = path.join(sqlBackup, ".my.cnf");
+      fs.writeFileSync(
+        tmpConfigPath,
+        `[client]\nuser=${config.username}\npassword=${config.password}\n`,
+        { mode: 0o600 }
+      );
+
+      const copyConfigCommand = `docker cp ${tmpConfigPath} ${dockerContainerName}:/tmp/.my.cnf`;
+      await exec(copyConfigCommand, async (error, stdout, stderr) => {});
+      const changeTmpPermsCommand2 = `docker exec ${dockerContainerName} chmod 605 /tmp/.my.cnf`;
+      await exec(changeTmpPermsCommand2, async (error, stdout, stderr) => {});
+      const changeTmpPermsCommand = `docker exec ${dockerContainerName} chmod 777 /tmp/dump.sql`;
+      await exec(changeTmpPermsCommand, async (error, stdout, stderr) => {});
+      const dumpCommand = `docker exec -u mysql ${dockerContainerName} bash -c "mysqldump --defaults-extra-file=/tmp/.my.cnf -h localhost ${config.database} > /tmp/dump.sql && cat /tmp/dump.sql && rm /tmp/.my.cnf /tmp/dump.sql"`;
+
+      // Execute the mysqldump command
+      await exec(dumpCommand, async (error, stdout, stderr) => {
+        if (error) {
+          return res.status(400).json({
+            error: "Something went wrong - dumpCommand" + error.message,
+          });
+        }
+        if (stderr) {
+          return res
+            .status(400)
+            .json({ error: "Something went wrong - dumpCommand" + stderr });
+          // throw new Error(stderr);
+        }
+        const params = {
+          Bucket: "kairos-sql-backup",
+          Key: dumpFilename,
+          Body: stdout,
+        };
+        await s3.upload(params).promise();
+
+        res.status(201).json({});
+      });
+    } catch (e) {
+      res.status(400).json({ error: "Something went wrong" + e });
+    }
+  });
 
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
@@ -133,9 +194,9 @@ async function init() {
 
 init();
 
-// let sql = "ALTER TABLE MenuItems\n";
+// let sql = "ALTER TABLE Tables\n";
 // for (let i = 1; i <= 60; i++) {
-//   sql += `  DROP INDEX \`name_${i}\`${i < 60 ? "," : ""}\n`;
+//   sql += `  DROP INDEX \`tableName_${i}\`${i < 60 ? "," : ""}\n`;
 // }
 
 // console.log(sql);
