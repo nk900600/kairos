@@ -58,7 +58,8 @@ async function init() {
     cors({
       origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || origin === "null") return callback(null, true);
+        if (origin === "null") return callback(null, true);
+        if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) {
           return callback(null, true);
         } else {
@@ -101,7 +102,7 @@ async function init() {
       { where: { FirmId: req.params.firmId } }
     );
 
-    res.redirect(`http://localhost:3000/dashboard`);
+    res.redirect(`https://app.theshopbusiness.com/dashboard`);
   });
 
   app.post("/api/subscribe", authMiddleware, async (req, res) => {

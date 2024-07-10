@@ -10,13 +10,24 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules  # Ensures node_modules is not overwritten by the host
-    env_file:
-      - ./env/.env.dev  # 
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DB=${MYSQL_DB}
+      - YOUR_PRIVATE_VAPID_KEY=${YOUR_PRIVATE_VAPID_KEY}
+      - YOUR_PUBLIC_VAPID_KEY=${YOUR_PUBLIC_VAPID_KEY}
+      - FASt2SMSTOKEN=${FASt2SMSTOKEN}
+      - YOUR_BUCKET_REGION=${YOUR_BUCKET_REGION}
+      - YOUR_SECRET_ACCESS_KEY=${YOUR_SECRET_ACCESS_KEY}
+      - YOUR_ACCESS_KEY_ID=${YOUR_ACCESS_KEY_ID}
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
     depends_on:
       - mysql
     ports:
       - "4200:4200"
-    # command: npm install && npm run-script start-dev
 
   mysql:
     image: mysql:5.7
