@@ -4,7 +4,7 @@ import {
   InputOTPSlot,
 } from "../../components/ui/input-otp";
 import { Button } from "../../components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 export function OtpComponent({
   goBack,
   submit,
@@ -15,10 +15,24 @@ export function OtpComponent({
 }: any) {
   const [value, setValue] = useState("");
   const [otpError, setOtpError] = useState(errorText);
+  const [timeLeft, setTimeLeft] = useState(0);
+  useEffect(() => {
+    if (timeLeft !== null && timeLeft > 0) {
+      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [timeLeft]);
+
   const handleValueChange = (value: any) => {
     setValue(value);
     if (value) setOtpError("");
     else setOtpError(errorText);
+  };
+
+  const retrySMS = (e: any) => {
+    if (timeLeft != 0) return;
+    else setTimeLeft(30);
+    resendSms(e);
   };
   return (
     <div className="mx-auto sm:w-[350px] w-full space-y-6">
@@ -49,9 +63,12 @@ export function OtpComponent({
 
         <p className="text-gray-500 dark:text-gray-400 text-sm">
           Didn't get the OTP?
-          <Button variant={"link"} className=" text-xs" onClick={resendSms}>
-            Resend SMS
-          </Button>
+          {timeLeft != 0 && `  Retry in ${timeLeft}`}
+          {timeLeft == 0 && (
+            <Button variant={"link"} className=" text-xs" onClick={retrySMS}>
+              Resend SMS
+            </Button>
+          )}
         </p>
 
         <div className="flex gap-4">
