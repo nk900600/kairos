@@ -379,7 +379,7 @@ class AuthController {
         }
       }
 
-      const otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+      let otpValue = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
       const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiration time
 
       if (!otpDetails.isLocal) {
@@ -412,6 +412,8 @@ class AuthController {
       }
 
       let otpRecord;
+
+      if (otpDetails.isLocal) otpValue = 111111;
 
       if (existingOtpRecord && existingOtpRecord.failedOtpCount < 3) {
         // Update the existing record with a new OTP and increment the failedOtpCount
