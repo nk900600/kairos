@@ -157,6 +157,13 @@ const counterSlice = createSlice({
           if (index !== -1) {
             state.alltables[index].status = action.payload.status;
           }
+          state.allTableSessions.forEach((val) => {
+            if (action.payload.id == val.tableId && val.status == "Active") {
+              val.status = "Close";
+              val.paymentStatus = "Paid";
+              val.endTime = new Date();
+            }
+          });
         }
       )
 
