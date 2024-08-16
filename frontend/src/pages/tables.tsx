@@ -439,24 +439,26 @@ export default function TableComponent() {
                     <CardContent className="flex flex-col text-sm p-4    gap-2 lg:p-6 md:p-6  pt-0  lg:pt-0  md:pt-0   ">
                       <div className="flex items-center">
                         <UserIcon className="h-3 w-3 mr-1.5" />
-                        <div className="text-sm">
-                          <span className="text-muted-foreground text-xs">
-                            {table.status != "Occupied"
-                              ? "Reserved for:"
-                              : "Assigned to:"}
-                          </span>{" "}
-                          <span>
-                            {table.status != "Occupied"
-                              ? table.reservationName
-                              : allEmployees?.find(
-                                  (val) => val.id == table.createdBy
-                                )?.firstName +
-                                " " +
-                                allEmployees?.find(
-                                  (val) => val.id == table.createdBy
-                                )?.lastName}
-                          </span>
-                        </div>
+                        {table.createdBy && (
+                          <div className="text-sm">
+                            <span className="text-muted-foreground text-xs">
+                              {table.status != "Occupied"
+                                ? "Reserved for:"
+                                : "Assigned to:"}
+                            </span>{" "}
+                            <span>
+                              {table.status != "Occupied"
+                                ? table.reservationName
+                                : allEmployees?.find(
+                                    (val) => val.id == table.createdBy
+                                  )?.firstName +
+                                  " " +
+                                  allEmployees?.find(
+                                    (val) => val.id == table.createdBy
+                                  )?.lastName}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center">
                         <ClockIcon className="h-3 w-3 mr-1.5" />
@@ -1078,7 +1080,7 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
         <SheetHeader className="mb-4">
           <SheetTitle>
             {
-              alltables.find((val) => val.id == tableSessionObj.tableId)
+              alltables.find((val) => val.id == tableSessionObj?.tableId)
                 ?.tableName
             }
           </SheetTitle>
@@ -1086,12 +1088,12 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
             Waiter -{" "}
             {
               allEmployees?.find(
-                (contact) => contact.id == tableSessionObj.createdBy
+                (contact) => contact.id == tableSessionObj?.createdBy
               )?.firstName
             }{" "}
             {
               allEmployees?.find(
-                (contact) => contact.id == tableSessionObj.createdBy
+                (contact) => contact.id == tableSessionObj?.createdBy
               )?.lastName
             }
           </SheetDescription>
@@ -1102,7 +1104,7 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
             <div className="font-semibold">All Order Details</div>
             <ul className="grid gap-3">
               {allOrders
-                .filter((val) => val.tableSessionId == tableSessionObj.id)
+                .filter((val) => val.tableSessionId == tableSessionObj?.id)
                 .map((orderData) => {
                   return (
                     <>
@@ -1186,7 +1188,7 @@ export function ClosetabPanel({ tableSessionObj, onClose }: any) {
           <Separator className="my-4" />
 
           {allOrders
-            .filter((val) => val.tableSessionId == tableSessionObj.id)
+            .filter((val) => val.tableSessionId == tableSessionObj?.id)
             .filter(
               (val) =>
                 val.status == OrderStatuses.PREPARING ||
